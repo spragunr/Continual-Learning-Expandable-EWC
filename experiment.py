@@ -7,7 +7,6 @@ BATCH_SIZE = 64
 # Create random Tensors to hold inputs and outputs
 x = torch.randn(BATCH_SIZE, 784)
 y_labels = torch.randn(BATCH_SIZE, 10)
-
 model = Model(x, y_labels)
 
 learning_rate = 1e-4
@@ -45,7 +44,7 @@ for i in range(500):
 
     # The overall accuracy of the model's predictions is the sum of its accurate predictions (valued at 1)
     # divided by the number of predictions it made (incorrect predictions evaluate to 0)
-    accuracy = torch.mean(correct_prediction)
+    accuracy = torch.mean(correct_prediction.type(torch.DoubleTensor))
 
     print(i, loss.item(), accuracy)
 
