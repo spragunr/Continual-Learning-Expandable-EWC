@@ -98,10 +98,10 @@ def train(args, model, device, train_loader, optimizer, epoch):
     # of an MNIST image data sample and an associated label classifying it as a digit 0-9.
     #
     # The image data for the batch represented as a 4D torch tensor (see train_loader definition in main())
-    # with dimensions (batch size, 1, 28, 28)- giving us a normalized floating point value for the color of
+    # with dimensions (batch size, 1, 28, 28)- containing a normalized floating point value for the color of
     # each pixel in each image in the batch (MNIST images are 28 x 28 pixels).
     #
-    # The target is represented as a tensor containing the digit classification labels for
+    # The target is represented as a torch tensor containing the digit classification labels for
     # the training data as follows:
     #       [ 3,  4,  2,  9,  7] represents ground truth labels for a 3, a 4, a 2, a 9, and a 7.
     # NOTE:
@@ -111,9 +111,29 @@ def train(args, model, device, train_loader, optimizer, epoch):
     # represents labels for a 5 and a 2, because 1's are at index 5 and 2 in rows 0 and 1, respectively.
     # THIS IS NOT THE WAY THE DATA IS REPRESENTED IN THIS EXPERIMENT.
     for batch_idx, (data, target) in enumerate(train_loader):
+
+        # set the device (CPU or GPU) to be used with data and target to device (defined in main())
         data, target = data.to(device), target.to(device)
+
+        # Gradients are automatically accumulated- therefore, they need to be zeroed out before the next backward
+        # pass through the network so that they are replaced by newly computed gradients at later training iterations,
+        # rather than SUMMED with those future gradients. The reasoning behind this approach and the need to zero
+        # gradients manually with each training minibatch is presented here in more detail:
+        # https://discuss.pytorch.org/t/why-do-we-need-to-set-the-gradients-manually-to-zero-in-pytorch/4903/9
+        #
+        # From PyTorch examples:
+        #   Before the backward pass, use the optimizer object to zero all of the
+        #   gradients for the variables it will update (which are the learnable
+        #   weights of the model). This is because by default, gradients are
+        #   accumulated in buffers( i.e, not overwritten) whenever .backward()
+        #   is called.
         optimizer.zero_grad()
+
+        # forward pass: compute predicted output by passing data to the network
+        # NOTE: we have overriden forward() in class Net above, so this will call model.forward()
         output = model(data)
+
+
         loss = F.nll_loss(output, target)
         loss.backward()
         optimizer.step()
