@@ -174,13 +174,29 @@ def main():
         # transform (callable, optional) – A function/transform that takes in an PIL image and returns a transformed
         #                                       version. E.g, transforms.RandomCrop
         datasets.MNIST('../data', train=True, download=True,
-                       transform=transforms.Compose([
-                           transforms.ToTensor(),
-                           transforms.Normalize((0.1307,), (0.3081,))
-                       ])),
+            # transforms.Compose() composes several transforms together.
+            #
+            # The transforms composed here are as follows:
+            #
+            # transforms.ToTensor():
+            #     Converts a PIL Image or numpy.ndarray (H x W x C) in the range [0, 255] to a
+            #     torch.FloatTensor of shape (C x H x W) in the range [0.0, 1.0].
+            #
+            # transforms.Normalize(mean, std):
+            #     Normalize a tensor image with mean and standard deviation. Given mean: (M1,...,Mn) and
+            #     std: (S1,..,Sn) for n channels, this transform will normalize each channel of the
+            #     input torch.*Tensor i.e. input[channel] = (input[channel] - mean[channel]) / std[channel]
+            #
+            #     NOTE: the values used here for mean and std are those computed on the MNIST dataset
+            #           SOURCE: https://discuss.pytorch.org/t/normalization-in-the-mnist-example/457
+            transform=transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Normalize((0.1307,), (0.3081,))
+            ])),
         batch_size=args.batch_size, shuffle=True, **kwargs)
 
-
+    # Instantiate a DataLoader for the testing data in the same manner as above for training data, with one exception:
+    # train=False, because we want to draw the data here from test.pt (as opposed to training.pt)
     test_loader = torch.utils.data.DataLoader(
         datasets.MNIST('../data', train=False, transform=transforms.Compose([
                            transforms.ToTensor(),
@@ -188,8 +204,28 @@ def main():
                        ])),
         batch_size=args.test_batch_size, shuffle=True, **kwargs)
 
-
+    # Move all parameters and buffers in the module Net to device (CPU or GPU- set above).
+    # Both integral and floating point values are moved.
     model = Net().to(device)
+
+    # Set the optimization algorithm for the model- in this case, standard Stochastic Gradient Descent with
+    # momentum.
+    #
+    # ARGUMENTS (in order):
+    #     params (iterable) – iterable of parameters to optimize or dicts defining parameter groups
+    #     lr (float) – learning rate
+    #     momentum (float, optional) – momentum factor (default: 0)
+    #
+    # NOTE on params:
+    #   model.parameters() returns an iterator over a list of the trainable model parameters in the same order in
+    #   which they appear in the network when traversed input -> output
+    #   (e.g.
+    #       [weights b/w input and first hidden layer,
+    #        bias b/w input and hidden layer 1,
+    #        ... ,
+    #        weights between last hidden layer and output,
+    #        bias b/w hidden layer and output]
+    #   )
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
 
     for epoch in range(1, args.epochs + 1):
