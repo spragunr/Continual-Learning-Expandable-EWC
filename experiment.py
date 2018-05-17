@@ -133,10 +133,32 @@ def train(args, model, device, train_loader, optimizer, epoch):
         # NOTE: we have overriden forward() in class Net above, so this will call model.forward()
         output = model(data)
 
-
+        # Define the loss function for the model to be negative likelihood loss.
+        # The addition of a log_softmax layer as the last layer of our network
+        # produces log probabilities and allows us to use this loss function instead of cross entropy.
         loss = F.nll_loss(output, target)
+
+        # Backward pass: compute gradient of the loss with respect to model
+        # parameters
         loss.backward()
+
+        # Simplified abstraction provided by PyTorch which uses a single statement to update all model parameters
+        # according to gradients and optimization function.
+        # In the case of SGD (without momentum), essentially executes the following:
+        #
+        #       with torch.no_grad():
+        #           for param in model.parameters():
+        #               param -= learning_rate * param.grad
         optimizer.step()
+
+        # Each time the batch index is a multiple of the specified progress display interval,
+        # print a message of the following format:
+        #
+        # Train Epoch: <epoch number> [data sample number/total samples (% progress)]    Loss: <current loss value>
+        #
+        # With example values, output looks as follows:
+        #
+        # Train Epoch: 1 [3200/60000 (5%)]	Loss: 2.259442
         if batch_idx % args.log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
