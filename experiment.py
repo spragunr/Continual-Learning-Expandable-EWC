@@ -88,7 +88,28 @@ class Net(nn.Module):
         return F.log_softmax(x, dim=1)
 
 def train(args, model, device, train_loader, optimizer, epoch):
+    # Set the module in "training mode"
+    # In the case of this particular network, the effects are as follows:
+    #   TODO SPECIFY THE CHANGES THAT TAKE PLACE HERE
     model.train()
+
+    # Enumerate will keep an automatic loop counter and store it in batch_idx.
+    # The (data, target) pair returned by DataLoader train_loader each iteration consists
+    # of an MNIST image data sample and an associated label classifying it as a digit 0-9.
+    #
+    # The image data for the batch represented as a 4D torch tensor (see train_loader definition in main())
+    # with dimensions (batch size, 1, 28, 28)- giving us a normalized floating point value for the color of
+    # each pixel in each image in the batch (MNIST images are 28 x 28 pixels).
+    #
+    # The target is represented as a tensor containing the digit classification labels for
+    # the training data as follows:
+    #       [ 3,  4,  2,  9,  7] represents ground truth labels for a 3, a 4, a 2, a 9, and a 7.
+    # NOTE:
+    # This should be distinguished from the other common representation of such data in which the following:
+    #       [[0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+    #        [0, 0, 1, 0, 0, 0, 0, 0, 0, 0]]
+    # represents labels for a 5 and a 2, because 1's are at index 5 and 2 in rows 0 and 1, respectively.
+    # THIS IS NOT THE WAY THE DATA IS REPRESENTED IN THIS EXPERIMENT.
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
@@ -196,7 +217,7 @@ def main():
         batch_size=args.batch_size, shuffle=True, **kwargs)
 
     # Instantiate a DataLoader for the testing data in the same manner as above for training data, with one exception:
-    # train=False, because we want to draw the data here from test.pt (as opposed to training.pt)
+    # train=False, because we want to draw the data here from <root>/test.pt (as opposed to <root>/training.pt)
     test_loader = torch.utils.data.DataLoader(
         datasets.MNIST('../data', train=False, transform=transforms.Compose([
                            transforms.ToTensor(),
@@ -208,7 +229,7 @@ def main():
     # Both integral and floating point values are moved.
     model = Net().to(device)
 
-    # Set the optimization algorithm for the model- in this case, standard Stochastic Gradient Descent with
+    # Set the optimization algorithm for the model- in this case, Stochastic Gradient Descent with
     # momentum.
     #
     # ARGUMENTS (in order):
@@ -228,6 +249,7 @@ def main():
     #   )
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
 
+    # for each desired epoch, train and test the model
     for epoch in range(1, args.epochs + 1):
         train(args, model, device, train_loader, optimizer, epoch)
         test(args, model, device, test_loader)
