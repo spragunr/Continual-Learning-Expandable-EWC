@@ -89,8 +89,9 @@ class Net(nn.Module):
 
 def train(args, model, device, train_loader, optimizer, epoch):
     # Set the module in "training mode"
-    # In the case of this particular network, the effects are as follows:
-    #   TODO SPECIFY THE CHANGES THAT TAKE PLACE HERE
+    # This is necessary because some network layers behave differently when training vs testing.
+    # Dropout, for example, is used to zero/mask certain weights during TRAINING to prevent overfitting.
+    # However, during TESTING (e.g. model.eval()) we do not want this to happen.
     model.train()
 
     # Enumerate will keep an automatic loop counter and store it in batch_idx.
@@ -112,7 +113,7 @@ def train(args, model, device, train_loader, optimizer, epoch):
     # THIS IS NOT THE WAY THE DATA IS REPRESENTED IN THIS EXPERIMENT.
     for batch_idx, (data, target) in enumerate(train_loader):
 
-        # set the device (CPU or GPU) to be used with data and target to device (defined in main())
+        # set the device (CPU or GPU) to be used with data and target to device variable (defined in main())
         data, target = data.to(device), target.to(device)
 
         # Gradients are automatically accumulated- therefore, they need to be zeroed out before the next backward
@@ -165,11 +166,24 @@ def train(args, model, device, train_loader, optimizer, epoch):
                 100. * batch_idx / len(train_loader), loss.item()))
 
 def test(args, model, device, test_loader):
+    # Set the module in "evaluation mode"
+    # This is necessary because some network layers behave differently when training vs testing.
+    # Dropout, for example, is used to zero/mask certain weights during TRAINING (e.g. model.train())
+    # to prevent overfitting. However, during TESTING/EVALUATION we do not want this to happen.
     model.eval()
+
     test_loss = 0
     correct = 0
+
+    # Wrap in torch.no_grad() because weights have requires_grad=True (meaning pyTorch autograd knows to
+    # automatically track history of computed gradients for those weights) but we don't need to track testing
+    # in autograd - we are no longer training so gradients should no longer be altered/computed (only "used")
+    # and therefore we don't need to track this.
     with torch.no_grad():
+        # each step of the iterator test_loader will return an MNIST image (data) and its corresponding ground truth
+        # label (target)
         for data, target in test_loader:
+            # set the device (CPU or GPU) to be used with data and target to device variable (defined in main())
             data, target = data.to(device), target.to(device)
             output = model(data)
             test_loss += F.nll_loss(output, target, size_average=False).item() # sum up batch loss
