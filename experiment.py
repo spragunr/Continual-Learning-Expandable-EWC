@@ -134,9 +134,11 @@ def train(args, model, device, train_loader, optimizer, epoch):
         # NOTE: we have overriden forward() in class Net above, so this will call model.forward()
         output = model(data)
 
-        # Define the loss function for the model to be negative likelihood loss.
+        # Define the training loss function for the model to be negative log likelihood loss based on predicted values
+        # and ground truth labels.
         # The addition of a log_softmax layer as the last layer of our network
-        # produces log probabilities and allows us to use this loss function instead of cross entropy.
+        # produces log probabilities from softmax and allows us to use this loss function instead of cross entropy,
+        # because torch.nn.CrossEntropyLoss combines torch.nn.LogSoftmax() and torch.nn.NLLLoss() in one single class.
         loss = F.nll_loss(output, target)
 
         # Backward pass: compute gradient of the loss with respect to model
@@ -172,7 +174,9 @@ def test(args, model, device, test_loader):
     # to prevent overfitting. However, during TESTING/EVALUATION we do not want this to happen.
     model.eval()
 
+    # total testing loss over ALL test batches (sum)
     test_loss = 0
+
     correct = 0
 
     # Wrap in torch.no_grad() because weights have requires_grad=True (meaning pyTorch autograd knows to
@@ -180,17 +184,50 @@ def test(args, model, device, test_loader):
     # in autograd - we are no longer training so gradients should no longer be altered/computed (only "used")
     # and therefore we don't need to track this.
     with torch.no_grad():
-        # each step of the iterator test_loader will return an MNIST image (data) and its corresponding ground truth
-        # label (target)
+        # Each step of the iterator test_loader will return the following values:
+        #
+        # data: a 4D tensor of dimensions (test batch size, 1, 28, 28), representing the MNIST data
+        # for each of the 28 x 28 = 784 pixels of each of the images in a given test batch
+        #
+        # target: a 1D tensor of dimension <test batch size> containing ground truth labels for each of the
+        # images in the corresponding test batch in order (contained within the data variable)
         for data, target in test_loader:
+
             # set the device (CPU or GPU) to be used with data and target to device variable (defined in main())
             data, target = data.to(device), target.to(device)
+
+            # Forward pass: compute predicted output by passing data to the model. Module objects
+            # override the __call__ operator so you can call them like functions. When
+            # doing so you pass a Tensor of input data to the Module and it produces
+            # a Tensor of output data. We have overriden forward() above, so our forward() method will be called here.
             output = model(data)
-            test_loss += F.nll_loss(output, target, size_average=False).item() # sum up batch loss
+
+            # Define the testing loss to be negative likelihood loss based on predicted values (output)
+            # and ground truth labels (target), calculate the testing batch loss, and sum it with the total testing
+            # loss over ALL test batches (contained within test_loss).
+            #
+            # NOTE: size_average = False:
+            # By default, the losses are averaged over observations for each minibatch.
+            # If size_average is False, the losses are summed for each minibatch. Default: True
+            #
+            # Here we use size_average = False because we want to SUM all testing batch losses and average those
+            # at the end of testing (by dividing by total number of testing SAMPLES (not batches) to obtain an
+            # average loss over all testing batches). Otherwise, if size_average == True, we would be getting average
+            # loss for each testing batch and then would average those at the end to obtain average testing loss,
+            # which could theoretically result in some comparative loss of accuracy in the calculation of the
+            # final value.
+            #
+            # NOTE:
+            # <some loss function>.item() gets the a scalar value held in the loss
+            test_loss += F.nll_loss(output, target, size_average=False).item()
+
+
             pred = output.max(1, keepdim=True)[1] # get the index of the max log-probability
             correct += pred.eq(target.view_as(pred)).sum().item()
 
     test_loss /= len(test_loader.dataset)
+
+    # e.g. Test set: Average loss: 0.2073, Accuracy: 9415/10000 (94%)
     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
         test_loss, correct, len(test_loader.dataset),
         100. * correct / len(test_loader.dataset)))
