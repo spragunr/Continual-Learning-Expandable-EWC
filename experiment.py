@@ -154,7 +154,7 @@ def train(args, model, device, train_loader, optimizer, epoch):
         #               param -= learning_rate * param.grad
         optimizer.step()
 
-        # Each time the batch index is a multiple of the specified progress display interval,
+        # Each time the batch index is a multiple of the specified progress display interval (args.log_interval),
         # print a message of the following format:
         #
         # Train Epoch: <epoch number> [data sample number/total samples (% progress)]    Loss: <current loss value>
@@ -221,16 +221,70 @@ def test(args, model, device, test_loader):
             # <some loss function>.item() gets the a scalar value held in the loss
             test_loss += F.nll_loss(output, target, size_average=False).item()
 
+            # Get the index of the max log-probability for each of the samples in the testing batch.
+            #
+            # output is a 2D tensor of dimensions (test batch size, 10) containing network-predicted probabilities
+            # that the testing input is an image of each class (digits 0-9, signified by the index of each probability
+            # in the output tensor for a given test image). That is to say that in the second dimension of output
+            # the classification probabilities might look like the following for a given image:
+            #       [0.1, 0.1, 0.05, 0.05, 0.2, 0.4, 0.1, 0.0, 0.0, 0.0]
+            # Because the sixth entry (index 5) contains the maximum value relative to all other indices, the network's
+            # prediction is that this image belongs to the sixth class- and is therefore the digit 5.
+            #
+            # NOTE: torch.max() Returns the maximum value of EACH ROW of the input tensor in the given dimension dim.
+            # The second return value is the index location of each maximum value found (argmax). This is why we use
+            # the second return value as the value of the variable pred, because we want the index of the maximum
+            # probability (not its value)- hence the [1] indexing at the end of the statement.
+            #
+            # ARGUMENTS:
+            #
+            # Using dimension 1 as the first argument allows us to get the index of the highest valued
+            # column in each row of output, which practically translates to getting the maximum predicted class
+            # probability for each sample.
+            #
+            # If keepdim is True, the output tensors are of the same size as input except in the dimension dim
+            # (first argument- in this case 1) where they are of size 1 (because we calculated ONE maximum value per
+            # row). Otherwise, dim is squeezed (see torch.squeeze()), resulting in the output tensors having 1
+            # fewer dimension than input.
+            pred = output.max(1, keepdim=True)[1]
 
-            pred = output.max(1, keepdim=True)[1] # get the index of the max log-probability
+            # Check if predictions are correct, and if so add one to the total number of correct predictions across the
+            # entire testing set for each correct prediction.
+            #
+            # A prediction is correct if the index of the highest value in the
+            # prediction output is the same as the index of the highest value in the label for that sample.
+            #
+            # For example (MNIST):
+            #   prediction: [0.1, 0.1, 0.05, 0.05, 0.2, 0.4, 0.1, 0.0, 0.0, 0.0]
+            #   label:      [0, 0, 0, 0, 0, 1, 0, 0, 0, 0]
+            #
+            #   This would be a correct prediction- the sixth entry (index 5) in each array holds the highest
+            #   value
+            #
+            # tensor_X.view_as(other) returns a resulting version of tensor_X with the same size as other.size()
+            #
+            # torch.eq() -> element wise equality:
+            # tensor_X.eq(tensor_Y) returns a tensor of the same size as tensor_X with 0's at every index for which
+            # the entry at that index in tensor_X does not match the entry at that index in tensor_Y and 1's at every
+            # index for which tensor_X and tensor_Y contain matching values
+            #
+            # .sum() sums every row of the tensor into a tensor holding a single value
+            #
+            # .item() gets the scalar value held in the sum tensor
             correct += pred.eq(target.view_as(pred)).sum().item()
 
+    # Divide the accumulated test loss across all testing batches by the total number of testing samples (in this
+    # case, 10,000) to get the average loss for the entire test set.
     test_loss /= len(test_loader.dataset)
 
+    # The overall accuracy of the model's predictions as a percent value is the count of its accurate predictions
+    # divided by the number of predictions it made, all multiplied by 100
+    accuracy = 100. * correct / len(test_loader.dataset)
+
+    # For the complete test set, display the average loss and accuracy
     # e.g. Test set: Average loss: 0.2073, Accuracy: 9415/10000 (94%)
     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-        test_loss, correct, len(test_loader.dataset),
-        100. * correct / len(test_loader.dataset)))
+        test_loss, correct, len(test_loader.dataset), accuracy))
 
 def main():
 
