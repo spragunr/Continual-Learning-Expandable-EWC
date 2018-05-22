@@ -6,6 +6,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
 
+output = 0
 
 class Net(nn.Module):
     def __init__(self):
@@ -27,6 +28,10 @@ class Net(nn.Module):
 
 
 def train(args, model, device, train_loader, optimizer, epoch):
+
+    # store the model output in a global variable for later reference
+    global output
+
     # Set the module "model" in "training mode"
     # This is necessary because some network layers behave differently when training vs testing.
     # Dropout, for example, is used to zero/mask certain weights during TRAINING to prevent overfitting.
@@ -108,6 +113,10 @@ def train(args, model, device, train_loader, optimizer, epoch):
 
 
 def test(args, model, device, test_loader):
+
+    # store the model output in a global variable for later reference
+    global output
+
     # Set the module "model" in "evaluation mode"
     # This is necessary because some network layers behave differently when training vs testing.
     # Dropout, for example, is used to zero/mask certain weights during TRAINING (e.g. model.train())
@@ -233,9 +242,9 @@ def compute_fisher(model):
     # list of all Fisher Information Matrices for all parameters in the model
     list_of_FIMs = []
 
-    # Initialize a series of empty (all 0's) Fisher Information Matrices for the most recently trained task- one for
-    # each trainable parameter of the model. Each FIM has the same dimensions as the parameter (weight or bias) to
-    # which it corresponds. Append each of these matrices to the list list_of_FIMs.
+    # Initialize a series of empty (all 0's) Fisher Information Matrices for the most recently trained task (SGD alone,
+    # no Elastic Weight Consolidation)- one for each trainable parameter of the model. Each FIM has the same dimensions
+    # as the parameter (weight or bias) to which it corresponds. Append each of these matrices to the list list_of_FIMs.
     #
     # torch.size() returns tensor dimensions as another tensor, so need to cast return value to a list to use
     # as the dimensionality argument to np.zeros(), which will created a zero-filled matrix of the dimensions
@@ -243,19 +252,31 @@ def compute_fisher(model):
     for parameter in model.parameters():
         list_of_FIMs.append(np.zeros(list(parameter.size())))
 
-    # Sample a random class from the model's output after SGD-only training run on most recent task
+    # Sample a random class from the model's output after testing run on most recent task (trained using
+    # SGD alone, with no Elastic Weight Consolidation)
     #
     # torch.multinomial(input, num_samples):
     # Returns a tensor where each row contains num_samples indices sampled from the multinomial probability
-    # distribution located in the corresponding row of tensor input.
+    # distribution located in the corresponding row of tensor input. Indices are ordered from left to right according
+    # to when each was sampled (first samples are placed in first column).
+    # If input is a vector, out is a vector of size num_samples.
+    # If input is a matrix with m rows, out is an matrix of shape (m × num_samples).
+    #
+    # In this case, output is a matrix, so to take just one value we want to index into a single entry-
+    # hence the [0][0] indexing to get the first entry. Also, because a tensor is returned, we use
+    # .item() to get the tensor as a scalar after the indexing has occured. The int cast is to make sure
+    # the scalar we got is not a float, but an integer which we can use as an INDEX later.
     #
     # NOTE:
-    # Our model's output after training has already had softmax activations applied and log computed
+    # Our model's output after training/testing has already had softmax activations applied and log computed
     # (see last line of Net.forward() - torch.nn.functional.log_softmax()), which are required for use with
     # the negative log likelihood loss function. Therefore, when sampling a random class from our output, we
     # do NOT need to apply softmax and log functions as in code in compute_fisher() at:
     # https://github.com/ariseff/overcoming-catastrophic/blob/master/model.py
-    class_index =
+    class_index = int((torch.multinomial(output, 1)[0][0]).item())
+
+
+
 
 def main():
     # Training settings
