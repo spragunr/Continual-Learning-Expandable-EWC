@@ -6,6 +6,26 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
 
+# The following class is used to split the training data for MNIST into training and validation sets,
+# as PyTorch does not have an official validation split for the data. The original class was obtained from:
+# https://github.com/pytorch/vision/issues/168
+# and I have modified it to include an option for a random sampler WITH replacement
+class ChunkSampler(torch.utils.data.Sampler):
+    """Samples elements sequentially or randomly from some offset.
+    Arguments:
+        num_samples: # of desired datapoints
+        start: offset where we should start selecting from
+    """
+    def __init__(self, num_samples, start = 0):
+        self.num_samples = num_samples
+        self.start = start
+
+    def __iter__(self):
+        return iter(range(self.start, self.start + self.num_samples))
+
+    def __len__(self):
+        return self.num_sample
+
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
@@ -228,7 +248,7 @@ def test(args, model, device, test_loader):
         test_loss, correct, len(test_loader.dataset), accuracy))
 
 
-def compute_fisher(model, num_samples=200):
+def compute_fisher(model, validation_loader, num_samples=200):
 
     # Fisher Information is defined as the variance in the score.
 
@@ -267,12 +287,15 @@ def compute_fisher(model, num_samples=200):
     # do NOT need to apply softmax and log functions as in code in compute_fisher() at:
     # https://github.com/ariseff/overcoming-catastrophic/blob/master/model.py
 
-    # TODO aren't we really operating on the OUTPUT here, or does .weight give us output anyway?
-    # TODO abs for flipping negative log-likelihood, but multinomial gives 46 (no good)
-    # maybe need to do softmax and log here... not sure... but this does not appear to work...
-    class_index = int((torch.multinomial((-1 * model.y.detach()), 1)[0][0]).item())
+    # class_index = int((torch.multinomial((-1 * model.y), 1)[1][0]).item())
 
-    print(class_index)
+    class_index = np.random.randint(0, 10)
+
+    for sample in range(num_samples):
+
+
+
+
 
 
 
@@ -296,7 +319,10 @@ def main():
                         help='random seed (default: 1)')
     parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                         help='how many batches to wait before logging training status')
-
+    parser.add_argument('--test-dataset-size', type=int, default=50000, metavar='TDS',
+                        help='how many images to put in the training dataset')
+    parser.add_argument('--validation-dataset-size', type=int, default=10000, metavar='VDS',
+                        help='how many images to put in the validation dataset')
     args = parser.parse_args()
 
     # determines if CUDA should be used - only if available AND not disabled via arguments
@@ -321,6 +347,8 @@ def main():
     # dataset (Dataset) – dataset from which to load the data.
     # batch_size (int, optional) – how many samples per batch to load (default: 1).
     # shuffle (bool, optional) – set to True to have the data reshuffled at every epoch (default: False).
+    # sampler - use a ChunkSampler (defined in this file) to produce training data as a subset of the full PyTorch
+    #           MNIST training dataset
     train_loader = torch.utils.data.DataLoader(
         # Use the MNIST dataset.
         # ARGUMENTS (in order):
@@ -350,10 +378,24 @@ def main():
                            transforms.ToTensor(),
                            transforms.Normalize((0.1307,), (0.3081,))
                        ])),
-        batch_size=args.batch_size, shuffle=True, **kwargs)
+        batch_size=args.batch_size, shuffle=True, sampler=ChunkSampler(args.test_dataset_size), **kwargs)
 
-    # Instantiate a DataLoader for the testing data in the same manner as above for training data, with one exception:
-    # train=False, because we want to draw the data here from <root>/test.pt (as opposed to <root>/training.pt)
+    # Instantiate a DataLoader for the validation data in the same manner as above for training data, with one
+    # exception:
+    # This ChunkSampler's offset picks up where the one we used for the training dataset left off (both are drawn from
+    # mutually disjoint subsets of the PyTorch training dataset).
+    validation_loader = torch.utils.data.DataLoader(
+        datasets.MNIST('../data', train=True, transform=transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.1307,), (0.3081,))
+        ])),
+        batch_size=args.batch_size, shuffle=True, sampler=ChunkSampler(args.validation_dataset_size,
+                                                                       args.test_dataset_size), **kwargs)
+
+
+    # Instantiate a DataLoader for the testing data in the same manner as above for training data, with two exceptions:
+    # 1) train=False, because we want to draw the data here from <root>/test.pt (as opposed to <root>/training.pt)
+    # 2) we no longer need to use the ChunkSampler class- testing data split is provided by PyTorch
     test_loader = torch.utils.data.DataLoader(
         datasets.MNIST('../data', train=False, transform=transforms.Compose([
             transforms.ToTensor(),
@@ -389,7 +431,7 @@ def main():
     for epoch in range(1, args.epochs + 1):
         train(args, model, device, train_loader, optimizer, epoch)
         test(args, model, device, test_loader)
-        compute_fisher(model)
+        compute_fisher(model, validation_loader)
 
 
 if __name__ == '__main__':
