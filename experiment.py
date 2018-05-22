@@ -1,9 +1,11 @@
 import argparse
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
+
 
 class Net(nn.Module):
     def __init__(self):
@@ -23,8 +25,9 @@ class Net(nn.Module):
         x = self.fc2(x)
         return F.log_softmax(x, dim=1)
 
+
 def train(args, model, device, train_loader, optimizer, epoch):
-    # Set the module in "training mode"
+    # Set the module "model" in "training mode"
     # This is necessary because some network layers behave differently when training vs testing.
     # Dropout, for example, is used to zero/mask certain weights during TRAINING to prevent overfitting.
     # However, during TESTING (e.g. model.eval()) we do not want this to happen.
@@ -67,7 +70,7 @@ def train(args, model, device, train_loader, optimizer, epoch):
         optimizer.zero_grad()
 
         # forward pass: compute predicted output by passing data to the network
-        # NOTE: we have overriden forward() in class Net above, so this will call model.forward()
+        # NOTE: we have overridden forward() in class Net above, so this will call model.forward()
         output = model(data)
 
         # Define the training loss function for the model to be negative log likelihood loss based on predicted values
@@ -101,10 +104,11 @@ def train(args, model, device, train_loader, optimizer, epoch):
         if batch_idx % args.log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
-                100. * batch_idx / len(train_loader), loss.item()))
+                       100. * batch_idx / len(train_loader), loss.item()))
+
 
 def test(args, model, device, test_loader):
-    # Set the module in "evaluation mode"
+    # Set the module "model" in "evaluation mode"
     # This is necessary because some network layers behave differently when training vs testing.
     # Dropout, for example, is used to zero/mask certain weights during TRAINING (e.g. model.train())
     # to prevent overfitting. However, during TESTING/EVALUATION we do not want this to happen.
@@ -128,7 +132,6 @@ def test(args, model, device, test_loader):
         # target: a 1D tensor of dimension <test batch size> containing ground truth labels for each of the
         # images in the corresponding test batch in order (contained within the data variable)
         for data, target in test_loader:
-
             # set the device (CPU or GPU) to be used with data and target to device variable (defined in main())
             data, target = data.to(device), target.to(device)
 
@@ -222,8 +225,39 @@ def test(args, model, device, test_loader):
     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
         test_loss, correct, len(test_loader.dataset), accuracy))
 
-def main():
 
+def compute_fisher(model):
+
+    # Fisher Information is defined as the variance in the score.
+
+    # list of all Fisher Information Matrices for all parameters in the model
+    list_of_FIMs = []
+
+    # Initialize a series of empty (all 0's) Fisher Information Matrices for the most recently trained task- one for
+    # each trainable parameter of the model. Each FIM has the same dimensions as the parameter (weight or bias) to
+    # which it corresponds. Append each of these matrices to the list list_of_FIMs.
+    #
+    # torch.size() returns tensor dimensions as another tensor, so need to cast return value to a list to use
+    # as the dimensionality argument to np.zeros(), which will created a zero-filled matrix of the dimensions
+    # specified in that list
+    for parameter in model.parameters():
+        list_of_FIMs.append(np.zeros(list(parameter.size())))
+
+    # Sample a random class from the model's output after SGD-only training run on most recent task
+    #
+    # torch.multinomial(input, num_samples):
+    # Returns a tensor where each row contains num_samples indices sampled from the multinomial probability
+    # distribution located in the corresponding row of tensor input.
+    #
+    # NOTE:
+    # Our model's output after training has already had softmax activations applied and log computed
+    # (see last line of Net.forward() - torch.nn.functional.log_softmax()), which are required for use with
+    # the negative log likelihood loss function. Therefore, when sampling a random class from our output, we
+    # do NOT need to apply softmax and log functions as in code in compute_fisher() at:
+    # https://github.com/ariseff/overcoming-catastrophic/blob/master/model.py
+    class_index =
+
+def main():
     # Training settings
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
 
@@ -278,34 +312,34 @@ def main():
         # transform (callable, optional) – A function/transform that takes in an PIL image and returns a transformed
         #                                       version. E.g, transforms.RandomCrop
         datasets.MNIST('../data', train=True, download=True,
-            # transforms.Compose() composes several transforms together.
-            #
-            # The transforms composed here are as follows:
-            #
-            # transforms.ToTensor():
-            #     Converts a PIL Image or numpy.ndarray (H x W x C) in the range [0, 255] to a
-            #     torch.FloatTensor of shape (C x H x W) in the range [0.0, 1.0].
-            #
-            # transforms.Normalize(mean, std):
-            #     Normalize a tensor image with mean and standard deviation. Given mean: (M1,...,Mn) and
-            #     std: (S1,..,Sn) for n channels, this transform will normalize each channel of the
-            #     input torch.*Tensor i.e. input[channel] = (input[channel] - mean[channel]) / std[channel]
-            #
-            #     NOTE: the values used here for mean and std are those computed on the MNIST dataset
-            #           SOURCE: https://discuss.pytorch.org/t/normalization-in-the-mnist-example/457
-            transform=transforms.Compose([
-                transforms.ToTensor(),
-                transforms.Normalize((0.1307,), (0.3081,))
-            ])),
+                       # transforms.Compose() composes several transforms together.
+                       #
+                       # The transforms composed here are as follows:
+                       #
+                       # transforms.ToTensor():
+                       #     Converts a PIL Image or numpy.ndarray (H x W x C) in the range [0, 255] to a
+                       #     torch.FloatTensor of shape (C x H x W) in the range [0.0, 1.0].
+                       #
+                       # transforms.Normalize(mean, std):
+                       #     Normalize a tensor image with mean and standard deviation. Given mean: (M1,...,Mn) and
+                       #     std: (S1,..,Sn) for n channels, this transform will normalize each channel of the
+                       #     input torch.*Tensor i.e. input[channel] = (input[channel] - mean[channel]) / std[channel]
+                       #
+                       #     NOTE: the values used here for mean and std are those computed on the MNIST dataset
+                       #           SOURCE: https://discuss.pytorch.org/t/normalization-in-the-mnist-example/457
+                       transform=transforms.Compose([
+                           transforms.ToTensor(),
+                           transforms.Normalize((0.1307,), (0.3081,))
+                       ])),
         batch_size=args.batch_size, shuffle=True, **kwargs)
 
     # Instantiate a DataLoader for the testing data in the same manner as above for training data, with one exception:
     # train=False, because we want to draw the data here from <root>/test.pt (as opposed to <root>/training.pt)
     test_loader = torch.utils.data.DataLoader(
         datasets.MNIST('../data', train=False, transform=transforms.Compose([
-                           transforms.ToTensor(),
-                           transforms.Normalize((0.1307,), (0.3081,))
-                       ])),
+            transforms.ToTensor(),
+            transforms.Normalize((0.1307,), (0.3081,))
+        ])),
         batch_size=args.test_batch_size, shuffle=True, **kwargs)
 
     # Move all parameters and buffers in the module Net to device (CPU or GPU- set above).
