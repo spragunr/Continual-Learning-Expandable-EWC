@@ -4,27 +4,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+import torch.utils.data as D
 from torchvision import datasets, transforms
-
-# The following class is used to split the training data for MNIST into training and validation sets,
-# as PyTorch does not have an official validation split for the data. The original class was obtained from:
-# https://github.com/pytorch/vision/issues/168
-# and I have modified it to include an option for a random sampler WITH replacement
-class ChunkSampler(torch.utils.data.Sampler):
-    """Samples elements sequentially or randomly from some offset.
-    Arguments:
-        num_samples: # of desired datapoints
-        start: offset where we should start selecting from
-    """
-    def __init__(self, num_samples, start = 0):
-        self.num_samples = num_samples
-        self.start = start
-
-    def __iter__(self):
-        return iter(range(self.start, self.start + self.num_samples))
-
-    def __len__(self):
-        return self.num_sample
 
 class Net(nn.Module):
     def __init__(self):
@@ -291,7 +272,16 @@ def compute_fisher(model, validation_loader, num_samples=200):
 
     class_index = np.random.randint(0, 10)
 
-    for sample in range(num_samples):
+
+    for iteration in range(num_samples):
+        # Get a single random image from the validation dataset (4D tensor- dimensions: torch.Size([1, 1, 28, 28])),
+        # and store the image in data variable. We don't need the target (ground truth label), so we just put that
+        # in variable _.
+        #
+        # The images selected are random because shuffle=True is used in the validation_loader
+        # definition, which is implemented in the source code as a torch.utils.data.sampler.RandomSampler().
+        # See source at: https://pytorch.org/docs/master/_modules/torch/utils/data/dataloader.html#DataLoader
+        data, _ = next(iter(validation_loader))
 
 
 
@@ -319,7 +309,7 @@ def main():
                         help='random seed (default: 1)')
     parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                         help='how many batches to wait before logging training status')
-    parser.add_argument('--test-dataset-size', type=int, default=50000, metavar='TDS',
+    parser.add_argument('--train-dataset-size', type=int, default=50000, metavar='TDS',
                         help='how many images to put in the training dataset')
     parser.add_argument('--validation-dataset-size', type=int, default=10000, metavar='VDS',
                         help='how many images to put in the validation dataset')
@@ -342,61 +332,56 @@ def main():
     # A PyTorch DataLoader combines a dataset and a sampler, and returns single- or multi-process iterators over
     # the dataset.
 
-    # DataLoader for the training data.
-    # ARGUMENTS (in order):
-    # dataset (Dataset) – dataset from which to load the data.
-    # batch_size (int, optional) – how many samples per batch to load (default: 1).
-    # shuffle (bool, optional) – set to True to have the data reshuffled at every epoch (default: False).
-    # sampler - use a ChunkSampler (defined in this file) to produce training data as a subset of the full PyTorch
-    #           MNIST training dataset
-    train_loader = torch.utils.data.DataLoader(
-        # Use the MNIST dataset.
-        # ARGUMENTS (in order):
-        # root (string) – Root directory of dataset where processed/training.pt and processed/test.pt exist.
-        # train (bool, optional) – If True, creates dataset from training.pt, otherwise from test.pt.
-        # download (bool, optional) – If true, downloads the dataset from the internet and puts it in root directory.
-        #                                       If dataset is already downloaded, it is not downloaded again.
-        # transform (callable, optional) – A function/transform that takes in an PIL image and returns a transformed
-        #                                       version. E.g, transforms.RandomCrop
-        datasets.MNIST('../data', train=True, download=True,
-                       # transforms.Compose() composes several transforms together.
-                       #
-                       # The transforms composed here are as follows:
-                       #
-                       # transforms.ToTensor():
-                       #     Converts a PIL Image or numpy.ndarray (H x W x C) in the range [0, 255] to a
-                       #     torch.FloatTensor of shape (C x H x W) in the range [0.0, 1.0].
-                       #
-                       # transforms.Normalize(mean, std):
-                       #     Normalize a tensor image with mean and standard deviation. Given mean: (M1,...,Mn) and
-                       #     std: (S1,..,Sn) for n channels, this transform will normalize each channel of the
-                       #     input torch.*Tensor i.e. input[channel] = (input[channel] - mean[channel]) / std[channel]
-                       #
-                       #     NOTE: the values used here for mean and std are those computed on the MNIST dataset
-                       #           SOURCE: https://discuss.pytorch.org/t/normalization-in-the-mnist-example/457
-                       transform=transforms.Compose([
-                           transforms.ToTensor(),
-                           transforms.Normalize((0.1307,), (0.3081,))
-                       ])),
-        batch_size=args.batch_size, shuffle=True, sampler=ChunkSampler(args.test_dataset_size), **kwargs)
-
-    # Instantiate a DataLoader for the validation data in the same manner as above for training data, with one
-    # exception:
-    # This ChunkSampler's offset picks up where the one we used for the training dataset left off (both are drawn from
-    # mutually disjoint subsets of the PyTorch training dataset).
-    validation_loader = torch.utils.data.DataLoader(
-        datasets.MNIST('../data', train=True, transform=transforms.Compose([
+    # Split the PyTorch MNIST training dataset into training and validation datasets, and transform the data.
+    #
+    # D.dataset.random_split(dataset, lengths):
+    #   Randomly split a dataset into non-overlapping new datasets of given lengths
+    #
+    # datasets.MNIST():
+    #   ARGUMENTS (in order):
+    #   root (string) – Root directory of dataset where processed/training.pt and processed/test.pt exist.
+    #   train (bool, optional) – If True, creates dataset from training.pt, otherwise from test.pt.
+    #   download (bool, optional) – If true, downloads the dataset from the internet and puts it in root directory.
+    #                                       If dataset is already downloaded, it is not downloaded again.
+    #   transform (callable, optional) – A function/transform that takes in an PIL image and returns a transformed
+    #                                       version. E.g, transforms.RandomCrop
+    train_data, validation_data = D.dataset.random_split(datasets.MNIST('../data', train=True,
+        # transforms.Compose() composes several transforms together.
+        #
+        # The transforms composed here are as follows:
+        #
+        # transforms.ToTensor():
+        #     Converts a PIL Image or numpy.ndarray (H x W x C) in the range [0, 255] to a
+        #     torch.FloatTensor of shape (C x H x W) in the range [0.0, 1.0].
+        #
+        # transforms.Normalize(mean, std):
+        #     Normalize a tensor image with mean and standard deviation. Given mean: (M1,...,Mn) and
+        #     std: (S1,..,Sn) for n channels, this transform will normalize each channel of the
+        #     input torch.*Tensor i.e. input[channel] = (input[channel] - mean[channel]) / std[channel]
+        #
+        #     NOTE: the values used here for mean and std are those computed on the MNIST dataset
+        #           SOURCE: https://discuss.pytorch.org/t/normalization-in-the-mnist-example/457
+        transform=transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize((0.1307,), (0.3081,))
-        ])),
-        batch_size=args.batch_size, shuffle=True, sampler=ChunkSampler(args.validation_dataset_size,
-                                                                       args.test_dataset_size), **kwargs)
+        ])), [args.train_dataset_size, args.validation_dataset_size])
 
 
-    # Instantiate a DataLoader for the testing data in the same manner as above for training data, with two exceptions:
-    # 1) train=False, because we want to draw the data here from <root>/test.pt (as opposed to <root>/training.pt)
-    # 2) we no longer need to use the ChunkSampler class- testing data split is provided by PyTorch
-    test_loader = torch.utils.data.DataLoader(
+
+    # DataLoader for the training data.
+    # ARGUMENTS (in order):
+    # dataset (Dataset) – dataset from which to load the data (train_data prepared in above statement, in this case).
+    # batch_size (int, optional) – how many samples per batch to load (default: 1).
+    # shuffle (bool, optional) – set to True to have the data reshuffled at every epoch (default: False).
+    # kwargs - see above definition
+    train_loader = D.DataLoader(train_data, batch_size=args.batch_size, shuffle=True, **kwargs)
+
+    # TODO comment this
+    validation_loader = D.DataLoader(validation_data, batch_size=1, shuffle=True, **kwargs)
+
+    # Instantiate a DataLoader for the testing data in the same manner as above for training data, with one exception:
+    #       train=False, because we want to draw the data here from <root>/test.pt (as opposed to <root>/training.pt)
+    test_loader = D.DataLoader(
         datasets.MNIST('../data', train=False, transform=transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize((0.1307,), (0.3081,))
