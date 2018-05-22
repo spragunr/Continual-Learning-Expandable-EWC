@@ -6,8 +6,6 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
 
-output = 0
-
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
@@ -16,6 +14,7 @@ class Net(nn.Module):
         self.conv2_drop = nn.Dropout2d()
         self.fc1 = nn.Linear(320, 50)
         self.fc2 = nn.Linear(50, 10)
+        self.y = F.log_softmax(self.fc2.weight, dim=1)
 
     def forward(self, x):
         x = F.relu(F.max_pool2d(self.conv1(x), 2))
@@ -28,9 +27,6 @@ class Net(nn.Module):
 
 
 def train(args, model, device, train_loader, optimizer, epoch):
-
-    # store the model output in a global variable for later reference
-    global output
 
     # Set the module "model" in "training mode"
     # This is necessary because some network layers behave differently when training vs testing.
@@ -113,9 +109,6 @@ def train(args, model, device, train_loader, optimizer, epoch):
 
 
 def test(args, model, device, test_loader):
-
-    # store the model output in a global variable for later reference
-    global output
 
     # Set the module "model" in "evaluation mode"
     # This is necessary because some network layers behave differently when training vs testing.
@@ -235,7 +228,7 @@ def test(args, model, device, test_loader):
         test_loss, correct, len(test_loader.dataset), accuracy))
 
 
-def compute_fisher(model):
+def compute_fisher(model, num_samples=200):
 
     # Fisher Information is defined as the variance in the score.
 
@@ -273,8 +266,13 @@ def compute_fisher(model):
     # the negative log likelihood loss function. Therefore, when sampling a random class from our output, we
     # do NOT need to apply softmax and log functions as in code in compute_fisher() at:
     # https://github.com/ariseff/overcoming-catastrophic/blob/master/model.py
-    class_index = int((torch.multinomial(output, 1)[0][0]).item())
 
+    # TODO aren't we really operating on the OUTPUT here, or does .weight give us output anyway?
+    # TODO abs for flipping negative log-likelihood, but multinomial gives 46 (no good)
+    # maybe need to do softmax and log here... not sure... but this does not appear to work...
+    class_index = int((torch.multinomial((-1 * model.y.detach()), 1)[0][0]).item())
+
+    print(class_index)
 
 
 
@@ -391,6 +389,7 @@ def main():
     for epoch in range(1, args.epochs + 1):
         train(args, model, device, train_loader, optimizer, epoch)
         test(args, model, device, test_loader)
+        compute_fisher(model)
 
 
 if __name__ == '__main__':
