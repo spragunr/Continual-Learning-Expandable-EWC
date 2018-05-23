@@ -20,6 +20,8 @@ class Net(nn.Module):
         # Represents the output layer of the network (used in compute_fisher() method below)
         # torch.modules.nn.Linear.weight is a Parameter type variable
         # Parameter.data gives the values in the parameter as a tensor of weights
+        #
+        # see source at : https://pytorch.org/docs/master/_modules/torch/nn/modules/linear.html
         self.y = F.log_softmax(self.fc2.weight.data, dim=1)
 
     def forward(self, x):
