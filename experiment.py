@@ -323,9 +323,17 @@ def compute_fisher(model, validation_loader, num_samples=200):
         list_of_FIMs[parameter] /= num_samples
 
 
+def save_optimal_weights(model):
 
+    # list of tensors used for saving optimal weights after most recent task training run using SGD only (no EWC)
+    optimal_vars = []
 
+    # get the current values of each learnable model parameter as tensors of weights and add them to the list
+    # optimal_vars
+    for parameter in model.parameters():
+        optimal_vars.append(parameter.weight)
 
+    return optimal_vars
 
 def main():
     # Training settings
@@ -414,7 +422,15 @@ def main():
     # kwargs - see above definition
     train_loader = D.DataLoader(train_data, batch_size=args.batch_size, shuffle=True, **kwargs)
 
-    # TODO comment this
+    # Dataloader for the validation dataset-
+    # ARGUMENTS (in order):
+    # 1) validation_data as the dataset
+    # 2) we use this in compute_fisher by sampling a SINGLE image from the validation set per iteration,
+    #       hence batch_size=1
+    # 3) shuffle=True ensures we are drawing random samples by shuffling the data each time we contstruct a new iterator
+    #       over the data, and is implemented in the source code as a RandomSampler() - see comments in compute_fisher
+    #       for more details and a link to the source code
+    # 4) kwargs defined above
     validation_loader = D.DataLoader(validation_data, batch_size=1, shuffle=True, **kwargs)
 
     # Instantiate a DataLoader for the testing data in the same manner as above for training data, with one exception:
@@ -454,6 +470,8 @@ def main():
     for epoch in range(1, args.epochs + 1):
         train(args, model, device, train_loader, optimizer, epoch)
         test(args, model, device, test_loader)
+        # using validation set in Fisher Information Matrix computation as specified by:
+        #   https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
         compute_fisher(model, validation_loader)
 
 
