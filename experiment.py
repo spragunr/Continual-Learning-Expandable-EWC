@@ -16,7 +16,11 @@ class Net(nn.Module):
         self.conv2_drop = nn.Dropout2d()
         self.fc1 = nn.Linear(320, 50)
         self.fc2 = nn.Linear(50, 10)
-        self.y = F.log_softmax(self.fc2.weight, dim=1)
+
+        # Represents the output layer of the network (used in compute_fisher() method below)
+        # torch.modules.nn.Linear.weight is a Parameter type variable
+        # Parameter.data gives the values in the parameter as a tensor of weights
+        self.y = F.log_softmax(self.fc2.weight.data, dim=1)
 
     def forward(self, x):
         x = F.relu(F.max_pool2d(self.conv1(x), 2))
@@ -279,7 +283,7 @@ def compute_fisher(model, validation_loader, num_samples=200):
     # index into a single entry- hence the [0][0] indexing to get the first entry. Also, because a tensor is returned,
     # we use .item() to get the tensor as a scalar after the indexing produces a SINGLE-VALUE tensor.
     class_index = (torch.multinomial(probs, 1)[0][0]).item()
-
+    print(class_index)
     for iteration in range(num_samples):
         # Get a single random image from the validation dataset (4D tensor- dimensions: torch.Size([1, 1, 28, 28])),
         # and store the image in data variable. We don't need the target (ground truth label), so we just put that
@@ -327,7 +331,7 @@ def save_optimal_weights(model):
     # get the current values of each learnable model parameter as tensors of weights and add them to the list
     # optimal_weights
     for parameter in model.parameters():
-        optimal_weights.append(parameter.weight)
+        optimal_weights.append(parameter.data)
 
     return optimal_weights
 
@@ -339,7 +343,7 @@ def restore_optimal_weights(model, optimal_weights):
     # NOTE:
     #   enumerate will keep an automated loop counter in param_index
     for param_index, parameter in enumerate(model.parameters()):
-        parameter.weight = optimal_weights[param_index]
+        parameter.data = optimal_weights[param_index]
 
 
 def main():
