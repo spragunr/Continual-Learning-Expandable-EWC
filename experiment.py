@@ -246,9 +246,31 @@ def compute_fisher(model, validation_loader, num_samples=200):
     for parameter in model.parameters():
         list_of_FIMs.append(np.zeros(list(parameter.size())))
 
-    # Sample a random class from the model's output after testing run on most recent task (trained using
+
+    # Sample a random class from softmax after testing run on most recent task (trained using
     # SGD alone, with no Elastic Weight Consolidation)
+
+    # torch.multinomial() requires entries to be positive, but the log of any number < 1 will be negative, and softmax
+    # gives values in the range (0,1) so all logs will be negative.
+    # Because we combined log(softmax()) into one operation by using F.log_softmax() in our definition of model.y (the
+    # model output layer), we use torch.exp() here to reverse that operation and get back the probabilities.
     #
+    # The probabilities we obtain are in a tensor of dimensions (10,50), but torch.multinomial() will sample from
+    # each ROW of input and we need it to sample a class index (0-9), so we use torch.t to transpose the tensor,
+    # giving us a tensor with dimensions (50,10). The number 50 comes from the dimensions of the last fully
+    # connected layer in our network- fc2.
+    #
+    # NOTES:
+    # 1) TensorFlow's tf.multinomial does not require that all entries be non-negative in the distribution,
+    #       but PyTorch's torch.multinomial DOES
+    #
+    # 2) Our model's output after training/testing has already had softmax activations applied and log computed
+    #       (see last line of Net.forward() - torch.nn.functional.log_softmax()), which are required for use with
+    #       the negative log likelihood loss function. Therefore, when sampling a random class from our output, we
+    #       do NOT need to apply softmax as in code in compute_fisher() at:
+    #       https://github.com/ariseff/overcoming-catastrophic/blob/master/model.py
+    probs = torch.t(torch.exp(model.y))
+
     # torch.multinomial(input, num_samples):
     # Returns a tensor where each row contains num_samples indices sampled from the multinomial probability
     # distribution located in the corresponding row of tensor input. Indices are ordered from left to right according
@@ -256,30 +278,10 @@ def compute_fisher(model, validation_loader, num_samples=200):
     # If input is a vector, out is a vector of size num_samples.
     # If input is a matrix with m rows, out is an matrix of shape (m × num_samples).
     #
-    # In this case, output is a matrix, so to take just one value we want to index into a single entry-
-    # hence the [0][0] indexing to get the first entry. Also, because a tensor is returned, we use
-    # .item() to get the tensor as a scalar after the indexing has occured. The int cast is to make sure
-    # the scalar we got is not a float, but an integer which we can use as an INDEX later.
-    #
-    # NOTE:
-    # Our model's output after training/testing has already had softmax activations applied and log computed
-    # (see last line of Net.forward() - torch.nn.functional.log_softmax()), which are required for use with
-    # the negative log likelihood loss function. Therefore, when sampling a random class from our output, we
-    # do NOT need to apply softmax and log functions as in code in compute_fisher() at:
-    # https://github.com/ariseff/overcoming-catastrophic/blob/master/model.py
-
-    print(model.y.detach().numpy())
-
-    # TODO comment all of this
-
-    probs = torch.t(torch.exp(model.y))
-
-    class_index = torch.multinomial(probs, 1)[0][0]
-
-    print(class_index.numpy())
-
-    class_index = np.random.randint(0, 10)
-
+    # In this case, input is a 10 x 50 matrix and output is a 10 x 1 matrix , so to take just one value we want to
+    # index into a single entry- hence the [0][0] indexing to get the first entry. Also, because a tensor is returned,
+    # we use .item() to get the tensor as a scalar after the indexing produces a SINGLE-VALUE tensor.
+    class_index = (torch.multinomial(probs, 1)[0][0]).item()
 
     for iteration in range(num_samples):
         # Get a single random image from the validation dataset (4D tensor- dimensions: torch.Size([1, 1, 28, 28])),
@@ -298,12 +300,25 @@ def compute_fisher(model, validation_loader, num_samples=200):
         # replacement, so if num_samples were larger than the validation set size, we would run out of samples.
         data, _ = next(iter(validation_loader))
 
+        # torch.autograd.grad(outputs, inputs):
+        #       Computes and returns the sum of gradients of outputs w.r.t. the inputs.
+        # equivalent to TensorFlow's tf.gradients(ys, xs):
+        #       Constructs symbolic derivatives of sum of ys w.r.t. x in xs.
+        #
+        # The purpose of this step is to calculate the score for each parameter in our model. In statistics, the score
+        # indicates how sensitive a likelihood function is to its parameter θ. Explicitly, the score for θ is the
+        # gradient of the log-likelihood with respect to θ. (https://en.wikipedia.org/wiki/Score_(statistics))
         ders = torch.autograd.grad(model(data)[0,class_index], model.parameters())
 
+        # Square the derivatives and add them (sum) to the FIM for each parameter.
+        # We need to calculate the variance in the score to get the Fisher information, and the sum of squares divided
+        # by the number of samples gives us the variance. (https://www.westgard.com/lesson35.htm#8)
         for parameter in range(len(list_of_FIMs)):
             list_of_FIMs[parameter] += np.square(ders[parameter])
 
-    # divide totals by number of samples
+    # Divide totals by number of samples.
+    # We need to calculate the variance in the score to get the Fisher information, and the sum of squares divided
+    # by the number of samples gives us the variance. (https://www.westgard.com/lesson35.htm#8)
     for parameter in range(len(list_of_FIMs)):
         list_of_FIMs[parameter] /= num_samples
 
