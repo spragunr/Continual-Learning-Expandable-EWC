@@ -280,9 +280,17 @@ def compute_fisher(model, validation_loader, num_samples=200):
         #
         # The images selected are random because shuffle=True is used in the validation_loader
         # definition, which is implemented in the source code as a torch.utils.data.sampler.RandomSampler().
+        # Based on the __init__ function in DataLoader and the __init__ function in DataLoaderIter, each time
+        # the statement below executes, we should get a NEW iterator and RandomSampler() that draws the random samples
+        # over which that iterator will iterate.
         # See source at: https://pytorch.org/docs/master/_modules/torch/utils/data/dataloader.html#DataLoader
+        #
+        # NOTE:
+        # The reason that this statement is not used outside of the loop is that RandomSampler() samples without
+        # replacement, so if num_samples were larger than the validation set size, we would run out of samples.
         data, _ = next(iter(validation_loader))
 
+        ders = torch.autograd.grad()
 
 
 
