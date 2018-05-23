@@ -268,7 +268,15 @@ def compute_fisher(model, validation_loader, num_samples=200):
     # do NOT need to apply softmax and log functions as in code in compute_fisher() at:
     # https://github.com/ariseff/overcoming-catastrophic/blob/master/model.py
 
-    # class_index = int((torch.multinomial((-1 * model.y), 1)[1][0]).item())
+    print(model.y.detach().numpy())
+
+    # TODO comment all of this
+
+    probs = torch.t(torch.exp(model.y))
+
+    class_index = torch.multinomial(probs, 1)[0][0]
+
+    print(class_index.numpy())
 
     class_index = np.random.randint(0, 10)
 
@@ -290,7 +298,14 @@ def compute_fisher(model, validation_loader, num_samples=200):
         # replacement, so if num_samples were larger than the validation set size, we would run out of samples.
         data, _ = next(iter(validation_loader))
 
-        ders = torch.autograd.grad()
+        ders = torch.autograd.grad(model(data)[0,class_index], model.parameters())
+
+        for parameter in range(len(list_of_FIMs)):
+            list_of_FIMs[parameter] += np.square(ders[parameter])
+
+    # divide totals by number of samples
+    for parameter in range(len(list_of_FIMs)):
+        list_of_FIMs[parameter] /= num_samples
 
 
 
