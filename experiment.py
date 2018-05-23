@@ -348,6 +348,7 @@ def restore_optimal_weights(model, optimal_weights):
         parameter.data = optimal_weights[param_index]
 
 
+
 def main():
     # Training settings
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
