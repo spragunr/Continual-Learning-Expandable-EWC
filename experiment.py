@@ -7,6 +7,7 @@ import torch.optim as optim
 import torch.utils.data as D
 from torchvision import datasets, transforms
 
+
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
@@ -28,7 +29,6 @@ class Net(nn.Module):
 
 
 def train(args, model, device, train_loader, optimizer, epoch):
-
     # Set the module "model" in "training mode"
     # This is necessary because some network layers behave differently when training vs testing.
     # Dropout, for example, is used to zero/mask certain weights during TRAINING to prevent overfitting.
@@ -105,12 +105,11 @@ def train(args, model, device, train_loader, optimizer, epoch):
         # Train Epoch: 1 [3200/60000 (5%)]	Loss: 2.259442
         if batch_idx % args.log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_idx * len(data), len(train_loader.dataset),
-                       100. * batch_idx / len(train_loader), loss.item()))
+                epoch, batch_idx * len(data), len(train_loader.dataset), 100. * batch_idx / len(train_loader),
+                loss.item()))
 
 
 def test(args, model, device, test_loader):
-
     # Set the module "model" in "evaluation mode"
     # This is necessary because some network layers behave differently when training vs testing.
     # Dropout, for example, is used to zero/mask certain weights during TRAINING (e.g. model.train())
@@ -230,7 +229,6 @@ def test(args, model, device, test_loader):
 
 
 def compute_fisher(model, validation_loader, num_samples=200):
-
     # Fisher Information is defined as the variance in the score.
 
     # list of all Fisher Information Matrices for all parameters in the model
@@ -245,7 +243,6 @@ def compute_fisher(model, validation_loader, num_samples=200):
     # specified in that list
     for parameter in model.parameters():
         list_of_FIMs.append(np.zeros(list(parameter.size())))
-
 
     # Sample a random class from softmax after testing run on most recent task (trained using
     # SGD alone, with no Elastic Weight Consolidation)
@@ -308,7 +305,7 @@ def compute_fisher(model, validation_loader, num_samples=200):
         # The purpose of this step is to calculate the score for each parameter in our model. In statistics, the score
         # indicates how sensitive a likelihood function is to its parameter θ. Explicitly, the score for θ is the
         # gradient of the log-likelihood with respect to θ. (https://en.wikipedia.org/wiki/Score_(statistics))
-        ders = torch.autograd.grad(model(data)[0,class_index], model.parameters())
+        ders = torch.autograd.grad(model(data)[0, class_index], model.parameters())
 
         # Square the derivatives and add them (sum) to the FIM for each parameter.
         # We need to calculate the variance in the score to get the Fisher information, and the sum of squares divided
@@ -324,16 +321,26 @@ def compute_fisher(model, validation_loader, num_samples=200):
 
 
 def save_optimal_weights(model):
-
     # list of tensors used for saving optimal weights after most recent task training run using SGD only (no EWC)
-    optimal_vars = []
+    optimal_weights = []
 
     # get the current values of each learnable model parameter as tensors of weights and add them to the list
-    # optimal_vars
+    # optimal_weights
     for parameter in model.parameters():
-        optimal_vars.append(parameter.weight)
+        optimal_weights.append(parameter.weight)
 
-    return optimal_vars
+    return optimal_weights
+
+
+def restore_optimal_weights(model, optimal_weights):
+
+    # Assign to each learnable parameter in the model the weight values which were obtained at the last iteration
+    # of training on the latest task using SGD alone (no EWC).
+    # NOTE:
+    #   enumerate will keep an automated loop counter in param_index
+    for param_index, parameter in enumerate(model.parameters()):
+        parameter.weight = optimal_weights[param_index]
+
 
 def main():
     # Training settings
@@ -391,28 +398,27 @@ def main():
     #                                       If dataset is already downloaded, it is not downloaded again.
     #   transform (callable, optional) – A function/transform that takes in an PIL image and returns a transformed
     #                                       version. E.g, transforms.RandomCrop
-    train_data, validation_data = D.dataset.random_split(datasets.MNIST('../data', train=True,
-        # transforms.Compose() composes several transforms together.
-        #
-        # The transforms composed here are as follows:
-        #
-        # transforms.ToTensor():
-        #     Converts a PIL Image or numpy.ndarray (H x W x C) in the range [0, 255] to a
-        #     torch.FloatTensor of shape (C x H x W) in the range [0.0, 1.0].
-        #
-        # transforms.Normalize(mean, std):
-        #     Normalize a tensor image with mean and standard deviation. Given mean: (M1,...,Mn) and
-        #     std: (S1,..,Sn) for n channels, this transform will normalize each channel of the
-        #     input torch.*Tensor i.e. input[channel] = (input[channel] - mean[channel]) / std[channel]
-        #
-        #     NOTE: the values used here for mean and std are those computed on the MNIST dataset
-        #           SOURCE: https://discuss.pytorch.org/t/normalization-in-the-mnist-example/457
-        transform=transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((0.1307,), (0.3081,))
-        ])), [args.train_dataset_size, args.validation_dataset_size])
-
-
+    train_data, validation_data = D.dataset.random_split(
+        datasets.MNIST('../data', train=True,
+                       # transforms.Compose() composes several transforms together.
+                       #
+                       # The transforms composed here are as follows:
+                       #
+                       # transforms.ToTensor():
+                       #     Converts a PIL Image or numpy.ndarray (H x W x C) in the range [0, 255] to a
+                       #     torch.FloatTensor of shape (C x H x W) in the range [0.0, 1.0].
+                       #
+                       # transforms.Normalize(mean, std):
+                       #     Normalize a tensor image with mean and standard deviation. Given mean: (M1,...,Mn) and
+                       #     std: (S1,..,Sn) for n channels, this transform will normalize each channel of the
+                       #     input torch.*Tensor i.e. input[channel] = (input[channel] - mean[channel]) / std[channel]
+                       #
+                       #     NOTE: the values used here for mean and std are those computed on the MNIST dataset
+                       #           SOURCE: https://discuss.pytorch.org/t/normalization-in-the-mnist-example/457
+                       transform=transforms.Compose([
+                           transforms.ToTensor(),
+                           transforms.Normalize((0.1307,), (0.3081,))
+                       ])), [args.train_dataset_size, args.validation_dataset_size])
 
     # DataLoader for the training data.
     # ARGUMENTS (in order):
