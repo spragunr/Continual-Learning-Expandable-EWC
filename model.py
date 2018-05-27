@@ -15,6 +15,18 @@ class Model(nn.Module):
         self.fc1 = nn.Linear(320, 50)
         self.fc2 = nn.Linear(50, 10)
 
+        # output layer placeholder (filled with actual useful data in forward())
+        self.y = None
+
+        #TODO comment
+        self.optimal_weights = None
+
+        #TODO comment
+        self.list_of_FIMS = None
+
+        #TODO comment
+        self.prev_tasks_ewc_loss = 0
+
     def forward(self, x):
         x = F.relu(F.max_pool2d(self.conv1(x), 2))
         x = F.relu(F.max_pool2d(self.conv2_drop(self.conv2(x)), 2))
@@ -22,9 +34,10 @@ class Model(nn.Module):
         x = F.relu(self.fc1(x))
         x = F.dropout(x, training=self.training)
         x = self.fc2(x)
-        return F.log_softmax(x, dim=1)
+        self.y = F.log_softmax(x, dim=1)
+        return self.y
 
-    def train_step(self, args, device, train_loader, optimizer, epoch):
+    def train_step(self, args, device, train_loader, optimizer, epoch, ewc):
         # Set the module in "training mode"
         # This is necessary because some network layers behave differently when training vs testing.
         # Dropout, for example, is used to zero/mask certain weights during TRAINING to prevent overfitting.
@@ -72,11 +85,17 @@ class Model(nn.Module):
             output = self(data)
 
             # Define the training loss function for the model to be negative log likelihood loss based on predicted values
-            # and ground truth labels.
+            # and ground truth labels. This loss function only takes into account loss on the most recent task (no
+            # regularization- SGD only).
             # The addition of a log_softmax layer as the last layer of our network
             # produces log probabilities from softmax and allows us to use this loss function instead of cross entropy,
             # because torch.nn.CrossEntropyLoss combines torch.nn.LogSoftmax() and torch.nn.NLLLoss() in one single class.
             loss = F.nll_loss(output, target)
+
+            # TODO comment
+            if ewc:
+                old_tasks_loss = self.calculate_ewc_loss_prev_tasks(15)
+                loss += old_tasks_loss
 
             # Backward pass: compute gradient of the loss with respect to model
             # parameters
@@ -228,17 +247,17 @@ class Model(nn.Module):
         # Fisher Information is defined as the variance in the score.
 
         # list of all Fisher Information Matrices for all parameters in the model
-        list_of_FIMs = []
+        self.list_of_FIMs = []
 
         # Initialize a series of empty (all 0's) Fisher Information Matrices for the most recently trained task (SGD alone,
         # no Elastic Weight Consolidation)- one for each trainable parameter of the model. Each FIM has the same dimensions
-        # as the parameter (weight or bias) to which it corresponds. Append each of these matrices to the list list_of_FIMs.
+        # as the parameter (weight or bias) to which it corresponds. Append each of these matrices to the list self.list_of_FIMs.
         #
         # torch.size() returns tensor dimensions as another tensor, so need to cast return value to a list to use
         # as the dimensionality argument to np.zeros(), which will created a zero-filled matrix of the dimensions
         # specified in that list
         for parameter in self.parameters():
-            list_of_FIMs.append(np.zeros(tuple(parameter.size())))
+            self.list_of_FIMs.append(np.zeros(tuple(parameter.size())))
 
         # Sample a random class from softmax after testing run on most recent task (trained using
         # SGD alone, with no Elastic Weight Consolidation)
@@ -247,11 +266,6 @@ class Model(nn.Module):
         # gives values in the range (0,1) so all logs will be negative.
         # Because we combined log(softmax()) into one operation by using F.log_softmax() in our definition of model.y (the
         # model output layer), we use torch.exp() here to reverse that operation and get back the probabilities.
-        #
-        # The probabilities we obtain are in a tensor of dimensions (10,50), but torch.multinomial() will sample from
-        # each ROW of input and we need it to sample a class index (0-9), so we use torch.t to transpose the tensor,
-        # giving us a tensor with dimensions (50,10). The number 50 comes from the dimensions of the last fully
-        # connected layer in our network- fc2.
         #
         # NOTES:
         # 1) TensorFlow's tf.multinomial does not require that all entries be non-negative in the distribution,
@@ -262,7 +276,7 @@ class Model(nn.Module):
         #       the negative log likelihood loss function. Therefore, when sampling a random class from our output, we
         #       do NOT need to apply softmax as in code in compute_fisher() at:
         #       https://github.com/ariseff/overcoming-catastrophic/blob/master/model.py
-        probs = torch.t(torch.exp(self.y))
+        probs = (torch.exp(self.y))
 
         # torch.multinomial(input, num_samples):
         # Returns a tensor where each row contains num_samples indices sampled from the multinomial probability
@@ -306,25 +320,24 @@ class Model(nn.Module):
             # Square the derivatives and add them (sum) to the FIM for each parameter.
             # We need to calculate the variance in the score to get the Fisher information, and the sum of squares divided
             # by the number of samples gives us the variance. (https://www.westgard.com/lesson35.htm#8)
-            for parameter in range(len(list_of_FIMs)):
-                list_of_FIMs[parameter] += np.square(ders[parameter])
+            for parameter in range(len(self.list_of_FIMs)):
+                self.list_of_FIMs[parameter] += np.square(ders[parameter])
 
         # Divide totals by number of samples.
         # We need to calculate the variance in the score to get the Fisher information, and the sum of squares divided
         # by the number of samples gives us the variance. (https://www.westgard.com/lesson35.htm#8)
-        for parameter in range(len(list_of_FIMs)):
-            list_of_FIMs[parameter] /= num_samples
+        for parameter in range(len(self.list_of_FIMs)):
+            self.list_of_FIMs[parameter] /= num_samples
 
     def save_optimal_weights(self):
+
         # list of tensors used for saving optimal weights after most recent task training run using SGD only (no EWC)
-        optimal_weights = []
+        self.optimal_weights = []
 
         # get the current values of each learnable model parameter as tensors of weights and add them to the list
         # optimal_weights
         for parameter in self.parameters():
-            optimal_weights.append(parameter.data)
-
-        return optimal_weights
+            self.optimal_weights.append(parameter.data)
 
     def restore_optimal_weights(self, optimal_weights):
         # Assign to each learnable parameter in the model the weight values which were obtained at the last iteration
@@ -334,4 +347,11 @@ class Model(nn.Module):
         for param_index, parameter in enumerate(self.parameters()):
             parameter.data = optimal_weights[param_index]
 
+    def calculate_ewc_loss_prev_tasks(self, lam):
 
+        #TODO comment and verify
+        for param_index, parameter in self.parameters():
+            self.prev_tasks_ewc_loss += \
+            (lam / 2.0)*((self.list_of_FIMS[param_index] * (parameter.data - self.optimal_weights[param_index]) ** 2).sum())
+
+        return self.prev_tasks_ewc_loss

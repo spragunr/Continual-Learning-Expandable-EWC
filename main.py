@@ -142,7 +142,7 @@ def main():
         model.test_step(device, test_loader)
         # using validation set in Fisher Information Matrix computation as specified by:
         #   https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
-        #model.compute_fisher(validation_loader)
+        model.compute_fisher(validation_loader)
 
 
 if __name__ == '__main__':
