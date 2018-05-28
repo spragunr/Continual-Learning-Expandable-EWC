@@ -205,6 +205,7 @@ class Model(nn.Module):
                 # fewer dimension than input.
                 pred = output.max(1, keepdim=True)[1]
 
+                # TODO alter this comment to account for the fact that targets are actual scalar index values in a tensor
                 # Check if predictions are correct, and if so add one to the total number of correct predictions across the
                 # entire testing set for each correct prediction.
                 #

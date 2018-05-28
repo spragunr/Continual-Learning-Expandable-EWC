@@ -2,6 +2,7 @@ import argparse
 import torch
 import torch.optim as optim
 import torch.utils.data as D
+from utils import create_new_mnist_task
 from torchvision import datasets, transforms
 from model import Model
 
@@ -103,14 +104,15 @@ def main():
     # 4) kwargs defined above
     validation_loader = D.DataLoader(validation_data, batch_size=1, shuffle=True, **kwargs)
 
+    #TODO comment
+    test_data = datasets.MNIST('../data', train=False, transform=transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.1307,), (0.3081,))
+    ]))
+
     # Instantiate a DataLoader for the testing data in the same manner as above for training data, with one exception:
     #       train=False, because we want to draw the data here from <root>/test.pt (as opposed to <root>/training.pt)
-    test_loader = D.DataLoader(
-        datasets.MNIST('../data', train=False, transform=transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((0.1307,), (0.3081,))
-        ])),
-        batch_size=args.test_batch_size, shuffle=True, **kwargs)
+    test_loader = D.DataLoader(test_data, batch_size=args.test_batch_size, shuffle=True, **kwargs)
 
     # Move all parameters and buffers in the module Net to device (CPU or GPU- set above).
     # Both integral and floating point values are moved.
@@ -136,9 +138,13 @@ def main():
     #   )
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
 
+    create_new_mnist_task(train_data, test_data, validation_data)
+
+
+    #TODO comment each step in this loop
     # for each desired epoch, train and test the model
     for epoch in range(1, args.epochs + 1):
-        model.train_step(args, device, train_loader, optimizer, epoch)
+        model.train_step(args, device, train_loader, optimizer, epoch, False)
         model.test_step(device, test_loader)
         # using validation set in Fisher Information Matrix computation as specified by:
         #   https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
