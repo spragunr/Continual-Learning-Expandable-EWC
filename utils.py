@@ -1,6 +1,7 @@
 import torch
 import torchvision
 import numpy as np
+import torch.utils.data as data
 from torchvision import datasets, transforms
 from copy import deepcopy
 import matplotlib.pyplot as plt
@@ -21,11 +22,13 @@ def create_new_mnist_task(mnist_train_original, mnist_test_original, mnist_valid
     # in the MNIST dataset
     mask = np.random.permutation(pixels_per_image)
 
-    permuted_train = deepcopy(mnist_train_original)
+    permuted_train_list = []
 
     #TODO comment the steps of this loop
     # target label is stored in _, we don't want to alter the targets
-    for image, _ in permuted_train:
+
+    print(mnist_train_original[0])
+    for image, label in mnist_train_original:
 
         orig_shape = image.size()
 
@@ -43,13 +46,11 @@ def create_new_mnist_task(mnist_train_original, mnist_test_original, mnist_valid
 
         image.resize_(orig_shape)
 
-        """
-        plt.imshow(image.numpy()[0])
+        permuted_train_list.append((image, label))
 
-        plt.show()
-        """
+    permuted_train_data = data.TensorDataset(permuted_train_list[0])
 
-    sample, _ = permuted_train[0]
+    sample, _ = permuted_train_data[0]
 
     print(_)
 
@@ -57,3 +58,26 @@ def create_new_mnist_task(mnist_train_original, mnist_test_original, mnist_valid
 
     plt.show()
 
+
+# trying this out to see if I can use PyTorch lambda transpose to simplify mnist task generation
+def apply_permutation(image, permutation):
+    plt.imshow(image.numpy()[0])
+    plt.show()
+
+    orig_shape = image.size()
+
+    image = image.numpy()
+
+    # numpy version - in-place
+    image.resize((784))
+
+    perm_image = (deepcopy(image))
+
+    for pixel_index, pixel in enumerate(perm_image):
+        perm_image[pixel_index] = image[permutation[pixel_index]]
+
+    image = torch.Tensor(perm_image)
+
+    image.resize_(orig_shape)
+
+    return image

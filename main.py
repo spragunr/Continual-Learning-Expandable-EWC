@@ -2,9 +2,11 @@ import argparse
 import torch
 import torch.optim as optim
 import torch.utils.data as D
-from utils import create_new_mnist_task
+import numpy as np
+from utils import apply_permutation
 from torchvision import datasets, transforms
 from model import Model
+from matplotlib import pyplot as plt
 
 def main():
     # Training settings
@@ -138,8 +140,33 @@ def main():
     #   )
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
 
-    create_new_mnist_task(train_data, test_data, validation_data)
+    samplex, labelx = train_data[0]
+    print(labelx)
 
+    plt.imshow(samplex.numpy()[0])
+    plt.show()
+
+
+    #TODO note the "spread" rather than travel method- as used in ariseff
+    permutation = np.random.permutation(784)
+
+    new_train_data = datasets.MNIST('../data', train=True, transform=transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.1307,), (0.3081,)),
+        transforms.Lambda(lambda x: apply_permutation(x, permutation))
+    ]))
+
+    sampley, labely = new_train_data[0]
+
+    print(labely)
+
+    plt.imshow(sampley.numpy()[0])
+    plt.show()
+
+    print(labelx)
+
+    plt.imshow(samplex.numpy()[0])
+    plt.show()
 
     #TODO comment each step in this loop
     # for each desired epoch, train and test the model
