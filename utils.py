@@ -10,7 +10,9 @@ def create_new_mnist_task(mnist_train_original, mnist_test_original, mnist_valid
 
     #TODO seed NUMPY random number generator (different from PyTorch)
 
-    # each MNIST image represented as 4D tensor- 1 x 1 x 28 x 28
+    # TODO UPDATE ALL COMMENTS TO REFLECT THE FACT THAT these are image/label combos(??)
+
+    # each MNIST image/ label combo represented as 4D tensor- 1 x 1 x 28 x 28
     # this statement gets the height and width of a sample image in pixels (should both be 28)
     # and multiplies them to get the total number of pixels in the image - should be 784
     pixels_per_image = len(mnist_train_original[0][0][0]) * len(mnist_train_original[0][0][0][0])
@@ -21,30 +23,37 @@ def create_new_mnist_task(mnist_train_original, mnist_test_original, mnist_valid
 
     permuted_train = deepcopy(mnist_train_original)
 
-
     #TODO comment the steps of this loop
     # target label is stored in _, we don't want to alter the targets
     for image, _ in permuted_train:
 
-        perm_image = (deepcopy(image))
+        orig_shape = image.size()
 
-        #in-place
-        perm_image.resize((1, pixels_per_image))
+        image = image.numpy()
+
+        # numpy version - in-place
+        image.resize((pixels_per_image))
+
+        perm_image = (deepcopy(image))
 
         for pixel_index, pixel in enumerate(perm_image):
             perm_image[pixel_index] = image[mask[pixel_index]]
 
-        image = perm_image
+        image = torch.Tensor(perm_image)
 
-    fig = plt.figure()
+        image.resize_(orig_shape)
 
-    for i in range(3):
-        sample = permuted_train
-        ax = plt.subplot(1, 4, i + 1)
-        plt.tight_layout()
-        ax.axis('off')
+        """
+        plt.imshow(image.numpy()[0])
 
-        if i == 3:
-            plt.show()
-            break
+        plt.show()
+        """
+
+    sample, _ = permuted_train[0]
+
+    print(_)
+
+    plt.imshow(sample.numpy()[0])
+
+    plt.show()
 
