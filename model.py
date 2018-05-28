@@ -124,7 +124,7 @@ class Model(nn.Module):
                     epoch, batch_idx * len(data), len(train_loader.dataset), 100. * batch_idx / len(train_loader),
                     loss.item()))
 
-    def test_step(self, device, test_loader):
+    def test_step(self, device, test_loaders):
         # Set the module in "evaluation mode"
         # This is necessary because some network layers behave differently when training vs testing.
         # Dropout, for example, is used to zero/mask certain weights during TRAINING (e.g. model.train())
@@ -340,13 +340,13 @@ class Model(nn.Module):
         for parameter in self.parameters():
             self.optimal_weights.append(parameter.data)
 
-    def restore_optimal_weights(self, optimal_weights):
+    def restore_optimal_weights(self):
         # Assign to each learnable parameter in the model the weight values which were obtained at the last iteration
         # of training on the latest task using SGD alone (no EWC).
         # NOTE:
         #   enumerate will keep an automated loop counter in param_index
         for param_index, parameter in enumerate(self.parameters()):
-            parameter.data = optimal_weights[param_index]
+            parameter.data = self.optimal_weights[param_index]
 
     def calculate_ewc_loss_prev_tasks(self, lam):
 
