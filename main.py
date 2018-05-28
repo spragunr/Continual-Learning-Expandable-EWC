@@ -37,17 +37,18 @@ def main():
     # determines if CUDA should be used - only if available AND not disabled via arguments
     use_cuda = not args.no_cuda and torch.cuda.is_available()
 
-    # set a manual seed for random number generation
-    torch.manual_seed(args.seed)
+    # arguments specific to CUDA computation
+    # num_workers: how many subprocesses to use for data loading - if set to 0, data will be loaded in the main process
+    # pin_memory: if True, the DataLoader will copy tensors into CUDA pinned memory before returning them
+    kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
+
 
     # set the device on which to perform computations - later calls to .to(device) will move tensors to GPU or CPU
     # based on the value determined here
     device = torch.device("cuda" if use_cuda else "cpu")
 
-    # arguments specific to CUDA computation
-    # num_workers: how many subprocesses to use for data loading - if set to 0, data will be loaded in the main process
-    # pin_memory: if True, the DataLoader will copy tensors into CUDA pinned memory before returning them
-    kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
+    # set a manual seed for random number generation
+    torch.manual_seed(args.seed)
 
     # A PyTorch DataLoader combines a dataset and a sampler, and returns single- or multi-process iterators over
     # the dataset.
@@ -140,42 +141,32 @@ def main():
     #   )
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
 
-    samplex, labelx = train_data[0]
-    print(labelx)
+    # TODO seed NUMPY random number generator (different from PyTorch)
 
-    plt.imshow(samplex.numpy()[0])
-    plt.show()
+    # TODO UPDATE ALL COMMENTS TO REFLECT THE FACT THAT there are image/label combos(??) (tuple)...
 
 
-    #TODO note the "spread" rather than travel method- as used in ariseff
-    permutation = np.random.permutation(784)
+    # TODO comment
+    train_loaders = []
+    validation_loaders = []
+    test_loaders = []
 
-    new_train_data = datasets.MNIST('../data', train=True, transform=transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.1307,), (0.3081,)),
-        transforms.Lambda(lambda x: apply_permutation(x, permutation))
-    ]))
+    # keep learning tasks ad infinitum
+    while(True):
+        print()
+        #TODO comment each step in this loop
+        # for each desired epoch, train and test the model
+        for epoch in range(1, args.epochs + 1):
+            model.train_step(args, device, train_loader, optimizer, epoch, False)
+            model.test_step(device, test_loader)
 
-    sampley, labely = new_train_data[0]
-
-    print(labely)
-
-    plt.imshow(sampley.numpy()[0])
-    plt.show()
-
-    print(labelx)
-
-    plt.imshow(samplex.numpy()[0])
-    plt.show()
-
-    #TODO comment each step in this loop
-    # for each desired epoch, train and test the model
-    for epoch in range(1, args.epochs + 1):
-        model.train_step(args, device, train_loader, optimizer, epoch, False)
-        model.test_step(device, test_loader)
         # using validation set in Fisher Information Matrix computation as specified by:
         #   https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
-        model.compute_fisher(validation_loader)
+            model.compute_fisher(validation_loader)
+
+        for epoch in range(1, args.epochs + 1):
+            model.train_step(args, device, train_loader, optimizer, epoch, True)
+            model.test_step(device, test_loader)
 
 
 if __name__ == '__main__':
