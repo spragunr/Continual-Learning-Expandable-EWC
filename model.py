@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.autograd import Variable
 from functools import reduce
 from matplotlib import pyplot as plt
 
@@ -17,10 +18,11 @@ class Model(nn.Module):
         self.hidden_dropout_prob = hidden_dropout_prob
         self.output_size = output_size
 
-        # Layers.
+        # Layers
         self.layers = nn.ModuleList([
             # input
-            nn.Linear(self.input_size, self.hidden_size), nn.ReLU(),
+            nn.Linear(self.input_size, self.hidden_size),
+            nn.ReLU(),
             nn.Dropout(self.input_dropout_prob),
             # hidden
             *((nn.Linear(self.hidden_size, self.hidden_size), nn.ReLU(),
@@ -70,9 +72,13 @@ class Model(nn.Module):
         # represents labels for a 5 and a 2, because 1's are at index 5 and 2 in rows 0 and 1, respectively.
         # THIS IS NOT THE WAY THE DATA IS REPRESENTED IN THIS EXPERIMENT.
         for batch_idx, (data, target) in enumerate(train_loader):
+            # TODO comment
+            data_size = len(data)
+            data = data.view(data_size, -1)
 
+            # TODO update comment
             # set the device (CPU or GPU) to be used with data and target to device variable (defined in main())
-            data, target = data.to(device), target.to(device)
+            data, target = Variable(data).to(device), Variable(target).to(device)
 
             # Gradients are automatically accumulated- therefore, they need to be zeroed out before the next backward
             # pass through the network so that they are replaced by newly computed gradients at later training iterations,
@@ -92,14 +98,16 @@ class Model(nn.Module):
             # NOTE: we have overridden forward() in class Net above, so this will call model.forward()
             output = self(data)
 
-            # TODO comment on .double() conversion
+            # TODO comment
             # Define the training loss function for the model to be negative log likelihood loss based on predicted values
             # and ground truth labels. This loss function only takes into account loss on the most recent task (no
             # regularization- SGD only).
             # The addition of a log_softmax layer as the last layer of our network
             # produces log probabilities from softmax and allows us to use this loss function instead of cross entropy,
             # because torch.nn.CrossEntropyLoss combines torch.nn.LogSoftmax() and torch.nn.NLLLoss() in one single class.
-            loss = nn.CrossEntropyLoss(output, target)
+            criterion = nn.CrossEntropyLoss()
+
+            loss = criterion(output, target)
 
             # TODO comment
             if ewc:
@@ -162,8 +170,12 @@ class Model(nn.Module):
                 # target: a 1D tensor of dimension <test batch size> containing ground truth labels for each of the
                 # images in the corresponding test batch in order (contained within the data variable)
                 for data, target in test_loader:
+                    # TODO comment
+                    data = data.view(test_loader.batch_size, -1)
+
+                    # TODO update comment
                     # set the device (CPU or GPU) to be used with data and target to device variable (defined in main())
-                    data, target = data.to(device), target.to(device)
+                    data, target = Variable(data).to(device), Variable(target).to(device)
 
                     # Forward pass: compute predicted output by passing data to the model. Module objects
                     # override the __call__ operator so you can call them like functions. When
@@ -171,6 +183,7 @@ class Model(nn.Module):
                     # a Tensor of output data. We have overriden forward() above, so our forward() method will be called here.
                     output = self(data)
 
+                    # TODO update comment
                     # Define the testing loss to be negative likelihood loss based on predicted values (output)
                     # and ground truth labels (target), calculate the testing batch loss, and sum it with the total testing
                     # loss over ALL test batches (contained within test_loss).
@@ -188,7 +201,8 @@ class Model(nn.Module):
                     #
                     # NOTE:
                     # <some loss function>.item() gets the a scalar value held in the loss
-                    test_loss += F.nll_loss(output, target, size_average=False).item()
+                    criterion = nn.CrossEntropyLoss(size_average=False)
+                    test_loss += criterion(output, target).item()
 
                     # Get the index of the max log-probability for each of the samples in the testing batch.
                     #
