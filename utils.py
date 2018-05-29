@@ -71,18 +71,18 @@ def generate_new_mnist_task(train_dataset_size, validation_dataset_size, batch_s
     #   ARGUMENTS (in order):
     #   root (string) – Root directory of dataset where processed/training.pt and processed/test.pt exist.
     #   train (bool, optional) – If True, creates dataset from training.pt, otherwise from test.pt.
-    #   download (bool, optional) – If true, downloads the dataset from the internet and puts it in root directory.
-    #                                       If dataset is already downloaded, it is not downloaded again.
     #   transform (callable, optional) – A function/transform that takes in an PIL image and returns a transformed
     #                                       version. E.g, transforms.RandomCrop
+    #   download (bool, optional) – If true, downloads the dataset from the internet and puts it in root directory.
+    #                                       If dataset is already downloaded, it is not downloaded again.
     train_data, validation_data = \
-        D.dataset.random_split(datasets.MNIST('../data', train=True, transform=transformations),
+        D.dataset.random_split(datasets.MNIST('../data', train=True, transform=transformations, download=True),
             [train_dataset_size, validation_dataset_size])
 
     # Testing dataset.
     # train=False, because we want to draw the data here from <root>/test.pt (as opposed to <root>/training.pt)
     test_data = \
-        datasets.MNIST('../data', train=False, transform=transformations)
+        datasets.MNIST('../data', train=False, transform=transformations, download=True)
 
     # A PyTorch DataLoader combines a dataset and a sampler, and returns single- or multi-process iterators over
     # the dataset.

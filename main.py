@@ -64,7 +64,7 @@ def main():
                   args.hidden_layer_num,
                   args.hidden_dropout_prob,
                   args.input_dropout_prob,
-                  input_size=784,  # 28 x 28 = 784 pixels per image
+                  input_size=28, # TODO comment
                   output_size=10,  # 10 classes - digits 0-9
                   ).to(device)
 

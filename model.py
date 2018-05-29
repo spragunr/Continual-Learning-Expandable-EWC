@@ -34,6 +34,7 @@ class Model(nn.Module):
 
     def forward(self, x):
         # TODO comment this and check if the last x is necessary... is it the initializer? I think yes.
+        # TODO maybe change name of x in lambda to improve clarity
         # this essentially allows the flexibility of defining a forward() function that should work
         # regardless of network structure
         # reduce will apply the lambda function to all of the layers in the iterable self.layers,
@@ -98,11 +99,11 @@ class Model(nn.Module):
             # The addition of a log_softmax layer as the last layer of our network
             # produces log probabilities from softmax and allows us to use this loss function instead of cross entropy,
             # because torch.nn.CrossEntropyLoss combines torch.nn.LogSoftmax() and torch.nn.NLLLoss() in one single class.
-            loss = (F.nll_loss(output, target)).double()
+            loss = nn.CrossEntropyLoss(output, target)
 
             # TODO comment
             if ewc:
-                old_tasks_loss = self.calculate_ewc_loss_prev_tasks(15)
+                old_tasks_loss = self.calculate_ewc_loss_prev_tasks(lam=15)
                 loss += old_tasks_loss
 
             # Backward pass: compute gradient of the loss with respect to model
