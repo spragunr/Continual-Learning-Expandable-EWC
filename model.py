@@ -108,7 +108,6 @@ class Model(nn.Module):
             criterion = nn.CrossEntropyLoss()
 
             loss = criterion(output, target)
-
             # TODO comment
             if ewc:
                 old_tasks_loss = self.calculate_ewc_loss_prev_tasks(lam=15)
@@ -308,6 +307,9 @@ class Model(nn.Module):
         # optimal_weights
         for parameter in self.parameters():
             self.optimal_weights.append(parameter.data)
+        # TODO remove
+        for parameter in self.optimal_weights:
+            print('star:', parameter)
 
     def restore_optimal_weights(self):
         # TODO update comment
@@ -318,6 +320,9 @@ class Model(nn.Module):
         if hasattr(self, 'optimal_weights'):
             for param_index, parameter in enumerate(self.parameters()):
                 parameter.data = self.optimal_weights[param_index]
+        # TODO remove
+        for parameter in self.parameters():
+            print('restore:', parameter.data)
 
     def calculate_ewc_loss_prev_tasks(self, lam):
 
