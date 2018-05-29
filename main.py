@@ -16,7 +16,8 @@ def main():
                         help='input batch size for training (default: 64)')
     parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
                         help='input batch size for testing (default: 1000)')
-    parser.add_argument('--epochs', type=int, default=10, metavar='N',
+    # TODO change this back to 10
+    parser.add_argument('--epochs', type=int, default=1, metavar='N',
                         help='number of epochs to train (default: 10)')
     parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
                         help='learning rate (default: 0.01)')
@@ -79,7 +80,6 @@ def main():
 
     # TODO UPDATE ALL COMMENTS TO REFLECT THE FACT THAT there are image/label combos(??) (tuple)...
 
-
     # TODO comment
     test_loaders = []
 
@@ -98,23 +98,22 @@ def main():
 
         test_loaders.append(test_loader)
 
-        model.restore_optimal_weights()
-
         # for each desired epoch, train and test the model with no ewc
         for epoch in range(1, args.epochs + 1):
-            model.train_step(args, device, train_loader, optimizer, epoch, ewc=False)
-            model.test_step(device, test_loaders)
+            model.train_step(args, device, train_loader, optimizer, epoch, task_count, ewc=False)
+            model.test_step(device, test_loaders, ewc=False)
 
-        model.save_optimal_weights()
+        if task_count > 1:
+            # now with ewc
+            for epoch in range(1, args.epochs + 1):
+                model.train_step(args, device, train_loader, optimizer, epoch, task_count, ewc=True)
+                model.test_step(device, test_loaders, ewc=True)
 
         # using validation set in Fisher Information Matrix computation as specified by:
         #   https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
         model.compute_fisher(validation_loader)
 
-        # now with ewc
-        for epoch in range(1, args.epochs + 1):
-            model.train_step(args, device, train_loader, optimizer, epoch, ewc=True)
-            model.test_step(device, test_loader)
+        model.save_optimal_weights()
 
         task_count += 1
 
