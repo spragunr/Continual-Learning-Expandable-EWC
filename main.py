@@ -123,7 +123,7 @@ def main():
 
         # using validation set in Fisher Information Matrix computation as specified by:
         #   https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
-        model.compute_fisher(validation_loader)
+        model.compute_fisher(device, validation_loader)
 
         model.save_optimal_weights()
 

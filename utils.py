@@ -95,6 +95,7 @@ def generate_new_mnist_task(train_dataset_size, validation_dataset_size, batch_s
     # kwargs - see above definition
     train_loader = D.DataLoader(train_data, batch_size=batch_size, shuffle=True, **kwargs)
 
+    # TODO update comment to reflect batch_size change
     # Dataloader for the validation dataset-
     # ARGUMENTS (in order):
     # 1) validation_data as the dataset
@@ -104,7 +105,7 @@ def generate_new_mnist_task(train_dataset_size, validation_dataset_size, batch_s
     #       over the data, and is implemented in the source code as a RandomSampler() - see comments in compute_fisher
     #       for more details and a link to the source code
     # 4) kwargs defined above
-    validation_loader = D.DataLoader(validation_data, batch_size=1, shuffle=True, **kwargs)
+    validation_loader = D.DataLoader(validation_data, batch_size=batch_size, shuffle=True, **kwargs)
 
     # Instantiate a DataLoader for the testing data in the same manner as above for training data, with one exception:
     #   Here, we use test_data rather than train_data.

@@ -271,91 +271,33 @@ class Model(nn.Module):
             print('\n{} Test set {}: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
                 'EWC' if ewc else 'NO EWC', task_number + 1, test_loss, correct, len(test_loader.dataset), accuracy))
 
-    def compute_fisher(self, validation_loader, num_samples=200):
-        # Fisher Information is defined as the variance in the score.
+    def compute_fisher(self, device, validation_loader, sample_size=1024):
+        # TODO comment
 
-        # list of all Fisher Information Matrices for all parameters in the model
-        self.list_of_FIMs = []
+        loglikelihoods = []
 
-        # Initialize a series of empty (all 0's) Fisher Information Matrices for the most recently trained task (SGD alone,
-        # no Elastic Weight Consolidation)- one for each trainable parameter of the model. Each FIM has the same dimensions
-        # as the parameter (weight or bias) to which it corresponds. Append each of these matrices to the list self.list_of_FIMs.
-        #
-        # torch.size() returns tensor dimensions as another tensor, so need to cast return value to a list to use
-        # as the dimensionality argument to np.zeros(), which will created a zero-filled matrix of the dimensions
-        # specified in that list
-        for parameter in self.parameters():
-            self.list_of_FIMs.append(np.zeros(tuple(parameter.size())))
+        for data, target in validation_loader:
+            data = data.view(validation_loader.batch_size, -1)
+            data, target = Variable(data).to(device), Variable(target).to(device)
 
-        # Sample a random class from softmax after testing run on most recent task (trained using
-        # SGD alone, with no Elastic Weight Consolidation)
+            loglikelihoods.append(
+                F.log_softmax(self(data))[range(validation_loader.batch_size), target.data]
+            )
 
-        # torch.multinomial() requires entries to be positive, but the log of any number < 1 will be negative, and softmax
-        # gives values in the range (0,1) so all logs will be negative.
-        # Because we combined log(softmax()) into one operation by using F.log_softmax() in our definition of model.y (the
-        # model output layer), we use torch.exp() here to reverse that operation and get back the probabilities.
-        #
-        # NOTES:
-        # 1) TensorFlow's tf.multinomial does not require that all entries be non-negative in the distribution,
-        #       but PyTorch's torch.multinomial DOES
-        #
-        # 2) Our model's output after training/testing has already had softmax activations applied and log computed
-        #       (see last line of Net.forward() - torch.nn.functional.log_softmax()), which are required for use with
-        #       the negative log likelihood loss function. Therefore, when sampling a random class from our output, we
-        #       do NOT need to apply softmax as in code in compute_fisher() at:
-        #       https://github.com/ariseff/overcoming-catastrophic/blob/master/model.py
-        probs = (torch.exp(self.y))
+            if len(loglikelihoods) >= sample_size // validation_loader.batch_size:
+                break
+        # concatenate loglikelihood tensors in list loglikelihoods along 0th (default) dimension,
+        # then calculate the mean of each row of the resulting tensor along the 0th dimension
+        loglikelihood = torch.cat(loglikelihoods).mean(0)
 
-        # torch.multinomial(input, num_samples):
-        # Returns a tensor where each row contains num_samples indices sampled from the multinomial probability
-        # distribution located in the corresponding row of tensor input. Indices are ordered from left to right according
-        # to when each was sampled (first samples are placed in first column).
-        # If input is a vector, out is a vector of size num_samples.
-        # If input is a matrix with m rows, out is an matrix of shape (m × num_samples).
-        #
-        # In this case, input is a 10 x 50 matrix and output is a 10 x 1 matrix , so to take just one value we want to
-        # index into a single entry- hence the [0][0] indexing to get the first entry. Also, because a tensor is returned,
-        # we use .item() to get the tensor as a scalar after the indexing produces a SINGLE-VALUE tensor.
-        class_index = (torch.multinomial(probs, 1)[0][0]).item()
+        loglikelihood_grads = torch.autograd.grad(loglikelihood, self.parameters())
 
-        for iteration in range(num_samples):
-            # Get a single random image from the validation dataset (4D tensor- dimensions: torch.Size([1, 1, 28, 28])),
-            # and store the image in data variable. We don't need the target (ground truth label), so we just put that
-            # in variable _.
-            #
-            # The images selected are random because shuffle=True is used in the validation_loader
-            # definition, which is implemented in the source code as a torch.utils.data.sampler.RandomSampler().
-            # Based on the __init__ function in DataLoader and the __init__ function in DataLoaderIter, each time
-            # the statement below executes, we should get a NEW iterator and RandomSampler() that draws the random samples
-            # over which that iterator will iterate.
-            # See source at: https://pytorch.org/docs/master/_modules/torch/utils/data/dataloader.html#DataLoader
-            #
-            # NOTE:
-            # The reason that this statement is not used outside of the loop is that RandomSampler() samples without
-            # replacement, so if num_samples were larger than the validation set size, we would run out of samples.
-            data, _ = next(iter(validation_loader))
+        self.fisher = []
 
-            # torch.autograd.grad(outputs, inputs):
-            #       Computes and returns the sum of gradients of outputs w.r.t. the inputs.
-            # equivalent to TensorFlow's tf.gradients(ys, xs):
-            #       Constructs symbolic derivatives of sum of ys w.r.t. x in xs.
-            #
-            # The purpose of this step is to calculate the score for each parameter in our model. In statistics, the score
-            # indicates how sensitive a likelihood function is to its parameter θ. Explicitly, the score for θ is the
-            # gradient of the log-likelihood with respect to θ. (https://en.wikipedia.org/wiki/Score_(statistics))
-            ders = torch.autograd.grad(self(data)[0, class_index], self.parameters())
+        for grad in loglikelihood_grads:
+            self.fisher.append(grad ** 2)
 
-            # Square the derivatives and add them (sum) to the FIM for each parameter.
-            # We need to calculate the variance in the score to get the Fisher information, and the sum of squares divided
-            # by the number of samples gives us the variance. (https://www.westgard.com/lesson35.htm#8)
-            for parameter in range(len(self.list_of_FIMs)):
-                self.list_of_FIMs[parameter] += np.square(ders[parameter])
 
-        # Divide totals by number of samples.
-        # We need to calculate the variance in the score to get the Fisher information, and the sum of squares divided
-        # by the number of samples gives us the variance. (https://www.westgard.com/lesson35.htm#8)
-        for parameter in range(len(self.list_of_FIMs)):
-            self.list_of_FIMs[parameter] /= num_samples
 
     def save_optimal_weights(self):
 
@@ -382,6 +324,6 @@ class Model(nn.Module):
         #TODO comment and verify
         for param_index, parameter in enumerate(self.parameters()):
             self.prev_tasks_ewc_loss += \
-                ((lam / 2.0) * (self.list_of_FIMs[param_index] * ((parameter.data - self.optimal_weights[param_index]) ** 2))).sum()
+                ((lam / 2.0) * (self.fisher[param_index] * ((parameter.data - self.optimal_weights[param_index]) ** 2))).sum()
 
         return self.prev_tasks_ewc_loss
