@@ -33,6 +33,11 @@ def main():
                         help='how many images to put in the training dataset')
     parser.add_argument('--validation-dataset-size', type=int, default=10000, metavar='VDS',
                         help='how many images to put in the validation dataset')
+    parser.add_argument('--hidden-size', type=int, default=400)
+    parser.add_argument('--hidden-layer-num', type=int, default=2)
+    parser.add_argument('--hidden-dropout-prob', type=float, default=.5)
+    parser.add_argument('--input-dropout-prob', type=float, default=.2)
+
     args = parser.parse_args()
 
     # determines if CUDA should be used - only if available AND not disabled via arguments
@@ -52,9 +57,16 @@ def main():
     # set a manual seed for random number generation
     torch.manual_seed(args.seed)
 
+    # TODO update this comment
     # Move all parameters and buffers in the module Net to device (CPU or GPU- set above).
     # Both integral and floating point values are moved.
-    model = Model().to(device)
+    model = Model(args.hidden_size,
+                  args.hidden_layer_num,
+                  args.hidden_dropout_prob,
+                  args.input_dropout_prob,
+                  input_size=784,  # 28 x 28 = 784 pixels per image
+                  output_size=10,  # 10 classes - digits 0-9
+                  ).to(device)
 
     # Set the optimization algorithm for the model- in this case, Stochastic Gradient Descent with
     # momentum.

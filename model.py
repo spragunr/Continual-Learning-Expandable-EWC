@@ -2,31 +2,44 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from functools import reduce
+from matplotlib import pyplot as plt
 
 
 class Model(nn.Module):
-    def __init__(self):
-        super(Model, self).__init__()
+    def __init__(self, hidden_size, hidden_layer_num, hidden_dropout_prob, input_dropout_prob, input_size, output_size):
+        super().__init__()
 
-        # layers of the network
-        self.conv1 = nn.Conv2d(1, 10, kernel_size=5)
-        self.conv2 = nn.Conv2d(10, 20, kernel_size=5)
-        self.conv2_drop = nn.Dropout2d()
-        self.fc1 = nn.Linear(320, 50)
-        self.fc2 = nn.Linear(50, 10)
+        self.input_size = input_size
+        self.input_dropout_prob = input_dropout_prob
+        self.hidden_size = hidden_size
+        self.hidden_layer_num = hidden_layer_num
+        self.hidden_dropout_prob = hidden_dropout_prob
+        self.output_size = output_size
+
+        # Layers.
+        self.layers = nn.ModuleList([
+            # input
+            nn.Linear(self.input_size, self.hidden_size), nn.ReLU(),
+            nn.Dropout(self.input_dropout_prob),
+            # hidden
+            *((nn.Linear(self.hidden_size, self.hidden_size), nn.ReLU(),
+               nn.Dropout(self.hidden_dropout_prob)) * self.hidden_layer_num),
+            # output
+            nn.Linear(self.hidden_size, self.output_size)
+        ])
 
         #TODO comment
         self.prev_tasks_ewc_loss = 0
 
     def forward(self, x):
-        x = F.relu(F.max_pool2d(self.conv1(x), 2))
-        x = F.relu(F.max_pool2d(self.conv2_drop(self.conv2(x)), 2))
-        x = x.view(-1, 320)
-        x = F.relu(self.fc1(x))
-        x = F.dropout(x, training=self.training)
-        x = self.fc2(x)
-        self.y = F.log_softmax(x, dim=1)
-        return self.y
+        # TODO comment this and check if the last x is necessary... is it the initializer? I think yes.
+        # this essentially allows the flexibility of defining a forward() function that should work
+        # regardless of network structure
+        # reduce will apply the lambda function to all of the layers in the iterable self.layers,
+        # with an initial value of x for the variable holding the result of the operation and self.layers
+        # being used as a sequence of functions l() applied to x
+        return reduce(lambda x, l: l(x), self.layers, x)
 
     def train_step(self, args, device, train_loader, optimizer, epoch, task_number, ewc):
         # Set the module in "training mode"
