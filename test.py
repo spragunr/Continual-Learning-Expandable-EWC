@@ -5,9 +5,6 @@ import torch
 # -*- coding: utf-8 -*-
 import torch
 
-# TODO comment
-expansion_count = 0
-
 # N is batch size; D_in is input dimension;
 # H is hidden dimension; D_out is output dimension.
 N, D_in, H, D_out = 64, 1000, 100, 10
@@ -30,10 +27,7 @@ loss_fn = torch.nn.MSELoss(size_average=False)
 # optimizer which Tensors it should update.
 learning_rate = 1e-4
 
-# TODO explain this
-params = filter(lambda p: p.requires_grad, model.parameters())
-
-optimizer = torch.optim.Adam(params, lr=learning_rate)
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
 for t in range(500):
 
@@ -128,13 +122,13 @@ for t in range(500):
             old_sizes.append(np.array(list(parameter.size())))
             old_values.append(parameter.data.clone())
 
+        print(old_values)
+
         model = torch.nn.Sequential(
             torch.nn.Linear(D_in, H*2),
             torch.nn.ReLU(),
             torch.nn.Linear(H*2, D_out),
         )
-
-        optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
         # put into the expanded model the values that were previously in these parameters in the smaller model
         for param_index, parameter in enumerate(model.parameters()):
@@ -142,8 +136,14 @@ for t in range(500):
             if list(old_sizes[param_index].shape)[0] == 2:
                 for row in range(len(old_values[param_index])):
                     for column in range(len(old_values[param_index][row])):
-                        parameter.data[row][column] += old_values[param_index][row][column]
+                        parameter.data[row][column] = old_values[param_index][row][column]
             else:
                 # biases - one dim
                 for value_index in range(len(old_values[param_index])):
-                    parameter.data[value_index] += old_values[param_index][value_index]
+                    parameter.data[value_index] = old_values[param_index][value_index]
+
+        # testing to see that the new values really made it over- they did!
+        for parameter in model.parameters():
+            print(parameter.data)
+
+        optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
