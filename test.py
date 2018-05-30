@@ -31,8 +31,7 @@ loss_fn = torch.nn.MSELoss(size_average=False)
 learning_rate = 1e-4
 
 # TODO explain this
-params = filter(lambda p : p.requires_grad, model.parameters())
-
+params = filter(lambda p: p.requires_grad, model.parameters())
 
 optimizer = torch.optim.Adam(params, lr=learning_rate)
 
@@ -61,9 +60,12 @@ for t in range(500):
     optimizer.step()
 
     if t == 250:
+        """
         count = 0
         for p in model.parameters():
             count += 1
+
+        new_parameters= []
 
         for param_index, parameter in enumerate(model.parameters()):
             print(parameter.size())
@@ -102,26 +104,47 @@ for t in range(500):
                 for value_index in range(len(old_values)):
                     new_param.data[value_index] += old_values[value_index]
 
-
-            new_param = torch.nn.Parameter(new_param)
             # don't keep updating this old parameter with autograd
             parameter.requires_grad = False
 
-            # TODO may need to do this OUTSIDE of loop
-            # TODO check if names need to vary - THEY DO
-            model.register_parameter("{}_expansion_{}".format(param_index, expansion_count), new_param)
+            new_param = torch.nn.Parameter(new_param, requires_grad=True)
 
+            new_parameters.append(("{}_expansion_{}".format(param_index, expansion_count), new_param))
 
-@torch.enable_grad()
-def param_setter():
-    return 0
+        for new_param_name, new_param_data in new_parameters:
+            model.register_parameter(new_param_name, new_param_data)
 
+        params = filter(lambda par: par.requires_grad, model.parameters())
 
+        for param in params:
+            print(param.size())
 
-for parameter in model.parameters():
-        parameter.data = torch.ones(list(parameter.data.size()))
-        torch.autograd.set_grad_enabled(True)
-for parameter in model.parameters():
-    print(parameter.data)
+        optimizer = torch.optim.Adam(params, lr=learning_rate)
+        """
+        old_sizes = []
+        old_values = []
 
+        for param_index, parameter in enumerate(model.parameters()):
+            old_sizes.append(np.array(list(parameter.size())))
+            old_values.append(parameter.data.clone())
 
+        model = torch.nn.Sequential(
+            torch.nn.Linear(D_in, H*2),
+            torch.nn.ReLU(),
+            torch.nn.Linear(H*2, D_out),
+        )
+
+        optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+
+        # put into the expanded model the values that were previously in these parameters in the smaller model
+        for param_index, parameter in enumerate(model.parameters()):
+            # weights - 2 dims
+            if len(old_sizes[param_index].shape) == 2:
+                for row in range(len(old_values[param_index])):
+                    for column in range(len(old_values[param_index][row])):
+                        parameter.data[row][column] += old_values[param_index][row][column]
+
+            else:
+                # biases - one dim
+                for value_index in range(len(old_values[param_index])):
+                    parameter.data[value_index] += old_values[param_index][value_index]
