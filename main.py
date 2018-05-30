@@ -1,6 +1,6 @@
 import argparse
 import torch
-import torch.optim as optim
+
 import torch.utils.data as D
 import numpy as np
 import utils
@@ -19,8 +19,13 @@ def main():
     # TODO change this back to 10
     parser.add_argument('--epochs', type=int, default=1, metavar='N',
                         help='number of epochs to train (default: 10)')
-    parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
-                        help='learning rate (default: 0.01)')
+    parser.add_argument('--lr', type=float, default=1e-03, metavar='LR',
+                        help='learning rate (default: 1e-03)')
+    parser.add_argument('--l2-reg-penalty', type=float, default=0.0, metavar='L2',
+                        help='l2 regularization penalty (weight decay) (default: 0.0)')
+    parser.add_argument('--lam', type=float, default=5e+3, metavar='LR',
+                        help='ewc lambda value (default: 5e+3)')
+    # TODO maybe remove this to avoid confusion
     parser.add_argument('--momentum', type=float, default=0.5, metavar='M',
                         help='SGD momentum (default: 0.5)')
     parser.add_argument('--no-cuda', action='store_true', default=False,
@@ -60,33 +65,29 @@ def main():
     # TODO update this comment
     # Move all parameters and buffers in the module Net to device (CPU or GPU- set above).
     # Both integral and floating point values are moved.
-    model = Model(args.hidden_size,
+    sgd_dropout_model = Model(args.hidden_size,
                   args.hidden_layer_num,
                   args.hidden_dropout_prob,
                   args.input_dropout_prob,
                   input_size=784, # TODO comment
                   output_size=10,  # 10 classes - digits 0-9
+                  ewc=False
                   ).to(device)
 
-    # Set the optimization algorithm for the model- in this case, Stochastic Gradient Descent with
-    # momentum.
-    #
-    # ARGUMENTS (in order):
-    #     params (iterable) – iterable of parameters to optimize or dicts defining parameter groups
-    #     lr (float) – learning rate
-    #     momentum (float, optional) – momentum factor (default: 0)
-    #
-    # NOTE on params:
-    #   model.parameters() returns an iterator over a list of the trainable model parameters in the same order in
-    #   which they appear in the network when traversed input -> output
-    #   (e.g.
-    #       [weights b/w input and first hidden layer,
-    #        bias b/w input and hidden layer 1,
-    #        ... ,
-    #        weights between last hidden layer and output,
-    #        bias b/w hidden layer and output]
-    #   )
-    optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
+    # TODO update this comment
+    # Move all parameters and buffers in the module Net to device (CPU or GPU- set above).
+    # Both integral and floating point values are moved.
+    ewc_model = Model(args.hidden_size,
+                  args.hidden_layer_num,
+                  args.hidden_dropout_prob,
+                  args.input_dropout_prob,
+                  input_size=784,  # TODO comment
+                  output_size=10,  # 10 classes - digits 0-9
+                  ewc=True,
+                  lam=args.lam
+                  ).to(device)
+
+    models = [sgd_dropout_model, ewc_model]
 
     # TODO seed NUMPY random number generator (different from PyTorch)
 
@@ -110,22 +111,21 @@ def main():
 
         test_loaders.append(test_loader)
 
-        # for each desired epoch, train and test the model with no ewc
-        for epoch in range(1, args.epochs + 1):
-            model.train_step(args, device, train_loader, optimizer, epoch, task_count, ewc=False)
-            model.test_step(device, test_loaders, ewc=False)
-
-        if task_count > 1:
-            # now with ewc
+        for model in models:
+            # for each desired epoch, train and test the model
             for epoch in range(1, args.epochs + 1):
-                model.train_step(args, device, train_loader, optimizer, epoch, task_count, ewc=True)
-                model.test_step(device, test_loaders, ewc=True)
+                model.train_model(args, device, train_loader, epoch, task_count)
+                model.test_model(device, test_loaders)
 
-        model.save_optimal_weights()
+                if model.ewc:
+                    # using validation set in Fisher Information Matrix computation as specified by:
+                    #   https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
+                    # This needs to happen after training
+                    model.compute_fisher(device, validation_loader)
 
-        # using validation set in Fisher Information Matrix computation as specified by:
-        #   https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
-        model.compute_fisher(device, validation_loader)
+                    # MUST BE DONE AFTER COMPUTE_FISHER - we are actually saving the theta star values for this task,
+                    # which will be used in the fisher matrix computations for the next task.
+                    model.save_theta_stars()
 
         task_count += 1
 

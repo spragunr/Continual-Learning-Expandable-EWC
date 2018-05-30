@@ -2,14 +2,18 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.optim as optim
 from torch.autograd import Variable
 from functools import reduce
 from matplotlib import pyplot as plt
 
 
 class Model(nn.Module):
-    def __init__(self, hidden_size, hidden_layer_num, hidden_dropout_prob, input_dropout_prob, input_size, output_size):
+    def __init__(self, hidden_size, hidden_layer_num, hidden_dropout_prob, input_dropout_prob, input_size, output_size, ewc, lam=0):
         super().__init__()
+
+        self.ewc = ewc # determines whether or not the model will use ewc
+        self.lam = lam
 
         self.input_size = input_size
         self.input_dropout_prob = input_dropout_prob
@@ -44,15 +48,32 @@ class Model(nn.Module):
         # being used as a sequence of functions l() applied to x
         return reduce(lambda x, l: l(x), self.layers, x)
 
-    def train_step(self, args, device, train_loader, optimizer, epoch, task_number, ewc):
+    def train_model(self, args, device, train_loader, epoch, task_number):
         # Set the module in "training mode"
         # This is necessary because some network layers behave differently when training vs testing.
         # Dropout, for example, is used to zero/mask certain weights during TRAINING to prevent overfitting.
         # However, during TESTING (e.g. model.eval()) we do not want this to happen.
         self.train()
 
-        # TODO comment
-        self.restore_optimal_weights()
+        # Set the optimization algorithm for the model- in this case, Stochastic Gradient Descent with
+        # momentum.
+        #
+        # ARGUMENTS (in order):
+        #     params (iterable) – iterable of parameters to optimize or dicts defining parameter groups
+        #     lr (float) – learning rate
+        #     momentum (float, optional) – momentum factor (default: 0)
+        #
+        # NOTE on params:
+        #   model.parameters() returns an iterator over a list of the trainable model parameters in the same order in
+        #   which they appear in the network when traversed input -> output
+        #   (e.g.
+        #       [weights b/w input and first hidden layer,
+        #        bias b/w input and hidden layer 1,
+        #        ... ,
+        #        weights between last hidden layer and output,
+        #        bias b/w hidden layer and output]
+        #   )
+        optimizer = optim.Adam(self.parameters(), lr=args.lr, weight_decay=args.l2_reg_penalty)
 
         # Enumerate will keep an automatic loop counter and store it in batch_idx.
         # The (data, target) pair returned by DataLoader train_loader each iteration consists
@@ -108,9 +129,10 @@ class Model(nn.Module):
             criterion = nn.CrossEntropyLoss()
 
             loss = criterion(output, target)
+
             # TODO comment
-            if ewc:
-                old_tasks_loss = self.calculate_ewc_loss_prev_tasks(lam=15)
+            if self.ewc and task_number > 1:
+                old_tasks_loss = self.calculate_ewc_loss_prev_tasks()
                 loss += old_tasks_loss
 
             # Backward pass: compute gradient of the loss with respect to model
@@ -137,11 +159,11 @@ class Model(nn.Module):
             # Train Epoch: 1 [3200/60000 (5%)]	Loss: 2.259442
             if batch_idx % args.log_interval == 0:
                 print('{} Task: {} Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                    'EWC' if ewc else 'NO EWC', task_number,
+                    'EWC' if self.ewc else 'SGD + DROPOUT', task_number,
                     epoch, batch_idx * len(data), len(train_loader.dataset), 100. * batch_idx / len(train_loader),
                     loss.item()))
 
-    def test_step(self, device, test_loaders, ewc):
+    def test_model(self, device, test_loaders):
         # Set the module in "evaluation mode"
         # This is necessary because some network layers behave differently when training vs testing.
         # Dropout, for example, is used to zero/mask certain weights during TRAINING (e.g. model.train())
@@ -268,7 +290,7 @@ class Model(nn.Module):
             # For the complete test set, display the average loss and accuracy
             # e.g. Test set: Average loss: 0.2073, Accuracy: 9415/10000 (94%)
             print('\n{} Test set {}: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-                'EWC' if ewc else 'NO EWC', task_number + 1, test_loss, correct, len(test_loader.dataset), accuracy))
+                'EWC' if self.ewc else 'SGD + DROPOUT', task_number + 1, test_loss, correct, len(test_loader.dataset), accuracy))
 
     def compute_fisher(self, device, validation_loader, sample_size=1024):
         # TODO comment
@@ -285,6 +307,7 @@ class Model(nn.Module):
 
             if len(loglikelihoods) >= sample_size // validation_loader.batch_size:
                 break
+
         # concatenate loglikelihood tensors in list loglikelihoods along 0th (default) dimension,
         # then calculate the mean of each row of the resulting tensor along the 0th dimension
         loglikelihood = torch.cat(loglikelihoods).mean(0)
@@ -294,41 +317,32 @@ class Model(nn.Module):
         self.fisher = []
 
         for grad in loglikelihood_grads:
-            self.fisher.append(grad ** 2)
+            self.fisher.append(torch.pow(grad, 2.0))
 
 
+    def save_theta_stars(self):
 
-    def save_optimal_weights(self):
-
-        # list of tensors used for saving optimal weights after most recent task training run using SGD only (no EWC)
-        self.optimal_weights = []
+        # list of tensors used for saving optimal weights after most recent task training
+        self.theta_stars = []
 
         # get the current values of each learnable model parameter as tensors of weights and add them to the list
         # optimal_weights
         for parameter in self.parameters():
-            self.optimal_weights.append(parameter.data)
-        # TODO remove
-        for parameter in self.optimal_weights:
-            print('star:', parameter)
+            self.theta_stars.append(parameter.data.clone())
 
-    def restore_optimal_weights(self):
-        # TODO update comment
-        # Assign to each learnable parameter in the model the weight values which were obtained at the last iteration
-        # of training on the latest task using SGD alone (no EWC).
-        # NOTE:
-        #   enumerate will keep an automated loop counter in param_index
-        if hasattr(self, 'optimal_weights'):
-            for param_index, parameter in enumerate(self.parameters()):
-                parameter.data = self.optimal_weights[param_index]
-        # TODO remove
-        for parameter in self.parameters():
-            print('restore:', parameter.data)
 
-    def calculate_ewc_loss_prev_tasks(self, lam):
+    def calculate_ewc_loss_prev_tasks(self):
+        losses = []
 
-        #TODO comment and verify
-        for param_index, parameter in enumerate(self.parameters()):
-            self.prev_tasks_ewc_loss += \
-                ((lam / 2.0) * (self.fisher[param_index] * ((parameter.data - self.optimal_weights[param_index]) ** 2))).sum()
+        # TODO if this doesn't work, try using the dictionary with named parameters approach
+        # (but ensure params all actually have different names)s
+        for parameter_index, parameter in enumerate(self.parameters()):
+            theta_star = Variable(self.theta_stars[parameter_index])
+            fisher = Variable(self.fisher[parameter_index])
 
-        return self.prev_tasks_ewc_loss
+            losses.append((fisher * (parameter - theta_star) ** 2).sum())
+
+        return (self.lam / 2.0) * sum(losses)
+
+
+
