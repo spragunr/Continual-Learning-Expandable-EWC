@@ -5,7 +5,6 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.autograd import Variable
 from functools import reduce
-from matplotlib import pyplot as plt
 
 
 class Model(nn.Module):
@@ -73,7 +72,7 @@ class Model(nn.Module):
         #        weights between last hidden layer and output,
         #        bias b/w hidden layer and output]
         #   )
-        optimizer = optim.Adam(self.parameters(), lr=args.lr, weight_decay=args.l2_reg_penalty)
+        optimizer = optim.SGD(self.parameters(), lr=args.lr, momentum=args.momentum)
 
         # Enumerate will keep an automatic loop counter and store it in batch_idx.
         # The (data, target) pair returned by DataLoader train_loader each iteration consists

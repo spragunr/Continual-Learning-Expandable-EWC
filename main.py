@@ -6,7 +6,6 @@ import numpy as np
 import utils
 from torchvision import datasets, transforms
 from model import Model
-from matplotlib import pyplot as plt
 
 def main():
     # Training settings
@@ -16,18 +15,20 @@ def main():
                         help='input batch size for training (default: 64)')
     parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
                         help='input batch size for testing (default: 1000)')
-    # TODO change this back to 10
+    # TODO maybe change this back to 10
     parser.add_argument('--epochs', type=int, default=1, metavar='N',
-                        help='number of epochs to train (default: 10)')
-    parser.add_argument('--lr', type=float, default=1e-03, metavar='LR',
-                        help='learning rate (default: 1e-03)')
+                        help='number of epochs to train (default: 1)')
+    parser.add_argument('--lr', type=float, default= 0.1, metavar='LR',
+                        help='learning rate (default: 0.1)')
+    # TODO add comment on how github experiment uses this but probably shouldn't...
     parser.add_argument('--l2-reg-penalty', type=float, default=0.0, metavar='L2',
                         help='l2 regularization penalty (weight decay) (default: 0.0)')
+    # got 400 from the hyperparameters for the paper's atari experiments
     parser.add_argument('--lam', type=float, default=5e+3, metavar='LR',
-                        help='ewc lambda value (default: 5e+3)')
+                        help='ewc lambda value (fisher multiplier) (default: 5e+3)')
     # TODO maybe remove this to avoid confusion
-    parser.add_argument('--momentum', type=float, default=0.5, metavar='M',
-                        help='SGD momentum (default: 0.5)')
+    parser.add_argument('--momentum', type=float, default=0.0, metavar='M',
+                        help='SGD momentum (default: 0.0)')
     parser.add_argument('--no-cuda', action='store_true', default=False,
                         help='disables CUDA training')
     parser.add_argument('--seed', type=int, default=1, metavar='S',
@@ -38,8 +39,8 @@ def main():
                         help='how many images to put in the training dataset')
     parser.add_argument('--validation-dataset-size', type=int, default=10000, metavar='VDS',
                         help='how many images to put in the validation dataset')
-    parser.add_argument('--hidden-size', type=int, default=400)
-    parser.add_argument('--hidden-layer-num', type=int, default=2)
+    parser.add_argument('--hidden-size', type=int, default=50)
+    parser.add_argument('--hidden-layer-num', type=int, default=1)
     parser.add_argument('--hidden-dropout-prob', type=float, default=.5)
     parser.add_argument('--input-dropout-prob', type=float, default=.2)
 
@@ -84,7 +85,7 @@ def main():
                   input_size=784,  # TODO comment
                   output_size=10,  # 10 classes - digits 0-9
                   ewc=True,
-                  lam=args.lam
+                  lam=args.lam # TODO comment, also consider changing to inverse learning rate
                   ).to(device)
 
     models = [sgd_dropout_model, ewc_model]
