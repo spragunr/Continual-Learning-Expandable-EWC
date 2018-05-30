@@ -26,7 +26,13 @@ loss_fn = torch.nn.MSELoss(size_average=False)
 # optimization algoriths. The first argument to the Adam constructor tells the
 # optimizer which Tensors it should update.
 learning_rate = 1e-4
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+
+# TODO explain this
+params = filter(lambda p : p.requires_grad, model.parameters())
+
+
+optimizer = torch.optim.Adam(params, lr=learning_rate)
+
 for t in range(500):
 
     # Forward pass: compute predicted y by passing x to the model.
@@ -70,17 +76,25 @@ for t in range(500):
             else:
                 new_size = old_size * 2
 
-            # TODO may need to flip this...
-            new_param = torch.nn.Linear(new_size[0],  new_size[1])
+            print(new_size)
 
-            print(new_param.size())
+            # TODO may need to flip this...
+            new_param = torch.zeros(tuple(new_size))
 
             old_values = parameter.data.clone()
 
-            for row in len(old_values):
-                for column in len(old_values[row]):
+            print(old_values)
+
+            for row in range(len(old_values)):
+                for column in range(len(old_values[row])):
                     new_param.data[row][column] = old_values[row][column]
 
+            # don't keep updating this old parameter with autograd
+            parameter.requires_grad = False
+
+            # TODO may need to do this OUTSIDE of loop
+            # TODO check if names need to vary - THEY DO
+            model.register_parameter("{}".format(param_index), new_param)
 
 
 
