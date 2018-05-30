@@ -1,47 +1,79 @@
 import argparse
 import torch
-
-import torch.utils.data as D
-import numpy as np
 import utils
-from torchvision import datasets, transforms
+import numpy as np
 from model import Model
 
 def main():
-    # Training settings
+    # Command Line args
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
-
     parser.add_argument('--batch-size', type=int, default=64, metavar='N',
                         help='input batch size for training (default: 64)')
     parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
                         help='input batch size for testing (default: 1000)')
-    # TODO maybe change this back to 10
+
+    # 1 is just for speed when testing - the original EWC paper hyperparameters are here:
+    # https://arxiv.org/pdf/1612.00796.pdf#section.4
+    # This experiment uses 100 epochs:
+    # https://github.com/stokesj/EWC
     parser.add_argument('--epochs', type=int, default=1, metavar='N',
                         help='number of epochs to train (default: 1)')
+
+    # This learning rate is the same as the one used by:
+    # https://github.com/ariseff/overcoming-catastrophic/blob/afea2d3c9f926d4168cc51d56f1e9a92989d7af0/model.py#L114
+    #
+    # The original EWC paper hyperparameters are here:
+    # https://arxiv.org/pdf/1612.00796.pdf#section.4
     parser.add_argument('--lr', type=float, default= 0.1, metavar='LR',
                         help='learning rate (default: 0.1)')
-    # TODO add comment on how github experiment uses this but probably shouldn't...
+
+    # We don't want an L2 regularization penalty because https://arxiv.org/pdf/1612.00796.pdf#subsection.2.1
+    # (see figure 2A) shows that this would prevent the network from learning another task.
+    #
+    # NOTE: Interestingly, this experiment DOES use an L2 regularization penalty (weight decay) and I honestly do not
+    # know why: https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/main.py#L21
     parser.add_argument('--l2-reg-penalty', type=float, default=0.0, metavar='L2',
                         help='l2 regularization penalty (weight decay) (default: 0.0)')
-    # got 400 from the hyperparameters for the paper's atari experiments
+
+    # This is the lambda (fisher multiplier) value used by:
+    # https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/main.py#L19
+    #
+    # Empirically, other lambda values appeared to be too small to give EWC an edge over SGD w/ Dropout-
+    # I tried the following:
+    # 400 (from https://arxiv.org/pdf/1612.00796.pdf#subsection.4.2)
+    # 15 (from https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb) - see In [17]
+    # inverse of learning rate (1.0 / lr) (from https://github.com/stokesj/EWC)- see readme
     parser.add_argument('--lam', type=float, default=5e+3, metavar='LR',
                         help='ewc lambda value (fisher multiplier) (default: 5e+3)')
-    # TODO maybe remove this to avoid confusion
+
+    # only necessary if optimizer SGD with momentum is desired, hence default is 0.0
     parser.add_argument('--momentum', type=float, default=0.0, metavar='M',
                         help='SGD momentum (default: 0.0)')
     parser.add_argument('--no-cuda', action='store_true', default=False,
                         help='disables CUDA training')
-    parser.add_argument('--seed', type=int, default=1, metavar='S',
-                        help='random seed (default: 1)')
+    parser.add_argument('--seed-torch', type=int, default=1, metavar='ST',
+                        help='random seed for PyTorch (default: 1)')
+    parser.add_argument('--seed-numpy', type=int, default=1, metavar='SN',
+                        help='random seed for numpy (default: 1)')
     parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                         help='how many batches to wait before logging training status')
     parser.add_argument('--train-dataset-size', type=int, default=50000, metavar='TDS',
                         help='how many images to put in the training dataset')
     parser.add_argument('--validation-dataset-size', type=int, default=10000, metavar='VDS',
                         help='how many images to put in the validation dataset')
+
+    # weights in each hidden layer
     parser.add_argument('--hidden-size', type=int, default=50)
+
+    # number of hidden layers
     parser.add_argument('--hidden-layer-num', type=int, default=1)
+
+    # Dropout probability for hidden layers - see:
+    # https://arxiv.org/pdf/1612.00796.pdf#section.4
     parser.add_argument('--hidden-dropout-prob', type=float, default=.5)
+
+    # Dropout probability for input layer - see:
+    # https://arxiv.org/pdf/1612.00796.pdf#section.4
     parser.add_argument('--input-dropout-prob', type=float, default=.2)
 
     args = parser.parse_args()
@@ -59,33 +91,39 @@ def main():
     # based on the value determined here
     device = torch.device("cuda" if use_cuda else "cpu")
 
-    # TODO ensure this carries over multiple modules- but I'm fairly confident it does...
-    # set a manual seed for random number generation
-    torch.manual_seed(args.seed)
+    # set a manual seed for PyTorch random number generation
+    torch.manual_seed(args.seed_torch)
 
-    # TODO update this comment
-    # Move all parameters and buffers in the module Net to device (CPU or GPU- set above).
-    # Both integral and floating point values are moved.
+    # set a manual seed for numpy random number generation
+    np.random.seed(args.seed_numpy)
+
+    # Initialize a model that will be trained using only SGD with dropout.
+    #
+    # .to(device):
+    #   Move all parameters and buffers in the module Net to device (CPU or GPU- set above).
+    #   Both integral and floating point values are moved.
     sgd_dropout_model = Model(args.hidden_size,
                   args.hidden_layer_num,
                   args.hidden_dropout_prob,
                   args.input_dropout_prob,
-                  input_size=784, # TODO comment
+                  input_size=784, # 28 x 28 pixels = 784 pixels per MNIST image
                   output_size=10,  # 10 classes - digits 0-9
                   ewc=False
                   ).to(device)
 
-    # TODO update this comment
-    # Move all parameters and buffers in the module Net to device (CPU or GPU- set above).
-    # Both integral and floating point values are moved.
+    #
+    #
+    # .to(device):
+    #   Move all parameters and buffers in the module Net to device (CPU or GPU- set above).
+    #   Both integral and floating point values are moved.
     ewc_model = Model(args.hidden_size,
                   args.hidden_layer_num,
                   args.hidden_dropout_prob,
                   args.input_dropout_prob,
-                  input_size=784,  # TODO comment
+                  input_size=784,  # 28 x 28 pixels = 784 pixels per MNIST image
                   output_size=10,  # 10 classes - digits 0-9
                   ewc=True,
-                  lam=args.lam # TODO comment, also consider changing to inverse learning rate
+                  lam=args.lam # the lambda (fisher multiplier) value to be used in the EWC loss formula
                   ).to(device)
 
     models = [sgd_dropout_model, ewc_model]
