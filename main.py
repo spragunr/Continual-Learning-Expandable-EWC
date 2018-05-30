@@ -57,7 +57,10 @@ def main():
                         help='random seed for numpy (default: 1)')
     parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                         help='how many batches to wait before logging training status')
-    parser.add_argument('--train-dataset-size', type=int, default=50000, metavar='TDS',
+
+    # since validation set, which is drawn from training set, is size 1024, the rest of the data from the training set
+    # are used as the actual data on which the network is trained: 60000 - 1024 = 58976
+    parser.add_argument('--train-dataset-size', type=int, default=58976, metavar='TDS',
                         help='how many images to put in the training dataset')
 
     # Both the size of the validation set AND the size of the number of samples used in computation of

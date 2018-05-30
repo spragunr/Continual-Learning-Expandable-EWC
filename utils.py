@@ -12,8 +12,6 @@ def apply_permutation(image, permutation):
 
     image = image.numpy()
 
-    # TODO replace magic number
-    # numpy version - in-place, make sure OK that not a tuple
     image.resize(784)
 
     perm_image = (deepcopy(image))
@@ -29,15 +27,17 @@ def apply_permutation(image, permutation):
 
 def generate_new_mnist_task(train_dataset_size, validation_dataset_size, batch_size, test_batch_size, kwargs, first_task):
 
-    # TODO note the "spread" rather than travel method- as used in ariseff, also get rid of magic number
-    # generate numpy array containing 0 - 783 in random order - a permutation "mask" to be applied to each image
+    # Note that, as in experiment from github/ariseff, these are permutations of the ORIGINAL dataset
+    #
+    # Generate numpy array containing 0 - 783 in random order - a permutation "mask" to be applied to each image
     # in the MNIST dataset
     permutation = np.random.permutation(784)
 
-    # TODO finish commenting (explain lambda)
     # transforms.Compose() composes several transforms together.
     #
-    # The transforms composed here are as follows:
+    # IF this is NOT the FIRST task, we should permute the original MNIST dataset to form a new task.
+    #
+    #  The transforms composed here are as follows:
     #
     # transforms.ToTensor():
     #     Converts a PIL Image or numpy.ndarray (H x W x C) in the range [0, 255] to a
@@ -50,6 +50,8 @@ def generate_new_mnist_task(train_dataset_size, validation_dataset_size, batch_s
     #
     #     NOTE: the values used here for mean and std are those computed on the MNIST dataset
     #           SOURCE: https://discuss.pytorch.org/t/normalization-in-the-mnist-example/457
+    #
+    # transforms.Lambda() applies the enclosed lambda function to each image (x) in the DataLoader
     transformations = transforms.Compose(
         [
             transforms.ToTensor(),
@@ -61,7 +63,6 @@ def generate_new_mnist_task(train_dataset_size, validation_dataset_size, batch_s
             transforms.Lambda(lambda x: apply_permutation(x, permutation))
         ])
 
-    # TODO check if we need to alter the root for each new dataset
     # Split the PyTorch MNIST training dataset into training and validation datasets, and transform the data.
     #
     # D.dataset.random_split(dataset, lengths):
@@ -95,20 +96,18 @@ def generate_new_mnist_task(train_dataset_size, validation_dataset_size, batch_s
     # kwargs - see above definition
     train_loader = D.DataLoader(train_data, batch_size=batch_size, shuffle=True, **kwargs)
 
-    # TODO update comment to reflect batch_size change
     # Dataloader for the validation dataset-
     # ARGUMENTS (in order):
     # 1) validation_data as the dataset
-    # 2) we use this in compute_fisher by sampling a SINGLE image from the validation set per iteration,
-    #       hence batch_size=1
+    # 2) batch_size is same as that provided for the training dataset
     # 3) shuffle=True ensures we are drawing random samples by shuffling the data each time we contstruct a new iterator
     #       over the data, and is implemented in the source code as a RandomSampler() - see comments in compute_fisher
     #       for more details and a link to the source code
     # 4) kwargs defined above
     validation_loader = D.DataLoader(validation_data, batch_size=batch_size, shuffle=True, **kwargs)
 
-    # Instantiate a DataLoader for the testing data in the same manner as above for training data, with one exception:
-    #   Here, we use test_data rather than train_data.
+    # Instantiate a DataLoader for the testing data in the same manner as above for training data, with two exceptions:
+    #   Here, we use test_data rather than train_data, and we use test_batch_size
     test_loader = D.DataLoader(test_data, batch_size=test_batch_size, shuffle=True, **kwargs)
 
     return train_loader, validation_loader, test_loader

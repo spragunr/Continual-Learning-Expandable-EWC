@@ -8,12 +8,15 @@ from functools import reduce
 
 
 class Model(nn.Module):
-    def __init__(self, hidden_size, hidden_layer_num, hidden_dropout_prob, input_dropout_prob, input_size, output_size, ewc, lam=0):
+    def __init__(self, hidden_size, hidden_layer_num, hidden_dropout_prob, input_dropout_prob, input_size, output_size,
+                 ewc, lam=0):
+
         super().__init__()
 
-        self.ewc = ewc # determines whether or not the model will use ewc
-        self.lam = lam
+        self.ewc = ewc # determines whether or not the model will use EWC
+        self.lam = lam # the value of lambda (fisher multiplier) to be used in EWC loss computation, if EWC used
 
+        # copy specified model hyperparameters into instance variables
         self.input_size = input_size
         self.input_dropout_prob = input_dropout_prob
         self.hidden_size = hidden_size
@@ -21,7 +24,10 @@ class Model(nn.Module):
         self.hidden_dropout_prob = hidden_dropout_prob
         self.output_size = output_size
 
-        # Layers
+        # Layers of our network - auto generate the required number or layers, of the appropriate size, as specified by
+        # arguments to  __init__()
+        #
+        # Taken from: https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/model.py#L25
         self.layers = nn.ModuleList([
             # input
             nn.Linear(self.input_size, self.hidden_size),
@@ -34,18 +40,16 @@ class Model(nn.Module):
             nn.Linear(self.hidden_size, self.output_size)
         ])
 
-        #TODO comment
-        self.prev_tasks_ewc_loss = 0
-
     def forward(self, x):
-        # TODO comment this and check if the last x is necessary... is it the initializer? I think yes.
-        # TODO maybe change name of x in lambda to improve clarity
-        # this essentially allows the flexibility of defining a forward() function that should work
-        # regardless of network structure
-        # reduce will apply the lambda function to all of the layers in the iterable self.layers,
-        # with an initial value of x for the variable holding the result of the operation and self.layers
-        # being used as a sequence of functions l() applied to x
-        return reduce(lambda x, l: l(x), self.layers, x)
+        # This essentially allows the flexibility of defining a forward() function that should work
+        # regardless of network structure.
+        #
+        # reduce() will apply the lambda function (argument 1) to all of the layers in the iterable self.layers
+        # (argument 2), with an initial value of x (argument 3) for data in the lambda function. data will be the
+        # variable holding the result of each application of the lambda function by reduce, and self.layers
+        # is being used as a sequence of functions l() applied to data (which in this case is initialized to the data
+        # input to our network: x
+        return reduce(lambda data, l: l(data), self.layers, x)
 
     def train_model(self, args, device, train_loader, epoch, task_number):
         # Set the module in "training mode"
@@ -54,8 +58,8 @@ class Model(nn.Module):
         # However, during TESTING (e.g. model.eval()) we do not want this to happen.
         self.train()
 
-        # Set the optimization algorithm for the model- in this case, Stochastic Gradient Descent with
-        # momentum.
+        # Set the optimization algorithm for the model- in this case, Stochastic Gradient Descent with/without
+        # momentum (depends on the value of args.momentum- default is 0.0, so no momentum by default).
         #
         # ARGUMENTS (in order):
         #     params (iterable) – iterable of parameters to optimize or dicts defining parameter groups
@@ -63,7 +67,7 @@ class Model(nn.Module):
         #     momentum (float, optional) – momentum factor (default: 0)
         #
         # NOTE on params:
-        #   model.parameters() returns an iterator over a list of the trainable model parameters in the same order in
+        #   model.parameters() returns an iterator over a list of the model parameters in the same order in
         #   which they appear in the network when traversed input -> output
         #   (e.g.
         #       [weights b/w input and first hidden layer,
@@ -78,7 +82,7 @@ class Model(nn.Module):
         # The (data, target) pair returned by DataLoader train_loader each iteration consists
         # of an MNIST image data sample and an associated label classifying it as a digit 0-9.
         #
-        # The image data for the batch represented as a 4D torch tensor (see train_loader definition in main())
+        # The image data for the batch is represented as a 4D torch tensor (see train_loader definition in main())
         # with dimensions (batch size, 1, 28, 28)- containing a normalized floating point value for the color of
         # each pixel in each image in the batch (MNIST images are 28 x 28 pixels).
         #
@@ -86,18 +90,32 @@ class Model(nn.Module):
         # the training data as follows:
         #       [ 3,  4,  2,  9,  7] represents ground truth labels for a 3, a 4, a 2, a 9, and a 7.
         # NOTE:
-        # This should be distinguished from the other common representation of such data in which the following:
+        # The indices are converted to one-hot label representations inside of the loss function:
         #       [[0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
         #        [0, 0, 1, 0, 0, 0, 0, 0, 0, 0]]
         # represents labels for a 5 and a 2, because 1's are at index 5 and 2 in rows 0 and 1, respectively.
-        # THIS IS NOT THE WAY THE DATA IS REPRESENTED IN THIS EXPERIMENT.
+        #
+        # SOURCE:
+        # https://discuss.pytorch.org/t/why-does-the-minimal-pytorch-tutorial-not-have-mnist-images-be-onehot-for-logistic-regression/12562/6
         for batch_idx, (data, target) in enumerate(train_loader):
-            # TODO comment
+
+            # For some reason, the data needs to be wrapped in another tensor to work with our network,
+            # otherwise it is not of the appropriate dimensions... I believe these two statements effectively add
+            # a dimension.
+            #
+            # For an explanation of the meaning of these statements, see:
+            #   https://stackoverflow.com/a/42482819/9454504
+            #
+            # This code was used here in another experiment:
+            # https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/train.py#L35
             data_size = len(data)
             data = data.view(data_size, -1)
 
-            # TODO update comment
-            # set the device (CPU or GPU) to be used with data and target to device variable (defined in main())
+            # wrap data and target in variables- again, from the following experiment:
+            #   https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/train.py#L50
+            #
+            # .to(device):
+            #   set the device (CPU or GPU) to be used with data and target to device variable (defined in main())
             data, target = Variable(data).to(device), Variable(target).to(device)
 
             # Gradients are automatically accumulated- therefore, they need to be zeroed out before the next backward
@@ -118,18 +136,20 @@ class Model(nn.Module):
             # NOTE: we have overridden forward() in class Net above, so this will call model.forward()
             output = self(data)
 
-            # TODO comment
-            # Define the training loss function for the model to be negative log likelihood loss based on predicted values
-            # and ground truth labels. This loss function only takes into account loss on the most recent task (no
-            # regularization- SGD only).
-            # The addition of a log_softmax layer as the last layer of our network
-            # produces log probabilities from softmax and allows us to use this loss function instead of cross entropy,
-            # because torch.nn.CrossEntropyLoss combines torch.nn.LogSoftmax() and torch.nn.NLLLoss() in one single class.
+            # Define the training loss function for the model to be cross entropy loss based on predicted values
+            # and ground truth labels. This loss function only takes into account loss on the most recent task.
+            #
+            # NOTE: torch.nn.CrossEntropyLoss combines torch.nn.LogSoftmax() and torch.nn.NLLLoss() in one single class.
             criterion = nn.CrossEntropyLoss()
 
+            # apply the loss function to the predictions/labels for this batch to compute loss
             loss = criterion(output, target)
 
-            # TODO comment
+            # if the model is using EWC, the summed loss term from the EWC equation must be calculated and
+            # added to the loss that will be minimized by the optimizer.
+            #
+            # See equation (3) at:
+            #   https://arxiv.org/pdf/1612.00796.pdf#section.2
             if self.ewc and task_number > 1:
                 old_tasks_loss = self.calculate_ewc_loss_prev_tasks()
                 loss += old_tasks_loss
@@ -149,13 +169,7 @@ class Model(nn.Module):
             optimizer.step()
 
             # Each time the batch index is a multiple of the specified progress display interval (args.log_interval),
-            # print a message of the following format:
-            #
-            # Train Epoch: <epoch number> [data sample number/total samples (% progress)]    Loss: <current loss value>
-            #
-            # With example values, output looks as follows:
-            #
-            # Train Epoch: 1 [3200/60000 (5%)]	Loss: 2.259442
+            # print a message indicating progress AND which network (model) is reporting values.
             if batch_idx % args.log_interval == 0:
                 print('{} Task: {} Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                     'EWC' if self.ewc else 'SGD + DROPOUT', task_number,
@@ -163,18 +177,20 @@ class Model(nn.Module):
                     loss.item()))
 
     def test_model(self, device, test_loaders):
+
         # Set the module in "evaluation mode"
         # This is necessary because some network layers behave differently when training vs testing.
         # Dropout, for example, is used to zero/mask certain weights during TRAINING (e.g. model.train())
         # to prevent overfitting. However, during TESTING/EVALUATION we do not want this to happen.
         self.eval()
 
-        # TODO comment this
+        # Test the model on ALL tasks, including that on which the model was most recently trained
         for task_number, test_loader in enumerate(test_loaders):
-            # total testing loss over ALL test batches (sum)
+
+            # total testing loss over all test batches for the given task_number's entire testset (sum)
             test_loss = 0
 
-            # total number of correct predictions over the entire testing set
+            # total number of correct predictions over the given task_number's entire testset (sum)
             correct = 0
 
             # Wrap in torch.no_grad() because weights have requires_grad=True (meaning pyTorch autograd knows to
@@ -182,18 +198,31 @@ class Model(nn.Module):
             # in autograd - we are no longer training so gradients should no longer be altered/computed (only "used")
             # and therefore we don't need to track this.
             with torch.no_grad():
+
                 # Each step of the iterator test_loader will return the following values:
                 #
                 # data: a 4D tensor of dimensions (test batch size, 1, 28, 28), representing the MNIST data
                 # for each of the 28 x 28 = 784 pixels of each of the images in a given test batch
                 #
                 # target: a 1D tensor of dimension <test batch size> containing ground truth labels for each of the
-                # images in the corresponding test batch in order (contained within the data variable)
+                # images in the corresponding test batch in order
                 for data, target in test_loader:
-                    # TODO comment
+
+                    # For some reason, the data needs to be wrapped in another tensor to work with our network,
+                    # otherwise it is not of the appropriate dimensions... I believe this statement effectively
+                    # adds a dimension.
+                    #
+                    # For an explanation of the meaning of this statement, see:
+                    #   https://stackoverflow.com/a/42482819/9454504
+                    #
+                    # This code was used here in another experiment:
+                    #   https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/utils.py#L75
                     data = data.view(test_loader.batch_size, -1)
 
-                    # TODO update comment
+                    # wrap data and target in variables- again, from the following experiment:
+                    #   https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/utils.py#L76
+                    #
+                    # .to(device):
                     # set the device (CPU or GPU) to be used with data and target to device variable (defined in main())
                     data, target = Variable(data).to(device), Variable(target).to(device)
 
@@ -203,21 +232,20 @@ class Model(nn.Module):
                     # a Tensor of output data. We have overriden forward() above, so our forward() method will be called here.
                     output = self(data)
 
-                    # TODO update comment
-                    # Define the testing loss to be negative likelihood loss based on predicted values (output)
+                    # Define the testing loss to be cross entropy loss based on predicted values (output)
                     # and ground truth labels (target), calculate the testing batch loss, and sum it with the total testing
-                    # loss over ALL test batches (contained within test_loss).
+                    # loss over all batches in the given task_number's entire testset (contained within test_loss).
                     #
                     # NOTE: size_average = False:
                     # By default, the losses are averaged over observations for each minibatch.
                     # If size_average is False, the losses are summed for each minibatch. Default: True
                     #
                     # Here we use size_average = False because we want to SUM all testing batch losses and average those
-                    # at the end of testing (by dividing by total number of testing SAMPLES (not batches) to obtain an
+                    # at the end of testing on the current task (by dividing by total number of testing SAMPLES (not batches) to obtain an
                     # average loss over all testing batches). Otherwise, if size_average == True, we would be getting average
-                    # loss for each testing batch and then would average those at the end to obtain average testing loss,
-                    # which could theoretically result in some comparative loss of accuracy in the calculation of the
-                    # final value.
+                    # loss for each testing batch and then would average those at the end of traing on the current task
+                    # to obtain average testing loss, which could theoretically result in some comparative loss of accuracy
+                    # in the calculation of the final testing loss value for this task.
                     #
                     # NOTE:
                     # <some loss function>.item() gets the a scalar value held in the loss
@@ -251,7 +279,6 @@ class Model(nn.Module):
                     # fewer dimension than input.
                     pred = output.max(1, keepdim=True)[1]
 
-                    # TODO alter this comment to account for the fact that targets are actual scalar index values in a tensor
                     # Check if predictions are correct, and if so add one to the total number of correct predictions across the
                     # entire testing set for each correct prediction.
                     #
@@ -265,6 +292,9 @@ class Model(nn.Module):
                     #   This would be a correct prediction- the sixth entry (index 5) in each array holds the highest
                     #   value
                     #
+                    # In this case, the targets/labels are stored as scalar index values (e.g. torch.Tensor([1, 4, 5])
+                    # for labels for a one, a four, and a five (in that order)
+                    #
                     # tensor_X.view_as(other) returns a resulting version of tensor_X with the same size as other.size()
                     #
                     # torch.eq() -> element wise equality:
@@ -277,27 +307,47 @@ class Model(nn.Module):
                     # .item() gets the scalar value held in the sum tensor
                     correct += pred.eq(target.view_as(pred)).sum().item()
 
-            # Divide the accumulated test loss across all testing batches by the total number of testing samples (in this
-            # case, 10,000) to get the average loss for the entire test set.
+            # Divide the accumulated test loss across all testing batches for the current task_number by the total number
+            # of testing samples in the task_number's testset (in this case, 10,000) to get the average loss for the
+            # entire test set for task_number.
             test_loss /= len(test_loader.dataset)
 
-            # The overall accuracy of the model's predictions as a percent value is the count of its accurate predictions
-            # divided by the number of predictions it made, all multiplied by 100
+            # The overall accuracy of the model's predictions on the task indicated by task_number as a percent
+            # value is the count of its accurate predictions divided by the number of predictions it made, all multiplied by 100
             accuracy = 100. * correct / len(test_loader.dataset)
 
-            # TODO update comment
-            # For the complete test set, display the average loss and accuracy
-            # e.g. Test set: Average loss: 0.2073, Accuracy: 9415/10000 (94%)
+            # For task_number's complete test set (all batches), display the average loss and accuracy
             print('\n{} Test set {}: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
                 'EWC' if self.ewc else 'SGD + DROPOUT', task_number + 1, test_loss, correct, len(test_loader.dataset), accuracy))
 
-    def compute_fisher(self, device, validation_loader):
-        # TODO comment
 
+    # This method relies on the logic here:
+    #   https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/model.py#L56
+    def compute_fisher(self, device, validation_loader):
+
+        # a list of log_likelihoods sampled from the model output when the input is
+        # a sample from the validation dataset
         loglikelihoods = []
 
+        # for every data sample in the validation set (default 1024)...
         for data, target in validation_loader:
+
+            # For some reason, the data needs to be wrapped in another tensor to work with our network,
+            # otherwise it is not of the appropriate dimensions... I believe this statement effectively adds
+            # a dimension.
+            #
+            # For an explanation of the meaning of this statement, see:
+            #   https://stackoverflow.com/a/42482819/9454504
+            #
+            # This code was used here in another experiment:
+            # https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/model.py#L61
             data = data.view(validation_loader.batch_size, -1)
+
+            # wrap data and target in variables- again, from the following experiment:
+            #   https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/model.py#L62
+            #
+            # .to(device):
+            # set the device (CPU or GPU) to be used with data and target to device variable (defined in main())
             data, target = Variable(data).to(device), Variable(target).to(device)
 
             loglikelihoods.append(
@@ -308,10 +358,14 @@ class Model(nn.Module):
         # then calculate the mean of each row of the resulting tensor along the 0th dimension
         loglikelihood = torch.cat(loglikelihoods).mean(0)
 
+        # here are the parameter gradients with respect to log likelihood
         loglikelihood_grads = torch.autograd.grad(loglikelihood, self.parameters())
 
+        # list of Fisher Information Matrix diagonals
         self.fisher = []
 
+        # see equation (2) at:
+        #   https://arxiv.org/pdf/1605.04859.pdf#subsection.2.1
         for grad in loglikelihood_grads:
             self.fisher.append(torch.pow(grad, 2.0))
 
@@ -321,18 +375,18 @@ class Model(nn.Module):
         # list of tensors used for saving optimal weights after most recent task training
         self.theta_stars = []
 
-        # get the current values of each learnable model parameter as tensors of weights and add them to the list
-        # optimal_weights
+        # get the current values of each model parameter as tensors and add them to the list
+        # self.theta_stars
         for parameter in self.parameters():
             self.theta_stars.append(parameter.data.clone())
 
 
     def calculate_ewc_loss_prev_tasks(self):
+
         losses = []
 
-        # TODO if this doesn't work, try using the dictionary with named parameters approach
-        # (but ensure params all actually have different names)s
         for parameter_index, parameter in enumerate(self.parameters()):
+
             theta_star = Variable(self.theta_stars[parameter_index])
             fisher = Variable(self.fisher[parameter_index])
 
