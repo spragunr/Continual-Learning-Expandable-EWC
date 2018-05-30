@@ -5,6 +5,9 @@ import torch
 # -*- coding: utf-8 -*-
 import torch
 
+# TODO comment
+expansion_count = 0
+
 # N is batch size; D_in is input dimension;
 # H is hidden dimension; D_out is output dimension.
 N, D_in, H, D_out = 64, 1000, 100, 10
@@ -85,19 +88,28 @@ for t in range(500):
 
             print(old_values)
 
-            for row in range(len(old_values)):
-                for column in range(len(old_values[row])):
-                    new_param.data[row][column] = old_values[row][column]
+            # the following statements use += because of in-place operations and their importance in PyTorch:
+            # see: https://discuss.pytorch.org/t/what-is-the-recommended-way-to-re-assign-update-values-in-a-variable-or-tensor/6125
 
+            #weights - 2 dims
+            if len(old_size.shape) == 2:
+                for row in range(len(old_values)):
+                    for column in range(len(old_values[row])):
+                        new_param.data[row][column] += old_values[row][column]
+
+            else:
+                #biases - one dim
+                for value_index in range(len(old_values)):
+                    new_param.data[value_index] += old_values[value_index]
+
+
+            new_param = torch.nn.Parameter(new_param)
             # don't keep updating this old parameter with autograd
             parameter.requires_grad = False
 
             # TODO may need to do this OUTSIDE of loop
             # TODO check if names need to vary - THEY DO
-            model.register_parameter("{}".format(param_index), new_param)
-
-
-
+            model.register_parameter("{}_expansion_{}".format(param_index, expansion_count), new_param)
 
 
 @torch.enable_grad()
