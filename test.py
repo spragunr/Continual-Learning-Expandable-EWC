@@ -139,11 +139,10 @@ for t in range(500):
         # put into the expanded model the values that were previously in these parameters in the smaller model
         for param_index, parameter in enumerate(model.parameters()):
             # weights - 2 dims
-            if len(old_sizes[param_index].shape) == 2:
+            if list(old_sizes[param_index].shape)[0] == 2:
                 for row in range(len(old_values[param_index])):
                     for column in range(len(old_values[param_index][row])):
                         parameter.data[row][column] += old_values[param_index][row][column]
-
             else:
                 # biases - one dim
                 for value_index in range(len(old_values[param_index])):
