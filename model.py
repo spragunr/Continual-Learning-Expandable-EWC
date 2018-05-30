@@ -291,7 +291,7 @@ class Model(nn.Module):
             print('\n{} Test set {}: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
                 'EWC' if self.ewc else 'SGD + DROPOUT', task_number + 1, test_loss, correct, len(test_loader.dataset), accuracy))
 
-    def compute_fisher(self, device, validation_loader, sample_size=1024):
+    def compute_fisher(self, device, validation_loader):
         # TODO comment
 
         loglikelihoods = []
@@ -303,9 +303,6 @@ class Model(nn.Module):
             loglikelihoods.append(
                 F.log_softmax(self(data))[range(validation_loader.batch_size), target.data]
             )
-
-            if len(loglikelihoods) >= sample_size // validation_loader.batch_size:
-                break
 
         # concatenate loglikelihood tensors in list loglikelihoods along 0th (default) dimension,
         # then calculate the mean of each row of the resulting tensor along the 0th dimension

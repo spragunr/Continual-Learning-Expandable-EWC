@@ -59,7 +59,14 @@ def main():
                         help='how many batches to wait before logging training status')
     parser.add_argument('--train-dataset-size', type=int, default=50000, metavar='TDS',
                         help='how many images to put in the training dataset')
-    parser.add_argument('--validation-dataset-size', type=int, default=10000, metavar='VDS',
+
+    # Both the size of the validation set AND the size of the number of samples used in computation of
+    # Fisher Information- because the method that performs that computation simply uses all of the data in the
+    # validation set.
+
+    # I got the value 1024 from:
+    #    https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/main.py#L24
+    parser.add_argument('--validation-dataset-size', type=int, default=1024, metavar='VDS',
                         help='how many images to put in the validation dataset')
 
     # weights in each hidden layer
@@ -97,75 +104,97 @@ def main():
     # set a manual seed for numpy random number generation
     np.random.seed(args.seed_numpy)
 
-    # Initialize a model that will be trained using only SGD with dropout.
+    # Instantiate a model that will be trained using only SGD with dropout (no EWC).
     #
     # .to(device):
     #   Move all parameters and buffers in the module Net to device (CPU or GPU- set above).
     #   Both integral and floating point values are moved.
-    sgd_dropout_model = Model(args.hidden_size,
+    sgd_dropout_model = Model(
+                  args.hidden_size,
                   args.hidden_layer_num,
                   args.hidden_dropout_prob,
                   args.input_dropout_prob,
                   input_size=784, # 28 x 28 pixels = 784 pixels per MNIST image
                   output_size=10,  # 10 classes - digits 0-9
-                  ewc=False
+                  ewc=False # don't use EWC
                   ).to(device)
 
-    #
+    # Instantiate a model that will be trained using EWC.
     #
     # .to(device):
     #   Move all parameters and buffers in the module Net to device (CPU or GPU- set above).
     #   Both integral and floating point values are moved.
-    ewc_model = Model(args.hidden_size,
+    ewc_model = Model(
+                  args.hidden_size,
                   args.hidden_layer_num,
                   args.hidden_dropout_prob,
                   args.input_dropout_prob,
                   input_size=784,  # 28 x 28 pixels = 784 pixels per MNIST image
                   output_size=10,  # 10 classes - digits 0-9
-                  ewc=True,
+                  ewc=True, # use EWC
                   lam=args.lam # the lambda (fisher multiplier) value to be used in the EWC loss formula
                   ).to(device)
 
+    # a list of the models we instantiated above
     models = [sgd_dropout_model, ewc_model]
-
-    # TODO seed NUMPY random number generator (different from PyTorch)
 
     # TODO UPDATE ALL COMMENTS TO REFLECT THE FACT THAT there are image/label combos(??) (tuple)...
 
-    # TODO comment
+    # A list of the different DataLoader objects that hold various permutations of the mnist testing dataset-
+    # we keep these around in a persistent list here so that we can use them to test each of the models in the
+    # list "models" after they are trained on the latest task's training dataset.
+    # For more details, see: generate_new_mnist_task() in utils.py
     test_loaders = []
 
+    # the number of the task on which we are CURRENTLY training in the loop below (as opposed to a list of the number
+    # of tasks on which we have already trained) - e.g. when training on task 3 this value will be 3
     task_count = 1
 
-    # TODO comment each step in this loop
     # keep learning tasks ad infinitum
     while(True):
+
+        # get the DataLoaders for the training, validation, and testing data
         train_loader, validation_loader, test_loader = utils.generate_new_mnist_task(
             args.train_dataset_size,
             args.validation_dataset_size,
             args.batch_size,
             args.test_batch_size,
             kwargs,
-            first_task=(task_count == 1))
+            first_task=(task_count == 1) # if first_task is True, we won't permute the MNIST dataset.
+        )
 
+        # add the new test_loader for this task to the list of testing dataset DataLoaders for later re-use
+        # to evaluate how well the models retain accuracy on old tasks after learning new ones
+        #
+        # NOTE: this list also includes the current test_loader, which we are appending here, because we also
+        # need to test each network on the current task after training
         test_loaders.append(test_loader)
 
+        # for both SGD w/ Dropout and EWC models...
         for model in models:
-            # for each desired epoch, train and test the model
+
+            # for each desired epoch, train the model on the latest task, and then test the model on ALL tasks
+            # trained thus far (including current task)
             for epoch in range(1, args.epochs + 1):
                 model.train_model(args, device, train_loader, epoch, task_count)
                 model.test_model(device, test_loaders)
 
+                # If the model currently being used in the loop is using EWC, we need to compute the fisher information
+                # and save the theta* ("theta star") values after training
+                #
+                # NOTE: when I reference theta*, I am referring to the values represented by that variable in
+                # equation (3) at:
+                #   https://arxiv.org/pdf/1612.00796.pdf#section.2
                 if model.ewc:
                     # using validation set in Fisher Information Matrix computation as specified by:
                     #   https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
-                    # This needs to happen after training
                     model.compute_fisher(device, validation_loader)
 
-                    # MUST BE DONE AFTER COMPUTE_FISHER - we are actually saving the theta star values for this task,
-                    # which will be used in the fisher matrix computations for the next task.
+                    # we are saving the theta star values for THIS task, which will be used in the fisher matrix
+                    # computations for the NEXT task.
                     model.save_theta_stars()
 
+        # increment the number of the current task before re-entering while loop
         task_count += 1
 
 if __name__ == '__main__':
