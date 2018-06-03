@@ -370,6 +370,56 @@ class Model(nn.Module):
             self.fisher.append(torch.pow(grad, 2.0))
 
 
+    # compute fisher by randomly sampling from probability distribution of outputs rather than the activations
+    # themselves
+    def compute_fisher_prob_dist(self, device, validation_loader):
+        # a list of log_likelihoods sampled from the model output when the input is
+        # a sample from the validation dataset
+        loglikelihoods = []
+
+        # for every data sample in the validation set (default 1024)...
+        for data, target in validation_loader:
+            # For some reason, the data needs to be wrapped in another tensor to work with our network,
+            # otherwise it is not of the appropriate dimensions... I believe this statement effectively adds
+            # a dimension.
+            #
+            # For an explanation of the meaning of this statement, see:
+            #   https://stackoverflow.com/a/42482819/9454504
+            #
+            # This code was used here in another experiment:
+            # https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/model.py#L61
+            data = data.view(validation_loader.batch_size, -1)
+
+            # wrap data and target in variables- again, from the following experiment:
+            #   https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/model.py#L62
+            #
+            # .to(device):
+            # set the device (CPU or GPU) to be used with data and target to device variable (defined in main())
+            data, target = Variable(data).to(device), Variable(target).to(device)
+
+            probs = ((self.y))
+
+            class_index = (torch.multinomial(probs, 1)[0][0]).item()
+
+            loglikelihoods.append(
+                F.log_softmax(self(data))[range(validation_loader.batch_size), target.data]
+            )
+
+        # concatenate loglikelihood tensors in list loglikelihoods along 0th (default) dimension,
+        # then calculate the mean of each row of the resulting tensor along the 0th dimension
+        loglikelihood = torch.cat(loglikelihoods).mean(0)
+
+        # here are the parameter gradients with respect to log likelihood
+        loglikelihood_grads = torch.autograd.grad(loglikelihood, self.parameters())
+
+        # list of Fisher Information Matrix diagonals
+        self.fisher = []
+
+        # see equation (2) at:
+        #   https://arxiv.org/pdf/1605.04859.pdf#subsection.2.1
+        for grad in loglikelihood_grads:
+            self.fisher.append(torch.pow(grad, 2.0))
+
     def save_theta_stars(self):
 
         # list of tensors used for saving optimal weights after most recent task training
