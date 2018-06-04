@@ -397,9 +397,16 @@ class Model(nn.Module):
             # set the device (CPU or GPU) to be used with data and target to device variable (defined in main())
             data, target = Variable(data).to(device), Variable(target).to(device)
 
-            probs = ((self.y))
+            output_layer = self.layers[len(self.layers) - 1]
+
+            probs = torch.log(nn.Softmax(output_layer))
+
+            print(probs)
 
             class_index = (torch.multinomial(probs, 1)[0][0]).item()
+
+            print(class_index)
+
 
             loglikelihoods.append(
                 F.log_softmax(self(data))[range(validation_loader.batch_size), target.data]

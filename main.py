@@ -191,7 +191,7 @@ def main():
                 if model.ewc:
                     # using validation set in Fisher Information Matrix computation as specified by:
                     #   https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
-                    model.compute_fisher(device, validation_loader)
+                    model.compute_fisher_prob_dist(device, validation_loader)
 
                     # we are saving the theta star values for THIS task, which will be used in the fisher matrix
                     # computations for the NEXT task.
