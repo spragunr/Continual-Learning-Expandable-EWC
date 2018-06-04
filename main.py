@@ -43,7 +43,7 @@ def main():
     # 400 (from https://arxiv.org/pdf/1612.00796.pdf#subsection.4.2)
     # 15 (from https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb) - see In [17]
     # inverse of learning rate (1.0 / lr) (from https://github.com/stokesj/EWC)- see readme
-    parser.add_argument('--lam', type=float, default=5e+3, metavar='LR',
+    parser.add_argument('--lam', type=float, default=15, metavar='LR',
                         help='ewc lambda value (fisher multiplier) (default: 5e+3)')
 
     # only necessary if optimizer SGD with momentum is desired, hence default is 0.0

@@ -24,32 +24,23 @@ class Model(nn.Module):
         self.hidden_dropout_prob = hidden_dropout_prob
         self.output_size = output_size
 
-        # Layers of our network - auto generate the required number or layers, of the appropriate size, as specified by
-        # arguments to  __init__()
-        #
-        # Taken from: https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/model.py#L25
-        self.layers = nn.ModuleList([
-            # input
-            nn.Linear(self.input_size, self.hidden_size),
-            nn.ReLU(),
-            nn.Dropout(self.input_dropout_prob),
-            # hidden
-            *((nn.Linear(self.hidden_size, self.hidden_size), nn.ReLU(),
-               nn.Dropout(self.hidden_dropout_prob)) * self.hidden_layer_num),
-            # output
-            nn.Linear(self.hidden_size, self.output_size)
-        ])
+        self.fully_connected_input = nn.Linear(self.input_size, self.hidden_size)
+
+        self.fully_connected_hidden = nn.Linear(self.hidden_size, self.hidden_size)
+
+        self.fully_connected_output = nn.Linear(self.hidden_size, self.output_size)
 
     def forward(self, x):
-        # This essentially allows the flexibility of defining a forward() function that should work
-        # regardless of network structure.
-        #
-        # reduce() will apply the lambda function (argument 1) to all of the layers in the iterable self.layers
-        # (argument 2), with an initial value of x (argument 3) for data in the lambda function. data will be the
-        # variable holding the result of each application of the lambda function by reduce, and self.layers
-        # is being used as a sequence of functions l() applied to data (which in this case is initialized to the data
-        # input to our network: x
-        return reduce(lambda data, l: l(data), self.layers, x)
+        x = self.fully_connected_input(x)
+        x = F.relu(x)
+        x = F.dropout(x, p=self.input_dropout_prob, training=self.training)
+        x = self.fully_connected_hidden(x)
+        x = F.relu(x)
+        x = F.dropout(x, p=self.hidden_dropout_prob, training=self.training)
+        x = self.fully_connected_output(x)
+
+        self.y = x
+        return self.y
 
     def train_model(self, args, device, train_loader, epoch, task_number):
         # Set the module in "training mode"
@@ -373,9 +364,19 @@ class Model(nn.Module):
     # compute fisher by randomly sampling from probability distribution of outputs rather than the activations
     # themselves
     def compute_fisher_prob_dist(self, device, validation_loader):
-        # a list of log_likelihoods sampled from the model output when the input is
-        # a sample from the validation dataset
-        loglikelihoods = []
+
+        self.list_of_FIMs = []
+
+        for parameter in self.parameters():
+            self.list_of_FIMs.append(torch.zeros(tuple(parameter.size())))
+
+        softmax = nn.Softmax()
+
+        log_softmax = nn.LogSoftmax()
+
+        probs = softmax(self.y)
+
+        class_index = (torch.multinomial(probs, 1)[0][0]).item()
 
         # for every data sample in the validation set (default 1024)...
         for data, target in validation_loader:
@@ -397,35 +398,14 @@ class Model(nn.Module):
             # set the device (CPU or GPU) to be used with data and target to device variable (defined in main())
             data, target = Variable(data).to(device), Variable(target).to(device)
 
-            output_layer = self.layers[len(self.layers) - 1]
+            loglikelihood_grads = torch.autograd.grad(log_softmax(self(data))[0, class_index], self.parameters())
 
-            probs = torch.log(nn.Softmax(output_layer))
-
-            print(probs)
-
-            class_index = (torch.multinomial(probs, 1)[0][0]).item()
-
-            print(class_index)
+            for parameter in range(len(self.list_of_FIMs)):
+                self.list_of_FIMs[parameter] += torch.pow(loglikelihood_grads[parameter], 2.0)
 
 
-            loglikelihoods.append(
-                F.log_softmax(self(data))[range(validation_loader.batch_size), target.data]
-            )
-
-        # concatenate loglikelihood tensors in list loglikelihoods along 0th (default) dimension,
-        # then calculate the mean of each row of the resulting tensor along the 0th dimension
-        loglikelihood = torch.cat(loglikelihoods).mean(0)
-
-        # here are the parameter gradients with respect to log likelihood
-        loglikelihood_grads = torch.autograd.grad(loglikelihood, self.parameters())
-
-        # list of Fisher Information Matrix diagonals
-        self.fisher = []
-
-        # see equation (2) at:
-        #   https://arxiv.org/pdf/1605.04859.pdf#subsection.2.1
-        for grad in loglikelihood_grads:
-            self.fisher.append(torch.pow(grad, 2.0))
+        for parameter in range(len(self.list_of_FIMs)):
+            self.list_of_FIMs[parameter] /= 1024
 
     def save_theta_stars(self):
 
@@ -445,7 +425,7 @@ class Model(nn.Module):
         for parameter_index, parameter in enumerate(self.parameters()):
 
             theta_star = Variable(self.theta_stars[parameter_index])
-            fisher = Variable(self.fisher[parameter_index])
+            fisher = Variable(self.list_of_FIMs[parameter_index])
 
             losses.append((fisher * (parameter - theta_star) ** 2).sum())
 
