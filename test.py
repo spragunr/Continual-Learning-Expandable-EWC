@@ -115,6 +115,7 @@ for t in range(500):
 
         optimizer = torch.optim.Adam(params, lr=learning_rate)
         """
+
         old_sizes = []
         old_values = []
 
@@ -122,7 +123,10 @@ for t in range(500):
             old_sizes.append(np.array(list(parameter.size())))
             old_values.append(parameter.data.clone())
 
-        print(old_values)
+        """
+        for value in old_values:
+            print(value[0])
+        """
 
         model = torch.nn.Sequential(
             torch.nn.Linear(D_in, H*2),
@@ -142,8 +146,11 @@ for t in range(500):
                 for value_index in range(len(old_values[param_index])):
                     parameter.data[value_index] = old_values[param_index][value_index]
 
+        """
+        print('NEW PARAMETERS')
+
         # testing to see that the new values really made it over- they did!
         for parameter in model.parameters():
-            print(parameter.data)
-
+            print(parameter.data[0])
+        """
         optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
