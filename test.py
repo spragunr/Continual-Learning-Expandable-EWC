@@ -5,6 +5,11 @@ import torch
 # -*- coding: utf-8 -*-
 import torch
 
+def init_weights(m):
+    if type(m) == torch.nn.Linear:
+        m.weight.data.fill_(0.0)
+
+
 # N is batch size; D_in is input dimension;
 # H is hidden dimension; D_out is output dimension.
 N, D_in, H, D_out = 64, 1000, 100, 10
@@ -134,6 +139,14 @@ for t in range(500):
             torch.nn.Linear(H*2, D_out),
         )
 
+        model.apply(init_weights)
+
+        for param_index, parameter in enumerate(model.parameters()):
+            torch.add(parameter.data, old_values[param_index])
+
+
+
+        """
         # put into the expanded model the values that were previously in these parameters in the smaller model
         for param_index, parameter in enumerate(model.parameters()):
             # weights - 2 dims
@@ -145,6 +158,7 @@ for t in range(500):
                 # biases - one dim
                 for value_index in range(len(old_values[param_index])):
                     parameter.data[value_index] = old_values[param_index][value_index]
+        """
 
         """
         print('NEW PARAMETERS')
@@ -154,3 +168,6 @@ for t in range(500):
             print(parameter.data[0])
         """
         optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+
+
+

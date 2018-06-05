@@ -4,6 +4,7 @@ import numpy as np
 import torch.utils.data as D
 from torchvision import datasets, transforms
 from copy import deepcopy
+from model import Model
 
 # tested, works!
 def apply_permutation(image, permutation):
@@ -112,3 +113,51 @@ def generate_new_mnist_task(train_dataset_size, validation_dataset_size, batch_s
 
     return train_loader, validation_loader, test_loader
 
+
+def copy_weights(old_model, expanded_model):
+
+    old_sizes = []
+    old_weights = []
+
+    # save data from old model
+    for param_index, parameter in enumerate(old_model.parameters()):
+        old_sizes.append(np.array(list(parameter.size())))
+        old_weights.append(parameter.data.clone())
+
+    # transfer that data to the expanded model
+    for param_index, parameter in enumerate(expanded_model.parameters()):
+
+        # weights - 2 dims
+        if list(old_sizes[param_index].shape)[0] == 2:
+
+            for row in range(len(old_weights[param_index])):
+
+                for column in range(len(old_weights[param_index][row])):
+
+                    # todo does this need to be in-place?
+                    parameter.data[row][column] = old_weights[param_index][row][column]
+
+        else:
+
+            # biases - one dim
+            for value_index in range(len(old_weights[param_index])):
+
+                # todo does this need to be in-place?
+                parameter.data[value_index] = old_weights[param_index][value_index]
+
+
+def expand_model(model):
+
+    expanded_model = Model(
+        model.hidden_size * 2,
+        model.hidden_dropout_prob,
+        model.input_dropout_prob,
+        model.input_size,
+        model.output_size,
+        model.ewc,
+        model.lam
+    )
+
+    copy_weights(model, expanded_model)
+
+    return expanded_model

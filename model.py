@@ -8,7 +8,7 @@ from functools import reduce
 
 
 class Model(nn.Module):
-    def __init__(self, hidden_size, hidden_layer_num, hidden_dropout_prob, input_dropout_prob, input_size, output_size,
+    def __init__(self, hidden_size, hidden_dropout_prob, input_dropout_prob, input_size, output_size,
                  ewc, lam=0):
 
         super().__init__()
@@ -20,7 +20,6 @@ class Model(nn.Module):
         self.input_size = input_size
         self.input_dropout_prob = input_dropout_prob
         self.hidden_size = hidden_size
-        self.hidden_layer_num = hidden_layer_num
         self.hidden_dropout_prob = hidden_dropout_prob
         self.output_size = output_size
 
