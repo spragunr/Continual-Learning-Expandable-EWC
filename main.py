@@ -114,7 +114,6 @@ def main():
     #   Both integral and floating point values are moved.
     sgd_dropout_model = Model(
                   args.hidden_size,
-                  args.hidden_layer_num,
                   args.hidden_dropout_prob,
                   args.input_dropout_prob,
                   input_size=784, # 28 x 28 pixels = 784 pixels per MNIST image
@@ -129,7 +128,6 @@ def main():
     #   Both integral and floating point values are moved.
     ewc_model = Model(
                   args.hidden_size,
-                  args.hidden_layer_num,
                   args.hidden_dropout_prob,
                   args.input_dropout_prob,
                   input_size=784,  # 28 x 28 pixels = 784 pixels per MNIST image

@@ -118,13 +118,13 @@ def generate_new_mnist_task(train_dataset_size, validation_dataset_size, batch_s
     return train_loader, validation_loader, test_loader
 
 
-def copy_weights(old_model, expanded_model):
+def copy_weights_expanding(old_model, expanded_model):
 
     old_sizes = []
     old_weights = []
 
     # save data from old model
-    for param_index, parameter in enumerate(old_model.parameters()):
+    for parameter in old_model.parameters():
         old_sizes.append(np.array(list(parameter.size())))
         old_weights.append(parameter.data.clone())
 
@@ -162,7 +162,7 @@ def expand_model(model):
         model.lam
     )
 
-    copy_weights(model, expanded_model)
+    copy_weights_expanding(model, expanded_model)
 
     return expanded_model
 
@@ -560,3 +560,69 @@ def calculate_ewc_loss_prev_tasks(model):
 
     return (model.lam / 2.0) * sum(losses)
 
+
+def copy_weights_shrinking(big_model, small_model):
+
+    big_weights = []
+
+    # save data from big model
+    for parameter in big_model.parameters():
+        big_weights.append(parameter.data.clone())
+
+    small_sizes = []
+
+    for parameter in small_model.parameters():
+        small_sizes.append(np.array(list(parameter.size())))
+
+
+    # transfer that data to the smaller model
+    for param_index, parameter in enumerate(small_model.parameters()):
+
+        # weights - 2 dims
+        if list(small_sizes[param_index].shape)[0] == 2:
+
+            for row in range(len(parameter.data)):
+
+                for column in range(len(parameter.data[row])):
+
+                    # todo does this need to be in-place?
+                    parameter.data[row][column] = big_weights[param_index][row][column]
+
+        else:
+
+            # biases - one dim
+            for value_index in range(len(parameter.data)):
+
+                # todo does this need to be in-place?
+                parameter.data[value_index] = big_weights[param_index][value_index]
+
+
+# given a dictionary with task numbers as keys and model sizes (size of hidden layer(s) in the model when the model was
+# trained on a given task) as values, generate and return a dictionary correlating task numbers with model.Model
+# objects of the appropriate sizes
+def generate_model_dictionary(model, model_size_dictionary):
+
+    model_sizes = []
+
+    # fetch all unique model sizes from the model size dictionary and store them in a list (model_sizes)
+    for key in model_size_dictionary.keys():
+        if not model_size_dictionary.get(key) in model_sizes:
+            model_sizes.append(model_size_dictionary.get(key))
+
+    models = []
+
+    # make a model of each size specified in model_sizes, add them to models list
+    for hidden_size in model_sizes:
+        models.append(
+            Model(
+                hidden_size,
+                model.hidden_dropout_prob,
+                model.input_dropout_prob,
+                model.input_size,
+                model.output_size,
+                model.ewc,
+                model.lam
+            )
+        )
+
+        copy_weights_shrinking(model, expanded_model)
