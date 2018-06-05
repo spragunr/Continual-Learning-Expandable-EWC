@@ -139,7 +139,7 @@ for t in range(500):
             torch.nn.Linear(H*2, D_out),
         )
 
-        model.apply(init_weights)
+        #model.apply(init_weights)
 
         for param_index, parameter in enumerate(model.parameters()):
             torch.add(parameter.data, old_values[param_index])
