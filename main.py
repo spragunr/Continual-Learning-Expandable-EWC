@@ -63,14 +63,16 @@ def main():
     parser.add_argument('--train-dataset-size', type=int, default=58976, metavar='TDS',
                         help='how many images to put in the training dataset')
 
-    # Both the size of the validation set AND the size of the number of samples used in computation of
-    # Fisher Information- because the method that performs that computation simply uses all of the data in the
-    # validation set.
-
+    # size of the validation set
+    #
     # I got the value 1024 from:
     #    https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/main.py#L24
     parser.add_argument('--validation-dataset-size', type=int, default=1024, metavar='VDS',
                         help='how many images to put in the validation dataset')
+
+    # the size of the number of samples used in computation of
+    # Fisher Information
+    parser.add_argument('--fisher-num-samples', type=int, default=200)
 
     # weights in each hidden layer
     parser.add_argument('--hidden-size', type=int, default=50)
@@ -151,6 +153,12 @@ def main():
     # of tasks on which we have already trained) - e.g. when training on task 3 this value will be 3
     task_count = 1
 
+    # todo comment
+    model_size_dictionaries = []
+
+    for model in models:
+        model_size_dictionaries.append({})
+
     # keep learning tasks ad infinitum
     while(True):
 
@@ -172,13 +180,15 @@ def main():
         test_loaders.append(test_loader)
 
         # for both SGD w/ Dropout and EWC models...
-        for model in models:
+        for model_num, model in enumerate(models):
 
             # for each desired epoch, train the model on the latest task, and then test the model on ALL tasks
             # trained thus far (including current task)
             for epoch in range(1, args.epochs + 1):
-                model.train_model(args, device, train_loader, epoch, task_count)
-                model.test_model(device, test_loaders)
+                utils.train(model, args, device, train_loader, epoch, task_count)
+                model_size_dictionaries[model_num].update({task_count:model.hidden_size})
+                test_models = utils.generate_model_dictionary(model, model_size_dictionaries[model_num])
+                utils.test(test_models, device, test_loaders)
 
                 # If the model currently being used in the loop is using EWC, we need to compute the fisher information
                 # and save the theta* ("theta star") values after training
@@ -189,11 +199,11 @@ def main():
                 if model.ewc:
                     # using validation set in Fisher Information Matrix computation as specified by:
                     #   https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
-                    model.compute_fisher_prob_dist(device, validation_loader)
+                    utils.compute_fisher_prob_dist(model, device, validation_loader, args.fisher_num_samples)
 
                     # we are saving the theta star values for THIS task, which will be used in the fisher matrix
                     # computations for the NEXT task.
-                    model.save_theta_stars()
+                    utils.save_theta_stars(model)
 
         # increment the number of the current task before re-entering while loop
         task_count += 1

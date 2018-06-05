@@ -476,7 +476,7 @@ def compute_fisher_prob_dist(model, device, validation_loader, num_samples):
         #
         # .to(device):
         # set the device (CPU or GPU) to be used with data and target to device variable (defined in main())
-        data, target = Variable(data).to(device), Variable(target).to(device)
+        data = Variable(data).to(device)
 
         loglikelihood_grads = torch.autograd.grad(log_softmax(model(data))[0, class_index], model.parameters())
 
