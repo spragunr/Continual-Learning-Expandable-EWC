@@ -625,4 +625,14 @@ def generate_model_dictionary(model, model_size_dictionary):
             )
         )
 
-        copy_weights_shrinking(model, expanded_model)
+    for to_model in models:
+        copy_weights_shrinking(model, to_model)
+
+    model_dictionary = {}
+
+    for model in models:
+        for task_number in [k for k,v in model_size_dictionary.items() if v == model.hidden_size]:
+            model_dictionary.update({task_number: model})
+
+
+    return model_dictionary
