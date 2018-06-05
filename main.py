@@ -75,7 +75,7 @@ def main():
     parser.add_argument('--fisher-num-samples', type=int, default=200)
 
     # weights in each hidden layer
-    parser.add_argument('--hidden-size', type=int, default=50)
+    parser.add_argument('--hidden-size', type=int, default=400)
 
     # number of hidden layers
     parser.add_argument('--hidden-layer-num', type=int, default=1)
