@@ -162,6 +162,9 @@ def expand_model(model):
         model.lam
     )
 
+    # copy over old post-training weights
+    expanded_model.theta_stars = model.theta_stars
+
     copy_weights_expanding(model, expanded_model)
 
     return expanded_model
@@ -558,7 +561,20 @@ def calculate_ewc_loss_prev_tasks(model):
         theta_star = Variable(model.theta_stars[parameter_index])
         fisher = Variable(model.list_of_FIMs[parameter_index])
 
-        losses.append((fisher * (parameter - theta_star) ** 2).sum())
+        # adjust the size of parameters to match theta_star values for the parameters if they already don't -
+        # this is to account for a scenario in which expansion has just occurred and we are now calculating ewc loss
+        # during training of the expanded network- the movement of weights in the new (expanded) network that
+        # did not exist in the smaller network should NOT factor into the loss for this particular task and should
+        # move freely. when theta stars are re-saved after training, movement of these weights will THEN be factored
+        # into the loss function because we want to restrict their movements.
+        theta_star_size = list(theta_star.size())
+
+        parameter_as_theta_star_size = torch.index_select(parameter.data.clone(), 0, theta_star_size[0])
+
+        if len(theta_star_size) > 1:
+            parameter_as_theta_star_size = torch.index_select(parameter_as_theta_star_size, 1, theta_star_size[1])
+
+        losses.append((fisher * (parameter_as_theta_star_size - theta_star) ** 2).sum())
 
     return (model.lam / 2.0) * sum(losses)
 
