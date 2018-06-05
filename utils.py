@@ -456,9 +456,8 @@ def compute_fisher_prob_dist(model, device, validation_loader, num_samples):
 
     class_index = (torch.multinomial(probs, 1)[0][0]).item()
 
-    for sample in range(num_samples):
+    for sample_number, (data, _) in enumerate(validation_loader):
 
-        data, _ = next(iter(validation_loader))
 
         # For some reason, the data needs to be wrapped in another tensor to work with our network,
         # otherwise it is not of the appropriate dimensions... I believe this statement effectively adds
@@ -482,6 +481,9 @@ def compute_fisher_prob_dist(model, device, validation_loader, num_samples):
 
         for parameter in range(len(model.list_of_FIMs)):
             model.list_of_FIMs[parameter] += torch.pow(loglikelihood_grads[parameter], 2.0)
+
+        if sample_number == num_samples - 1:
+            break
 
     for parameter in range(len(model.list_of_FIMs)):
         model.list_of_FIMs[parameter] /= num_samples

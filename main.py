@@ -70,7 +70,7 @@ def main():
     parser.add_argument('--validation-dataset-size', type=int, default=1024, metavar='VDS',
                         help='how many images to put in the validation dataset')
 
-    # the size of the number of samples used in computation of
+    # the number of samples used in computation of
     # Fisher Information
     parser.add_argument('--fisher-num-samples', type=int, default=200)
 
