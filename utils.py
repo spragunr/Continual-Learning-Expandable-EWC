@@ -559,22 +559,7 @@ def calculate_ewc_loss_prev_tasks(model):
     losses = []
 
     for parameter_index, parameter in enumerate(model.parameters()):
-        """
-        theta_star_template = (parameter.data.clone())
 
-        if len(list(model.theta_stars[parameter_index].size())) > 1:
-
-            for row in range(len(model.theta_stars[parameter_index])):
-                for col in range(len(model.theta_stars[parameter_index][row])):
-                    theta_star_template[row][col] = model.theta_stars[parameter_index][row][col]
-
-        else:
-
-            for value_index in range(len(model.theta_stars[parameter_index])):
-                theta_star_template[value_index] = model.theta_stars[parameter_index][value_index]
-        
-        theta_star = Variable(theta_star_template)
-        """
         theta_star = Variable(model.theta_stars[parameter_index])
         fisher = Variable(model.list_of_FIMs[parameter_index])
 
@@ -585,7 +570,8 @@ def calculate_ewc_loss_prev_tasks(model):
         # move freely. when theta stars are re-saved after training, movement of these weights will THEN be factored
         # into the loss function because we want to restrict their movements.
 
-        # todo fix this
+        # NOTE: IT IS ABSOLUTELY CRITICAL THAT WE DO NOT USE parameter.data HERE- IT RUINS EWC ACCURACY BECAUSE
+        # IT IS NOT TRACKED BY PYTORCH'S AUTOGRAD...
         theta_star_size = theta_star.size()
 
         dim_0_indices = torch.arange(theta_star_size[0], dtype=torch.long)
@@ -597,9 +583,7 @@ def calculate_ewc_loss_prev_tasks(model):
 
             parameter_as_theta_star_size = torch.index_select(parameter_as_theta_star_size, 1, dim_1_indices)
 
-
-        diff = (parameter - theta_star)
-        losses.append((fisher * (diff ** 2)).sum())
+        losses.append((fisher * ((parameter_as_theta_star_size - theta_star) ** 2)).sum())
 
     return (model.lam / 2.0) * sum(losses)
 
