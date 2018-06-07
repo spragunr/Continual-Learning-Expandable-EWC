@@ -274,9 +274,9 @@ def train(model, args, device, train_loader, epoch, task_number):
         if model.ewc and task_number > 1:
             for parameter_index, parameter in enumerate(model.parameters()):
                 # NOTE: * operator is element-wise multiplication
-                loss += torch.pow(parameter, 2.0) * model.sum_Fx[parameter_index]
-                loss -= 2 * parameter * model.sum_Fx_Wx[parameter_index]
-            loss += model.sum_Fx_Wx_sq
+                loss += torch.sum(torch.pow(parameter, 2.0) * model.sum_Fx[parameter_index])
+                loss -= 2 * torch.sum(parameter * model.sum_Fx_Wx[parameter_index])
+                loss += torch.sum(model.sum_Fx_Wx_sq[parameter_index])
 
         # Backward pass: compute gradient of the loss with respect to model
         # parameters
