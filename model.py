@@ -16,8 +16,7 @@ class Model(nn.Module):
 
         self.ewc = ewc # determines whether or not the model will use EWC
 
-        if self.ewc:
-            self.lam = lam          # the value of lambda (fisher multiplier) to be used in EWC loss computation
+        self.lam = lam          # the value of lambda (fisher multiplier) to be used in EWC loss computation, if EWC enabled
 
         # copy specified model hyperparameters into instance variables
         self.input_size = input_size
@@ -69,7 +68,7 @@ class Model(nn.Module):
             #
             # For an explanation of the meaning of this statement, see:
             #   https://stackoverflow.com/a/42482819/9454504
-            #(
+            #
             # This code was used here in another experiment:
             # https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/model.py#L61
             data = data.view(validation_loader.batch_size, -1)
@@ -81,7 +80,7 @@ class Model(nn.Module):
             # set the device (CPU or GPU) to be used with data and target to device variable (defined in main())
             data = Variable(data).to(device)
 
-            loglikelihood_grads = torch.autograd.grad(log_softmax(model(data))[0, class_index], model.parameters())
+            loglikelihood_grads = torch.autograd.grad(log_softmax(self(data))[0, class_index], self.parameters())
 
             for parameter in range(len(self.list_of_FIMs)):
                 self.list_of_FIMs[parameter] += torch.pow(loglikelihood_grads[parameter], 2.0)
