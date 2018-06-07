@@ -199,16 +199,19 @@ def main():
                 if model.ewc:
                     # using validation set in Fisher Information Matrix computation as specified by:
                     #   https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
-                    utils.compute_fisher_prob_dist(model, device, validation_loader, args.fisher_num_samples)
+                    model.compute_fisher_prob_dist(device, validation_loader, args.fisher_num_samples)
+                    model.update_ewc_sums()
 
                     # we are saving the theta star values for THIS task, which will be used in the fisher matrix
                     # computations for the NEXT task.
                     utils.save_theta_stars(model)
 
+        """
         # just testing expansion...
         if task_count == 2:
             for model_num, model in enumerate(models):
                 models[model_num] = utils.expand_model(model)
+        """
 
         # increment the number of the current task before re-entering while loop
         task_count += 1

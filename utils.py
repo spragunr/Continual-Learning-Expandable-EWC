@@ -272,8 +272,12 @@ def train(model, args, device, train_loader, epoch, task_number):
         # See equation (3) at:
         #   https://arxiv.org/pdf/1612.00796.pdf#section.2
         if model.ewc and task_number > 1:
-            old_tasks_loss = calculate_ewc_loss_prev_tasks(model)
-            loss += old_tasks_loss
+            for parameter_index, parameter in enumerate(model.parameters()):
+                # NOTE: * operator is element-wise multiplication
+                loss += torch.pow(parameter, 2.0) * model.sum_Fx[parameter_index]
+                loss -= 2 * parameter * model.sum_Fx_Wx[parameter_index]
+
+            loss += model.sum_Fx_Wx_sq
 
         # Backward pass: compute gradient of the loss with respect to model
         # parameters

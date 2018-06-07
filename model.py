@@ -69,7 +69,7 @@ class Model(nn.Module):
             #
             # For an explanation of the meaning of this statement, see:
             #   https://stackoverflow.com/a/42482819/9454504
-            #
+            #(
             # This code was used here in another experiment:
             # https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/model.py#L61
             data = data.view(validation_loader.batch_size, -1)
@@ -118,7 +118,14 @@ class Model(nn.Module):
                 self.list_of_FIMs[fisher_diagonal_index],
                 current_weights[fisher_diagonal_index])
 
-        for fisher_diagonal_
+        # add the element-wise multiplication of the fisher diagonal for each parameter and the square of each of that
+        # parameter's current weight values to the existing sum_Fx_Wx_sq
+        for fisher_diagonal_index in range(len(self.sum_Fx_Wx_sq)):
+            self.sum_Fx_Wx_sq[fisher_diagonal_index] = torch.addcmul(
+                self.sum_Fx_Wx_sq[fisher_diagonal_index],
+                self.list_of_FIMs[fisher_diagonal_index],
+                torch.pow(current_weights[fisher_diagonal_index], 2.0))
+
 
     # helper method for initializing 0-filled tensors to hold sums used in calculation of ewc loss
     def initialize_fisher_sums(self):
