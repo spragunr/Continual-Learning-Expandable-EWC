@@ -92,12 +92,19 @@ class Model(nn.Module):
         for parameter in range(len(self.list_of_FIMs)):
             self.list_of_FIMs[parameter] /= num_samples
 
+
+    # NOTE: using parameter.data, so for autograd it is critical that we re-initilize the optimizer after calling this
+    # method during the training process!!!
     def update_ewc_sums(self):
 
         if not hasattr(self, 'sum_Fx'):
             self.initialize_fisher_sums()
 
-        self.sum_Fx +=
+        for fisher_diagonal_index in range(len(self.sum_Fx)):
+            torch.Tensor.add_(self.sum_Fx[fisher_diagonal_index], self.list_of_FIMs[fisher_diagonal_index])
+
+
+
 
 
     # helper method for initializing 0-filled tensors to hold sums used in calculation of ewc loss
