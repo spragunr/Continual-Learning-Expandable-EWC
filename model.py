@@ -94,18 +94,31 @@ class Model(nn.Module):
 
 
     # NOTE: using parameter.data, so for autograd it is critical that we re-initilize the optimizer after calling this
-    # method during the training process!!!
+    # method during the training process!!! (we may already be doing this as long as we don't call it within the
+    # train() method...
     def update_ewc_sums(self):
+
+        current_weights = []  # list of the current weights in the network
+
+        for parameter in self.parameters():
+            current_weights.append(deepcopy(parameter.data.clone()))
 
         if not hasattr(self, 'sum_Fx'):
             self.initialize_fisher_sums()
 
+        # in-place addition of the Fisher diagonal for each parameter to the existing sum_Fx
         for fisher_diagonal_index in range(len(self.sum_Fx)):
-            torch.Tensor.add_(self.sum_Fx[fisher_diagonal_index], self.list_of_FIMs[fisher_diagonal_index])
+            self.sum_Fx[fisher_diagonal_index].add_(self.list_of_FIMs[fisher_diagonal_index])
 
+        # add the element-wise multiplication of the fisher diagonal for each parameter and that parameter's current
+        # weight values to the existing sum_Fx_Wx
+        for fisher_diagonal_index in range(len(self.sum_Fx_Wx)):
+            self.sum_Fx_Wx[fisher_diagonal_index] = torch.addcmul(
+                self.sum_Fx_Wx[fisher_diagonal_index],
+                self.list_of_FIMs[fisher_diagonal_index],
+                current_weights[fisher_diagonal_index])
 
-
-
+        for fisher_diagonal_
 
     # helper method for initializing 0-filled tensors to hold sums used in calculation of ewc loss
     def initialize_fisher_sums(self):
