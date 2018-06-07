@@ -587,7 +587,6 @@ def calculate_ewc_loss_prev_tasks(model):
 
     return (model.lam / 2.0) * sum(losses)
 
-
 def copy_weights_shrinking(big_model, small_model):
 
     big_weights = []
