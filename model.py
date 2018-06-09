@@ -16,7 +16,7 @@ class Model(nn.Module):
 
         self.ewc = ewc # determines whether or not the model will use EWC
 
-        self.lam = lam          # the value of lambda (fisher multiplier) to be used in EWC loss computation, if EWC enabled
+        self.lam = lam # the value of lambda (fisher multiplier) to be used in EWC loss computation, if EWC enabled
 
         # copy specified model hyperparameters into instance variables
         self.input_size = input_size
@@ -107,6 +107,9 @@ class Model(nn.Module):
 
         # in-place addition of the Fisher diagonal for each parameter to the existing sum_Fx
         for fisher_diagonal_index in range(len(self.sum_Fx)):
+            if self.sum_Fx[fisher_diagonal_index] != self.list_of_FIMs[fisher_diagonal_index]:
+
+                self.sum_Fx[fisher_diagonal_index] =
             self.sum_Fx[fisher_diagonal_index].add_(self.list_of_FIMs[fisher_diagonal_index])
 
         # add the element-wise multiplication of the fisher diagonal for each parameter and that parameter's current
