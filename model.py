@@ -109,9 +109,11 @@ class Model(nn.Module):
 
         # in-place addition of the Fisher diagonal for each parameter to the existing sum_Fx
         for fisher_diagonal_index in range(len(self.sum_Fx)):
+            sum_size = torch.Tensor(list(self.sum_Fx[fisher_diagonal_index].size()))
+            fisher_size = torch.Tensor(list(self.list_of_FIMs[fisher_diagonal_index].size()))
             # pad the current sum tensor at the current parameter index with zeros so that it matches the size in all dimensions
             # of the corresponding fisher diagonal
-            if not torch.equal(self.sum_Fx[fisher_diagonal_index].size(), self.list_of_FIMs[fisher_diagonal_index].size()):
+            if not torch.equal(sum_size, fisher_size):
                 pad_tuple = utils.pad_tuple(self.sum_Fx[fisher_diagonal_index], self.list_of_FIMs[fisher_diagonal_index])
                 self.sum_Fx[fisher_diagonal_index] = F.pad(self.sum_Fx[fisher_diagonal_index], pad_tuple, mode='constant', value=0)
             self.sum_Fx[fisher_diagonal_index].add_(self.list_of_FIMs[fisher_diagonal_index])
@@ -119,9 +121,12 @@ class Model(nn.Module):
         # add the element-wise multiplication of the fisher diagonal for each parameter and that parameter's current
         # weight values to the existing sum_Fx_Wx
         for fisher_diagonal_index in range(len(self.sum_Fx_Wx)):
+            sum_size = torch.Tensor(list(self.sum_Fx_Wx[fisher_diagonal_index].size()))
+            fisher_size = torch.Tensor(list(self.list_of_FIMs[fisher_diagonal_index].size()))
+
             # pad the current sum tensor at the current parameter index with zeros so that it matches the size in all dimensions
             # of the corresponding fisher diagonal
-            if not torch.equal(self.sum_Fx_Wx[fisher_diagonal_index].size(), self.list_of_FIMs[fisher_diagonal_index].size()):
+            if not torch.equal(sum_size, fisher_size):
                 pad_tuple = utils.pad_tuple(self.sum_Fx_Wx[fisher_diagonal_index], self.list_of_FIMs[fisher_diagonal_index])
                 self.sum_Fx_Wx[fisher_diagonal_index] = F.pad(self.sum_Fx_Wx[fisher_diagonal_index], pad_tuple, mode='constant', value=0)
             self.sum_Fx_Wx[fisher_diagonal_index] = torch.addcmul(
@@ -132,9 +137,12 @@ class Model(nn.Module):
         # add the element-wise multiplication of the fisher diagonal for each parameter and the square of each of that
         # parameter's current weight values to the existing sum_Fx_Wx_sq
         for fisher_diagonal_index in range(len(self.sum_Fx_Wx_sq)):
+            sum_size = torch.Tensor(list(self.sum_Fx_Wx_sq[fisher_diagonal_index].size()))
+            fisher_size = torch.Tensor(list(self.list_of_FIMs[fisher_diagonal_index].size()))
+
             # pad the current sum tensor at the current parameter index with zeros so that it matches the size in all dimensions
             # of the corresponding fisher diagonal
-            if not torch.equal(self.sum_Fx_Wx_sq[fisher_diagonal_index].size(), self.list_of_FIMs[fisher_diagonal_index].size()):
+            if not torch.equal(sum_size, fisher_size):
                 pad_tuple = utils.pad_tuple(self.sum_Fx_Wx_sq[fisher_diagonal_index], self.list_of_FIMs[fisher_diagonal_index])
                 self.sum_Fx_Wx_sq[fisher_diagonal_index] = F.pad(self.sum_Fx_Wx_sq[fisher_diagonal_index], pad_tuple, mode='constant', value=0)
 
@@ -163,3 +171,18 @@ class Model(nn.Module):
         # the sum of each task's Fisher Information multiplied by the square of its respective post-training weights
         # in the network
         self.sum_Fx_Wx_sq = deepcopy(empty_sums)
+
+    def expand_ewc_sums(self):
+
+        ewc_sums = [self.sum_Fx, self.sum_Fx_Wx, self.sum_Fx_Wx_sq]
+
+        for ewc_sum in ewc_sums:
+            for parameter_index, parameter in enumerate(self.parameters()):
+                sum_size = torch.Tensor(list(ewc_sum[parameter_index].size()))
+                parameter_size = torch.Tensor(list(parameter.size()))
+
+                # pad the sum tensor at the current parameter index of the given sum list with zeros so that it matches the size in
+                # all dimensions of the corresponding parameter
+                if not torch.equal(sum_size, parameter_size):
+                    pad_tuple = utils.pad_tuple(ewc_sum[parameter_index],parameter)
+                    ewc_sum[parameter_index] = F.pad(ewc_sum[parameter_index], pad_tuple, mode='constant', value=0)

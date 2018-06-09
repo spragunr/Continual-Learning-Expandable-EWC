@@ -300,6 +300,16 @@ def train(model, args, device, train_loader, epoch, task_number):
                 epoch, batch_idx * len(data), len(train_loader.dataset), 100. * batch_idx / len(train_loader),
                 loss.item()))
 
+def ewc_loss_prev_tasks(model):
+    loss_prev_tasks = 0
+
+    for parameter_index, parameter in enumerate(model.parameters()):
+        # NOTE: * operator is element-wise multiplication
+        loss_prev_tasks += (model.lam / 2.0) * torch.sum(torch.pow(parameter, 2.0) * model.sum_Fx[parameter_index])
+        loss_prev_tasks -= (model.lam / 2.0) * (2 * torch.sum(parameter * model.sum_Fx_Wx[parameter_index]))
+        loss_prev_tasks += (model.lam / 2.0) * torch.sum(model.sum_Fx_Wx_sq[parameter_index])
+
+    return loss_prev_tasks
 
 
 def test(models, device, test_loaders):
