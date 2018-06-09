@@ -166,6 +166,11 @@ def expand_model(model):
         # copy over old post-training weights and Fisher info
         expanded_model.theta_stars = model.theta_stars
         expanded_model.list_of_FIMs = model.list_of_FIMs
+        expanded_model.sum_Fx = model.sum_Fx
+        expanded_model.sum_Fx_Wx = model.sum_Fx_Wx
+        expanded_model.sum_Fx_Wx_sq = model.sum_Fx_Wx_sq
+
+        expanded_model.expand_ewc_sums()
 
     copy_weights_expanding(model, expanded_model)
 
