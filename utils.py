@@ -666,6 +666,7 @@ def generate_model_dictionary(model, model_size_dictionary):
 
     return model_dictionary
 
+
 def pad_tuple(smaller, larger):
 
     pads_required = []

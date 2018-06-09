@@ -1,11 +1,13 @@
 import numpy as np
 import torch
+import utils
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.autograd import Variable
 from functools import reduce
 from copy import deepcopy
+
 
 
 class Model(nn.Module):
@@ -107,9 +109,9 @@ class Model(nn.Module):
 
         # in-place addition of the Fisher diagonal for each parameter to the existing sum_Fx
         for fisher_diagonal_index in range(len(self.sum_Fx)):
-            if self.sum_Fx[fisher_diagonal_index] != self.list_of_FIMs[fisher_diagonal_index]:
-
-                self.sum_Fx[fisher_diagonal_index] =
+            if not torch.equal(self.sum_Fx[fisher_diagonal_index].size(), self.list_of_FIMs[fisher_diagonal_index].size()):
+                pad_tuple = utils.pad_tuple(self.sum_Fx[fisher_diagonal_index], self.list_of_FIMs[fisher_diagonal_index])
+                self.sum_Fx[fisher_diagonal_index] = F.pad(self.sum_Fx[fisher_diagonal_index], pad_tuple)
             self.sum_Fx[fisher_diagonal_index].add_(self.list_of_FIMs[fisher_diagonal_index])
 
         # add the element-wise multiplication of the fisher diagonal for each parameter and that parameter's current
