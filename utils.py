@@ -272,11 +272,7 @@ def train(model, args, device, train_loader, epoch, task_number):
         # See equation (3) at:
         #   https://arxiv.org/pdf/1612.00796.pdf#section.2
         if model.ewc and task_number > 1:
-            for parameter_index, parameter in enumerate(model.parameters()):
-                # NOTE: * operator is element-wise multiplication
-                loss += (model.lam / 2.0) * torch.sum(torch.pow(parameter, 2.0) * model.sum_Fx[parameter_index])
-                loss -= (model.lam / 2.0) * (2 * torch.sum(parameter * model.sum_Fx_Wx[parameter_index]))
-                loss += (model.lam / 2.0) * torch.sum(model.sum_Fx_Wx_sq[parameter_index])
+            loss += ewc_loss_prev_tasks(model)
 
         # Backward pass: compute gradient of the loss with respect to model
         # parameters
@@ -299,6 +295,7 @@ def train(model, args, device, train_loader, epoch, task_number):
                 'EWC' if model.ewc else 'SGD + DROPOUT', task_number,
                 epoch, batch_idx * len(data), len(train_loader.dataset), 100. * batch_idx / len(train_loader),
                 loss.item()))
+
 
 def ewc_loss_prev_tasks(model):
     loss_prev_tasks = 0
