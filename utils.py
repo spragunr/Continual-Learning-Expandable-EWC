@@ -665,3 +665,16 @@ def generate_model_dictionary(model, model_size_dictionary):
 
 
     return model_dictionary
+
+def pad_tuple(smaller, larger):
+
+    pads_required = []
+
+    for dim in range(len(list(smaller.size()))):
+        pads_required.append(list(larger.size())[dim] - list(smaller.size())[dim])
+        pads_required.append(0)
+
+    pads_required.reverse()
+
+    return tuple(pads_required)
+
