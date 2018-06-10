@@ -763,28 +763,24 @@ def run_experiment(args, kwargs, models, device, task_count=1, test_loaders=[], 
                 test_models = generate_model_dictionary(model, model_size_dictionaries[model_num])
                 test(test_models, device, test_loaders)
 
-                # If the model currently being used in the loop is using EWC, we need to compute the fisher information
-                # and save the theta* ("theta star") values after training
-                #
-                # NOTE: when I reference theta*, I am referring to the values represented by that variable in
-                # equation (3) at:
-                #   https://arxiv.org/pdf/1612.00796.pdf#section.2
-                if model.ewc:
-                    # using validation set in Fisher Information Matrix computation as specified by:
-                    #   https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
-                    model.compute_fisher_prob_dist(device, validation_loader, args.fisher_num_samples)
-                    model.update_ewc_sums()
-
-
-            if just_expanded:
-                # return to while loop without incrementing task count
-                break
+            # If the model currently being used in the loop is using EWC, we need to compute the fisher information
+            # and save the theta* ("theta star") values after training
+            #
+            # NOTE: when I reference theta*, I am referring to the values represented by that variable in
+            # equation (3) at:
+            #   https://arxiv.org/pdf/1612.00796.pdf#section.2
+            if model.ewc and not just_expanded:
+                # using validation set in Fisher Information Matrix computation as specified by:
+                #   https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
+                model.compute_fisher_prob_dist(device, validation_loader, args.fisher_num_samples)
+                model.update_ewc_sums()
 
         if not just_expanded:
             for model in models:
                 # we are saving the post-training weights for this task, so that they can be used to reset the model
                 # after expansion (if necessary)
                 save_theta_stars(model)
+
                 if model.ewc:
                     model.pre_failure_fisher = deepcopy(model.list_of_FIMs)
                     model.pre_failure_sum_Fx = deepcopy(model.sum_Fx)
@@ -793,3 +789,7 @@ def run_experiment(args, kwargs, models, device, task_count=1, test_loaders=[], 
 
             # increment the number of the current task before re-entering while loop
             task_count += 1
+
+            if task_count == 3:
+                for model_num, model in enumerate(models):
+                    models[model_num] = expand_model(model)
