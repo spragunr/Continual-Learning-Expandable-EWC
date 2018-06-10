@@ -766,6 +766,10 @@ def run_experiment(args, kwargs, models, device, task_count=1, test_loaders=[], 
                     model.compute_fisher_prob_dist(device, validation_loader, args.fisher_num_samples)
                     model.update_ewc_sums()
 
+
+                    # TODO use this to save the weights after training, so that the model can be reset
+                    # if loss goes to NaN
+
                     # we are saving the theta star values for THIS task, which will be used in the fisher matrix
                     # computations for the NEXT task.
                     save_theta_stars(model)
