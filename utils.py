@@ -152,6 +152,12 @@ def copy_weights_expanding(old_model, expanded_model):
 
 def expand_model(model):
 
+    # reset the weights in the model to their values after the last successful training on a task occured.
+    # this way, when the weights are copied, the weights in the expanded model that are copied over from the original,
+    # smaller model will be reset to their values BEFORE training on the task that caused blackout catastrophe occured...
+    for parameter_index, parameter in enumerate(model.parameters()):
+        parameter.data = model.theta_stars[parameter_index]
+
     expanded_model = Model(
         model.hidden_size * 2,
         model.hidden_dropout_prob,
@@ -162,9 +168,11 @@ def expand_model(model):
         model.lam
     )
 
+    # in case we have to expand more than once without a successful training run
+    expanded_model.theta_stars = model.theta_stars
+
     if model.ewc:
         # copy over old post-training weights and Fisher info
-        expanded_model.theta_stars = model.theta_stars
         expanded_model.list_of_FIMs = model.list_of_FIMs
         expanded_model.sum_Fx = model.sum_Fx
         expanded_model.sum_Fx_Wx = model.sum_Fx_Wx
@@ -767,16 +775,15 @@ def run_experiment(args, kwargs, models, device, task_count=1, test_loaders=[], 
                     model.update_ewc_sums()
 
 
-                    # TODO use this to save the weights after training, so that the model can be reset
-                    # if loss goes to NaN
-
-                    # we are saving the theta star values for THIS task, which will be used in the fisher matrix
-                    # computations for the NEXT task.
-                    save_theta_stars(model)
-
             if just_expanded:
                 # return to while loop without incrementing task count
                 break
+
         if not just_expanded:
+            for model in models:
+                # we are saving the post-training weights for this task, so that they can be used to reset the model
+                # after expansion (if necessary)
+                save_theta_stars(model)
+
             # increment the number of the current task before re-entering while loop
             task_count += 1
