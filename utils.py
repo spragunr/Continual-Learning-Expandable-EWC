@@ -773,6 +773,6 @@ def run_experiment(args, kwargs, models, device, task_count=1, test_loaders=[], 
             if just_expanded:
                 # return to while loop without incrementing task count
                 break
-
-        # increment the number of the current task before re-entering while loop
-        task_count += 1
+        if not just_expanded:
+            # increment the number of the current task before re-entering while loop
+            task_count += 1
