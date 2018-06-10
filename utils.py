@@ -787,7 +787,7 @@ def run_experiment(args, kwargs, models, device, task_count=1, test_loaders=[], 
                 save_theta_stars(model)
                 if model.ewc:
                     model.pre_failure_fisher = deepcopy(model.list_of_FIMs)
-                    model.pre_failure_sum_Fx = deepcopy(model.sum_Fx_Wx)
+                    model.pre_failure_sum_Fx = deepcopy(model.sum_Fx)
                     model.pre_failure_sum_Fx_Wx = deepcopy(model.sum_Fx_Wx)
                     model.pre_failure_sum_Fx_Wx_sq = deepcopy(model.sum_Fx_Wx_sq)
 
