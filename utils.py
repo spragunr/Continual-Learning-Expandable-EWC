@@ -301,17 +301,22 @@ def train(model, args, device, train_loader, epoch, task_number):
                 epoch, batch_idx * len(data), len(train_loader.dataset), 100. * batch_idx / len(train_loader),
                 loss.item()))
 
+        if np.isnan(loss.item()):
+            print("model saturated, expanding...")
+            return -1
+
+    return 0
 
 def ewc_loss_prev_tasks(model):
     loss_prev_tasks = 0
 
     for parameter_index, parameter in enumerate(model.parameters()):
         # NOTE: * operator is element-wise multiplication
-        loss_prev_tasks += (model.lam / 2.0) * torch.sum(torch.pow(parameter, 2.0) * model.sum_Fx[parameter_index])
-        loss_prev_tasks -= (model.lam / 2.0) * (2 * torch.sum(parameter * model.sum_Fx_Wx[parameter_index]))
-        loss_prev_tasks += (model.lam / 2.0) * torch.sum(model.sum_Fx_Wx_sq[parameter_index])
+        loss_prev_tasks += torch.sum(torch.pow(parameter, 2.0) * model.sum_Fx[parameter_index])
+        loss_prev_tasks -= (2 * torch.sum(parameter * model.sum_Fx_Wx[parameter_index]))
+        loss_prev_tasks += torch.sum(model.sum_Fx_Wx_sq[parameter_index])
 
-    return loss_prev_tasks
+    return loss_prev_tasks * (model.lam / 2.0)
 
 
 def test(models, device, test_loaders):
@@ -691,3 +696,83 @@ def pad_tuple(smaller, larger):
 
     return tuple(pads_required)
 
+
+def run_experiment(args, kwargs, models, device, task_count=1, test_loaders=[], model_size_dictionaries=[]):
+
+    model_size_dictionaries = model_size_dictionaries
+
+    for model in models:
+        model_size_dictionaries.append({})
+
+    # A list of the different DataLoader objects that hold various permutations of the mnist testing dataset-
+    # we keep these around in a persistent list here so that we can use them to test each of the models in the
+    # list "models" after they are trained on the latest task's training dataset.
+    # For more details, see: generate_new_mnist_task() in utils.py
+    test_loaders = test_loaders
+
+    # the number of the task on which we are CURRENTLY training in the loop below (as opposed to a list of the number
+    # of tasks on which we have already trained) - e.g. when training on task 3 this value will be 3
+    task_count = task_count
+
+    just_expanded = False
+
+    # keep learning tasks ad infinitum
+    while (True):
+        if not just_expanded:
+            # get the DataLoaders for the training, validation, and testing data
+            train_loader, validation_loader, test_loader = generate_new_mnist_task(
+                args.train_dataset_size,
+                args.validation_dataset_size,
+                args.batch_size,
+                args.test_batch_size,
+                kwargs,
+                first_task=(task_count == 1)  # if first_task is True, we won't permute the MNIST dataset.
+            )
+
+            # add the new test_loader for this task to the list of testing dataset DataLoaders for later re-use
+            # to evaluate how well the models retain accuracy on old tasks after learning new ones
+            #
+            # NOTE: this list also includes the current test_loader, which we are appending here, because we also
+            # need to test each network on the current task after training
+            test_loaders.append(test_loader)
+
+        just_expanded = False
+        # for both SGD w/ Dropout and EWC models...
+        for model_num, model in enumerate(models):
+
+            # for each desired epoch, train the model on the latest task, and then test the model on ALL tasks
+            # trained thus far (including current task)
+            for epoch in range(1, args.epochs + 1):
+                if train(model, args, device, train_loader, epoch, task_count) == -1:
+                    for model_num, model in enumerate(models):
+                        models[model_num] = expand_model(model)
+                    just_expanded = True
+                    # return to the outer for loop
+                    break
+
+                model_size_dictionaries[model_num].update({task_count: model.hidden_size})
+                test_models = generate_model_dictionary(model, model_size_dictionaries[model_num])
+                test(test_models, device, test_loaders)
+
+                # If the model currently being used in the loop is using EWC, we need to compute the fisher information
+                # and save the theta* ("theta star") values after training
+                #
+                # NOTE: when I reference theta*, I am referring to the values represented by that variable in
+                # equation (3) at:
+                #   https://arxiv.org/pdf/1612.00796.pdf#section.2
+                if model.ewc:
+                    # using validation set in Fisher Information Matrix computation as specified by:
+                    #   https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
+                    model.compute_fisher_prob_dist(device, validation_loader, args.fisher_num_samples)
+                    model.update_ewc_sums()
+
+                    # we are saving the theta star values for THIS task, which will be used in the fisher matrix
+                    # computations for the NEXT task.
+                    save_theta_stars(model)
+
+            if just_expanded:
+                # return to while loop without incrementing task count
+                break
+
+        # increment the number of the current task before re-entering while loop
+        task_count += 1

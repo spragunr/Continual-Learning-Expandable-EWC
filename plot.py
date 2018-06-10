@@ -21,18 +21,17 @@ fig = plt.figure()
 ax = fig.gca(projection='3d')
 
 # Make data.
-X = np.arange(1, 11, 1)
-Y = np.arange(1, 11, 1)
-X, Y = np.meshgrid(X,Y)
-list = []
+def f(x, y):
+    return np.cos(np.sqrt(x ** 2 + y ** 2))
 
-for num in range(10):
-    list.append(np.random.randn(10))
+x = np.linspace(-6, 6, 30)
+y = np.linspace(-6, 6, 30)
 
-Z = np.array(list)
-print(Z.shape)
-# Plot the surface.
-ax.plot_wireframe(X, Y, Z, rstride=1, cstride=1)
+X, Y = np.meshgrid(x, y)
+Z = f(X, Y)
 
+ax.plot_surface(X, Y, Z, rstride=1, cstride=1,
+                cmap='viridis', edgecolor='none')
+ax.set_title('surface')
 
 plt.show()
