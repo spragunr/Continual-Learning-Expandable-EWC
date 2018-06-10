@@ -158,6 +158,7 @@ def expand_model(model):
     for parameter_index, parameter in enumerate(model.parameters()):
         parameter.data = model.theta_stars[parameter_index]
 
+
     expanded_model = Model(
         model.hidden_size * 2,
         model.hidden_dropout_prob,
@@ -173,10 +174,10 @@ def expand_model(model):
 
     if model.ewc:
         # copy over old post-training weights and Fisher info
-        expanded_model.list_of_FIMs = model.list_of_FIMs
-        expanded_model.sum_Fx = model.sum_Fx
-        expanded_model.sum_Fx_Wx = model.sum_Fx_Wx
-        expanded_model.sum_Fx_Wx_sq = model.sum_Fx_Wx_sq
+        expanded_model.list_of_FIMs = model.pre_failure_fisher
+        expanded_model.sum_Fx = model.pre_failure_sum_Fx
+        expanded_model.sum_Fx_Wx = model.pre_failure_sum_Fx_Wx
+        expanded_model.sum_Fx_Wx_sq = model.pre_failure_sum_Fx_Wx_sq
 
         expanded_model.expand_ewc_sums()
 
@@ -784,6 +785,11 @@ def run_experiment(args, kwargs, models, device, task_count=1, test_loaders=[], 
                 # we are saving the post-training weights for this task, so that they can be used to reset the model
                 # after expansion (if necessary)
                 save_theta_stars(model)
+                if model.ewc:
+                    model.pre_failure_fisher = deepcopy(model.list_of_FIMs)
+                    model.pre_failure_sum_Fx = deepcopy(model.sum_Fx_Wx)
+                    model.pre_failure_sum_Fx_Wx = deepcopy(model.sum_Fx_Wx)
+                    model.pre_failure_sum_Fx_Wx_sq = deepcopy(model.sum_Fx_Wx_sq)
 
             # increment the number of the current task before re-entering while loop
             task_count += 1
