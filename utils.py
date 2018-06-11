@@ -153,7 +153,7 @@ def copy_weights_expanding(old_model, expanded_model):
 def expand_model(model):
 
     expanded_model = Model(
-        model.hidden_size * 4,
+        model.hidden_size * 2,
         model.hidden_dropout_prob,
         model.input_dropout_prob,
         model.input_size,
@@ -164,11 +164,11 @@ def expand_model(model):
 
     if model.ewc:
         # copy over old post-training weights and Fisher info
-        expanded_model.theta_stars = model.theta_stars
-        expanded_model.list_of_FIMs = model.list_of_FIMs
-        expanded_model.sum_Fx = model.sum_Fx
-        expanded_model.sum_Fx_Wx = model.sum_Fx_Wx
-        expanded_model.sum_Fx_Wx_sq = model.sum_Fx_Wx_sq
+        expanded_model.theta_stars = deepcopy(model.theta_stars)
+        expanded_model.list_of_FIMs = deepcopy(model.list_of_FIMs)
+        expanded_model.sum_Fx = deepcopy(model.sum_Fx)
+        expanded_model.sum_Fx_Wx = deepcopy(model.sum_Fx_Wx)
+        expanded_model.sum_Fx_Wx_sq = deepcopy(model.sum_Fx_Wx_sq)
 
         expanded_model.expand_ewc_sums()
 

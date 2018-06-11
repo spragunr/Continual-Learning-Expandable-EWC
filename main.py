@@ -209,12 +209,9 @@ def main():
 
         # just testing expansion...
         if task_count == 2:
+            print("expanding...")
             for model_num, model in enumerate(models):
                 models[model_num] = utils.expand_model(model)
-
-        for model in models:
-            for parameter in model.parameters():
-                print(parameter.size())
 
         # increment the number of the current task before re-entering while loop
         task_count += 1
