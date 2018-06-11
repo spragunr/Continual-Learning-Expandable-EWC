@@ -139,7 +139,7 @@ def copy_weights_expanding(old_model, expanded_model):
                 for column in range(len(old_weights[param_index][row])):
 
                     # todo does this need to be in-place?
-                    parameter.data[row][column] = old_weights[param_index][row][column]
+                    parameter.data[row][column].copy_(old_weights[param_index][row][column])
 
         else:
 
@@ -147,7 +147,7 @@ def copy_weights_expanding(old_model, expanded_model):
             for value_index in range(len(old_weights[param_index])):
 
                 # todo does this need to be in-place?
-                parameter.data[value_index] = old_weights[param_index][value_index]
+                parameter.data[value_index].copy_(old_weights[param_index][value_index])
 
 
 def expand_model(model):
@@ -164,11 +164,11 @@ def expand_model(model):
 
     if model.ewc:
         # copy over old post-training weights and Fisher info
-        expanded_model.theta_stars = deepcopy(model.theta_stars)
-        expanded_model.list_of_FIMs = deepcopy(model.list_of_FIMs)
-        expanded_model.sum_Fx = deepcopy(model.sum_Fx)
-        expanded_model.sum_Fx_Wx = deepcopy(model.sum_Fx_Wx)
-        expanded_model.sum_Fx_Wx_sq = deepcopy(model.sum_Fx_Wx_sq)
+        expanded_model.theta_stars = model.theta_stars
+        expanded_model.list_of_FIMs = model.list_of_FIMs
+        expanded_model.sum_Fx = model.sum_Fx
+        expanded_model.sum_Fx_Wx = model.sum_Fx_Wx
+        expanded_model.sum_Fx_Wx_sq = model.sum_Fx_Wx_sq
 
         expanded_model.expand_ewc_sums()
 
@@ -307,9 +307,9 @@ def ewc_loss_prev_tasks(model):
 
     for parameter_index, parameter in enumerate(model.parameters()):
         # NOTE: * operator is element-wise multiplication
-        loss_prev_tasks += (model.lam / 2.0) * torch.sum(torch.pow(parameter, 2.0) * model.sum_Fx[parameter_index])
+        loss_prev_tasks += (model.lam / 2.0) * (torch.sum(torch.pow(parameter, 2.0) * model.sum_Fx[parameter_index]))
         loss_prev_tasks -= (model.lam / 2.0) * (2 * torch.sum(parameter * model.sum_Fx_Wx[parameter_index]))
-        loss_prev_tasks += (model.lam / 2.0) * torch.sum(model.sum_Fx_Wx_sq[parameter_index])
+        loss_prev_tasks += (model.lam / 2.0) * (torch.sum(model.sum_Fx_Wx_sq[parameter_index]))
 
     return loss_prev_tasks
 
