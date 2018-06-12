@@ -24,7 +24,7 @@ def main():
     #
     # The original EWC paper hyperparameters are here:
     # https://arxiv.org/pdf/1612.00796.pdf#section.4
-    parser.add_argument('--lr', type=float, default= 0.1, metavar='LR',
+    parser.add_argument('--lr', type=float, default= 0.01, metavar='LR',
                         help='learning rate (default: 0.1)')
 
     # We don't want an L2 regularization penalty because https://arxiv.org/pdf/1612.00796.pdf#subsection.2.1
@@ -190,29 +190,31 @@ def main():
                 test_models = utils.generate_model_dictionary(model, model_size_dictionaries[model_num])
                 utils.test(test_models, device, test_loaders)
 
-                # If the model currently being used in the loop is using EWC, we need to compute the fisher information
-                # and save the theta* ("theta star") values after training
-                #
-                # NOTE: when I reference theta*, I am referring to the values represented by that variable in
-                # equation (3) at:
-                #   https://arxiv.org/pdf/1612.00796.pdf#section.2
-                if model.ewc:
-                    # using validation set in Fisher Information Matrix computation as specified by:
-                    #   https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
-                    model.compute_fisher_prob_dist(device, validation_loader, args.fisher_num_samples)
-                    model.update_ewc_sums()
+            # If the model currently being used in the loop is using EWC, we need to compute the fisher information
+            # and save the theta* ("theta star") values after training
+            #
+            # NOTE: when I reference theta*, I am referring to the values represented by that variable in
+            # equation (3) at:
+            #   https://arxiv.org/pdf/1612.00796.pdf#section.2
+            if model.ewc:
+                # using validation set in Fisher Information Matrix computation as specified by:
+                # https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
+                model.compute_fisher_prob_dist(device, validation_loader, args.fisher_num_samples)
+                model.update_ewc_sums()
 
-                    # we are saving the theta star values for THIS task, which will be used in the fisher matrix
-                    # computations for the NEXT task.
-                    utils.save_theta_stars(model)
+                # we are saving the theta star values for THIS task, which will be used in the fisher matrix
+                # computations for the NEXT task.
+                utils.save_theta_stars(model)
 
 
+
+        """
         # just testing expansion...
         if task_count == 2:
             print("expanding...")
             for model_num, model in enumerate(models):
                 models[model_num] = utils.expand_model(model)
-
+        """
 
         # increment the number of the current task before re-entering while loop
         task_count += 1
