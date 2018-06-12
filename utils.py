@@ -164,7 +164,7 @@ def expand_model(model):
 
     if model.ewc:
         # copy over old post-training weights and Fisher info
-        expanded_model.theta_stars = model.theta_stars
+        #expanded_model.theta_stars = model.theta_stars
         expanded_model.list_of_FIMs = model.list_of_FIMs
         expanded_model.sum_Fx = model.sum_Fx
         expanded_model.sum_Fx_Wx = model.sum_Fx_Wx
@@ -307,11 +307,11 @@ def ewc_loss_prev_tasks(model):
 
     for parameter_index, parameter in enumerate(model.parameters()):
         # NOTE: * operator is element-wise multiplication
-        loss_prev_tasks += (model.lam / 2.0) * (torch.sum(torch.pow(parameter, 2.0) * model.sum_Fx[parameter_index]))
-        loss_prev_tasks -= (model.lam / 2.0) * (2 * torch.sum(parameter * model.sum_Fx_Wx[parameter_index]))
-        loss_prev_tasks += (model.lam / 2.0) * (torch.sum(model.sum_Fx_Wx_sq[parameter_index]))
+        loss_prev_tasks += torch.sum(torch.pow(parameter, 2.0) * model.sum_Fx[parameter_index])
+        loss_prev_tasks -= 2 * torch.sum(parameter * model.sum_Fx_Wx[parameter_index])
+        loss_prev_tasks += torch.sum(model.sum_Fx_Wx_sq[parameter_index])
 
-    return loss_prev_tasks
+    return loss_prev_tasks * (model.lam / 2.0)
 
 
 def test(models, device, test_loaders):

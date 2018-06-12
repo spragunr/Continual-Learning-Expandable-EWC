@@ -24,7 +24,7 @@ def main():
     #
     # The original EWC paper hyperparameters are here:
     # https://arxiv.org/pdf/1612.00796.pdf#section.4
-    parser.add_argument('--lr', type=float, default= 0.01, metavar='LR',
+    parser.add_argument('--lr', type=float, default= 0.1, metavar='LR',
                         help='learning rate (default: 0.1)')
 
     # We don't want an L2 regularization penalty because https://arxiv.org/pdf/1612.00796.pdf#subsection.2.1
@@ -44,7 +44,7 @@ def main():
     # 15 (from https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb) - see In [17]
     # inverse of learning rate (1.0 / lr) (from https://github.com/stokesj/EWC)- see readme
     parser.add_argument('--lam', type=float, default=15, metavar='LR',
-                        help='ewc lambda value (fisher multiplier) (default: 5e+3)')
+                        help='ewc lambda value (fisher multiplier) (default: 15)')
 
     # only necessary if optimizer SGD with momentum is desired, hence default is 0.0
     parser.add_argument('--momentum', type=float, default=0.0, metavar='M',
@@ -180,14 +180,14 @@ def main():
         test_loaders.append(test_loader)
 
         # for both SGD w/ Dropout and EWC models...
-        for model_num, model in enumerate(models):
+        for model_num in range(len(models)):
 
             # for each desired epoch, train the model on the latest task, and then test the model on ALL tasks
             # trained thus far (including current task)
             for epoch in range(1, args.epochs + 1):
-                utils.train(model, args, device, train_loader, epoch, task_count)
-                model_size_dictionaries[model_num].update({task_count:model.hidden_size})
-                test_models = utils.generate_model_dictionary(model, model_size_dictionaries[model_num])
+                models[model_num].train_model(args, device, train_loader, epoch, task_count)
+                model_size_dictionaries[model_num].update({task_count:models[model_num].hidden_size})
+                test_models = utils.generate_model_dictionary(models[model_num], model_size_dictionaries[model_num])
                 utils.test(test_models, device, test_loaders)
 
             # If the model currently being used in the loop is using EWC, we need to compute the fisher information
@@ -196,25 +196,26 @@ def main():
             # NOTE: when I reference theta*, I am referring to the values represented by that variable in
             # equation (3) at:
             #   https://arxiv.org/pdf/1612.00796.pdf#section.2
-            if model.ewc:
+            if models[model_num].ewc:
+
                 # using validation set in Fisher Information Matrix computation as specified by:
                 # https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
-                model.compute_fisher_prob_dist(device, validation_loader, args.fisher_num_samples)
-                model.update_ewc_sums()
+                models[model_num].compute_fisher_prob_dist(device, validation_loader, args.fisher_num_samples)
+                models[model_num].update_ewc_sums()
 
                 # we are saving the theta star values for THIS task, which will be used in the fisher matrix
                 # computations for the NEXT task.
-                utils.save_theta_stars(model)
+                #utils.save_theta_stars(model)
 
 
 
-        """
+
         # just testing expansion...
         if task_count == 2:
             print("expanding...")
-            for model_num, model in enumerate(models):
-                models[model_num] = utils.expand_model(model)
-        """
+            for model_num in range(len(models)):
+                models[model_num] = utils.expand_model(models[model_num])
+
 
         # increment the number of the current task before re-entering while loop
         task_count += 1
