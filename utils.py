@@ -311,6 +311,7 @@ def ewc_loss_prev_tasks(model):
         loss_prev_tasks -= 2 * torch.sum(parameter * model.sum_Fx_Wx[parameter_index])
         loss_prev_tasks += torch.sum(model.sum_Fx_Wx_sq[parameter_index])
 
+
     return loss_prev_tasks * (model.lam / 2.0)
 
 
