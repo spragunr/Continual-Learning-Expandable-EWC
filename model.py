@@ -319,11 +319,11 @@ class Model(nn.Module):
                 parameter_size = torch.Tensor(list(parameter.size()))
 
                 if not torch.equal(task_weights_size, parameter_size):
-                    pad_tuple = pad_tuple(task_weights[param_index], parameter)
+                    pad_tuple = utils.pad_tuple(task_weights[param_index], parameter)
                     task_weights[param_index] = nn.functional.pad(task_weights[param_index], pad_tuple, mode='constant', value=0)
 
                 if not torch.equal(task_fisher_size, parameter_size):
-                    pad_tuple = pad_tuple(task_fisher[param_index], parameter)
+                    pad_tuple = utils.pad_tuple(task_fisher[param_index], parameter)
                     task_fisher[param_index] = nn.functional.pad(task_fisher[param_index], pad_tuple, mode='constant', value=0)
 
                 loss_prev_tasks += (((parameter - task_weights[param_index]) ** 2) * task_fisher[param_index]).sum()
