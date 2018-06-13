@@ -205,21 +205,23 @@ def main():
             #   https://arxiv.org/pdf/1612.00796.pdf#section.2
             if models[model_num].ewc:
 
-                # using validation set in Fisher Information Matrix computation as specified by:
-                # https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
-                models[model_num].compute_fisher_prob_dist(device, validation_loader, args.fisher_num_samples)
-                models[model_num].update_ewc_sums()
-
                 current_weights = []
 
                 for parameter in models[model_num].parameters():
                     current_weights.append(deepcopy(parameter.data.clone()))
 
                 task_post_training_weights.update({task_count: deepcopy(current_weights)})
-                task_fisher_diags.update({task_count: deepcopy(models[model_num].list_of_FIMs)})
 
                 if task_count > 1:
                     plot.plot(current_weights, task_post_training_weights, task_count, task_fisher_diags)
+
+                # using validation set in Fisher Information Matrix computation as specified by:
+                # https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
+                models[model_num].compute_fisher_prob_dist(device, validation_loader, args.fisher_num_samples)
+                models[model_num].update_ewc_sums()
+
+                task_fisher_diags.update({task_count: deepcopy(models[model_num].list_of_FIMs)})
+
 
         """
         # just testing expansion...
