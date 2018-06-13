@@ -220,13 +220,13 @@ def main():
                 models[model_num].task_fisher_diags.update({task_count: deepcopy(models[model_num].list_of_FIMs)})
 
 
-        """
+
         # just testing expansion...
         if task_count == 2:
             print("expanding...")
+            for model_num in range(len(models)):
+                models[model_num] = utils.expand_model(models[model_num])
 
-            models[model_num] = utils.expand_model(models[model_num])
-        """
 
         # increment the number of the current task before re-entering while loop
         task_count += 1
