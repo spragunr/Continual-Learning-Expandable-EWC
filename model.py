@@ -10,13 +10,16 @@ from copy import deepcopy
 
 class Model(nn.Module):
     def __init__(self, hidden_size, hidden_dropout_prob, input_dropout_prob, input_size, output_size,
-                 ewc, lam=0):
+                 ewc, lam=0, task_fisher_diags ={}, task_post_training_weights={}):
 
         super().__init__()
 
         self.ewc = ewc # determines whether or not the model will use EWC
 
         self.lam = lam # the value of lambda (fisher multiplier) to be used in EWC loss computation, if EWC enabled
+
+        self.task_fisher_diags = task_fisher_diags
+        self.task_post_training_weights = task_post_training_weights
 
         # copy specified model hyperparameters into instance variables
         self.input_size = input_size
@@ -275,8 +278,8 @@ class Model(nn.Module):
             # See equation (3) at:
             #   https://arxiv.org/pdf/1612.00796.pdf#section.2
             if self.ewc and task_number > 1:
-                loss += self.ewc_loss_prev_tasks()
-
+                #loss += self.ewc_loss_prev_tasks()
+                loss += self.alternative_ewc_loss(task_number)
             # Backward pass: compute gradient of the loss with respect to model
             # parameters
             loss.backward()
@@ -298,4 +301,33 @@ class Model(nn.Module):
                     'EWC' if self.ewc else 'SGD + DROPOUT', task_number,
                     epoch, batch_idx * len(data), len(train_loader.dataset), 100. * batch_idx / len(train_loader),
                     loss.item()))
+
+
+# try defining loss based on all extant Fisher diagonals and previous task weights (in lists in main.py)
+def alternative_ewc_loss(self, task_count):
+    loss_prev_tasks = 0
+
+    for task in range(1, task_count):
+
+        task_weights = self.task_post_training_weights.get(task)
+        task_fisher = self.task_fisher_diags.get(task)
+
+        for param_index, parameter in enumerate(self.parameters()):
+            task_weights_size = torch.Tensor(list(task_weights[param_index].size()))
+            task_fisher_size = torch.Tensor(list(task_fisher[param_index].size()))
+
+            parameter_size = torch.Tensor(list(parameter.size()))
+
+            if not torch.equal(task_weights_size, parameter_size):
+                pad_tuple = pad_tuple(task_weights[param_index], parameter)
+                task_weights[param_index] = nn.functional.pad(task_weights[param_index], pad_tuple, mode='constant', value=0)
+
+            if not torch.equal(task_fisher_size, parameter_size):
+                pad_tuple = pad_tuple(task_fisher[param_index], parameter)
+                task_fisher[param_index] = nn.functional.pad(task_fisher[param_index], pad_tuple, mode='constant', value=0)
+
+            loss_prev_tasks += ((parameter - task_weights[param_index]) ** 2) * task_fisher[param_index]
+
+    return loss_prev_tasks * (self.lam / 2.0)
+
 

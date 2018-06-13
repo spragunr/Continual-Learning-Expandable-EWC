@@ -155,7 +155,9 @@ def expand_model(model):
         model.input_size,
         model.output_size,
         model.ewc,
-        model.lam
+        model.lam,
+        deepcopy(model.task_fisher_diags),
+        deepcopy(model.task_post_training_weights)
     )
 
     if model.ewc:
@@ -319,55 +321,6 @@ def test(models, device, test_loaders):
             accuracy))
 
 
-# compute fisher by randomly sampling from probability distribution of outputs rather than the activations
-# themselves
-def compute_fisher_prob_dist(model, device, validation_loader, num_samples):
-    model.list_of_FIMs = []
-
-    for parameter in model.parameters():
-        model.list_of_FIMs.append(torch.zeros(tuple(parameter.size())))
-
-    softmax = nn.Softmax()
-
-    log_softmax = nn.LogSoftmax()
-
-    probs = softmax(model.y)
-
-    class_index = (torch.multinomial(probs, 1)[0][0]).item()
-
-    for sample_number, (data, _) in enumerate(validation_loader):
-
-
-        # For some reason, the data needs to be wrapped in another tensor to work with our network,
-        # otherwise it is not of the appropriate dimensions... I believe this statement effectively adds
-        # a dimension.
-        #
-        # For an explanation of the meaning of this statement, see:
-        #   https://stackoverflow.com/a/42482819/9454504
-        #
-        # This code was used here in another experiment:
-        # https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/model.py#L61
-        data = data.view(validation_loader.batch_size, -1)
-
-        # wrap data and target in variables- again, from the following experiment:
-        #   https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/model.py#L62
-        #
-        # .to(device):
-        # set the device (CPU or GPU) to be used with data and target to device variable (defined in main())
-        data = Variable(data).to(device)
-
-        loglikelihood_grads = torch.autograd.grad(log_softmax(model(data))[0, class_index], model.parameters())
-
-        for parameter in range(len(model.list_of_FIMs)):
-            model.list_of_FIMs[parameter] += torch.pow(loglikelihood_grads[parameter], 2.0)
-
-        if sample_number == num_samples - 1:
-            break
-
-    for parameter in range(len(model.list_of_FIMs)):
-        model.list_of_FIMs[parameter] /= num_samples
-
-
 def copy_weights_shrinking(big_model, small_model):
 
     big_weights = []
@@ -456,6 +409,4 @@ def pad_tuple(smaller, larger):
 
     return tuple(pads_required)
 
-# try defining loss based on all extant Fisher diagonals and previous task weights (in lists in main.py)
-def alternative_ewc_loss(weights, task_post_training_weights, task_count, task_fisher_diags):
-    for param_index, parameter in enumerate(weights):
+
