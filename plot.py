@@ -20,18 +20,13 @@ import numpy as np
 fig = plt.figure()
 ax = fig.gca(projection='3d')
 
-# Make data.
-def f(x, y):
-    return np.cos(np.sqrt(x ** 2 + y ** 2))
-
-x = np.linspace(-6, 6, 30)
-y = np.linspace(-6, 6, 30)
+x = np.array([0, 1, 2, 3, 4])
+y = np.array([0, 1, 2, 3, 4])
 
 X, Y = np.meshgrid(x, y)
-Z = f(X, Y)
+Z = np.array([[.25,0,0,.25,0],[0, 0, .25, 0, 0],[0, 0, 1, 0, 0],[0, 0, .25, 0, 0],[0, 0, 0, .25, 0]])
 
 ax.plot_surface(X, Y, Z, rstride=1, cstride=1,
                 cmap='viridis', edgecolor='none')
-ax.set_title('surface')
 
 plt.show()

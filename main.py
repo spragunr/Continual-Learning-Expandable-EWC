@@ -75,7 +75,7 @@ def main():
     parser.add_argument('--fisher-num-samples', type=int, default=200)
 
     # weights in each hidden layer
-    parser.add_argument('--hidden-size', type=int, default=50)
+    parser.add_argument('--hidden-size', type=int, default=75)
 
     # number of hidden layers
     parser.add_argument('--hidden-layer-num', type=int, default=1)
@@ -181,6 +181,8 @@ def main():
 
         # for both SGD w/ Dropout and EWC models...
         for model_num in range(len(models)):
+            for parameter in models[model_num].parameters():
+                print(parameter.size())
 
             # for each desired epoch, train the model on the latest task, and then test the model on ALL tasks
             # trained thus far (including current task)
@@ -211,7 +213,7 @@ def main():
 
 
         # just testing expansion...
-        if task_count == 2:
+        if task_count == 4:
             print("expanding...")
             for model_num in range(len(models)):
                 models[model_num] = utils.expand_model(models[model_num])

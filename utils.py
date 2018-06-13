@@ -153,7 +153,7 @@ def copy_weights_expanding(old_model, expanded_model):
 def expand_model(model):
 
     expanded_model = Model(
-        model.hidden_size * 2,
+        model.hidden_size * 10,
         model.hidden_dropout_prob,
         model.input_dropout_prob,
         model.input_size,
