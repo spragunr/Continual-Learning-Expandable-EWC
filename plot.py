@@ -20,11 +20,18 @@ import numpy as np
 
 def plot(weights, task_post_training_weights, task_count, task_fisher_diags):
     fig = plt.figure()
+    fig.suptitle('Task {}'.format(task_count))
+
     position = 1
+    weight_count = 1
+    bias_count = 1
+
     for param_index, parameter in enumerate(weights):
 
         if len(list(parameter.shape)) == 2:
             ax = fig.add_subplot(len(weights) / 2, 2, position, projection='3d')
+            ax.set_title('weights layer {}'.format(weight_count))
+            weight_count += 1
             x = np.arange(list(parameter.shape)[1])
             y = np.arange(list(parameter.shape)[0])
             X, Y = np.meshgrid(x, y)
@@ -40,10 +47,12 @@ def plot(weights, task_post_training_weights, task_count, task_fisher_diags):
 
             Z = z_data
 
-            ax.plot_wireframe(X, Y, Z, rstride=1, cstride=1)
+            ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap='inferno')
 
         else:
             ax = fig.add_subplot(len(weights) / 2, 2, position)
+            ax.set_title('bias layer {}'.format(bias_count))
+            bias_count += 1
             x = np.arange(list(parameter.shape)[0])
 
             y_data = np.zeros((list(parameter.shape)[0]))
