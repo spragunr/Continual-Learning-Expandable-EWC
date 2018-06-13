@@ -456,3 +456,6 @@ def pad_tuple(smaller, larger):
 
     return tuple(pads_required)
 
+# try defining loss based on all extant Fisher diagonals and previous task weights (in lists in main.py)
+def alternative_ewc_loss(weights, task_post_training_weights, task_count, task_fisher_diags):
+    for param_index, parameter in enumerate(weights):
