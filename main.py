@@ -18,7 +18,7 @@ def main():
     # https://arxiv.org/pdf/1612.00796.pdf#section.4
     # This experiment uses 100 epochs:
     # https://github.com/stokesj/EWC
-    parser.add_argument('--epochs', type=int, default=10, metavar='N',
+    parser.add_argument('--epochs', type=int, default=1, metavar='N',
                         help='number of epochs to train (default: 1)')
 
     # This learning rate is the same as the one used by:
@@ -26,7 +26,7 @@ def main():
     #
     # The original EWC paper hyperparameters are here:
     # https://arxiv.org/pdf/1612.00796.pdf#section.4
-    parser.add_argument('--lr', type=float, default= 0.01, metavar='LR',
+    parser.add_argument('--lr', type=float, default= 0.1, metavar='LR',
                         help='learning rate (default: 0.1)')
 
     # We don't want an L2 regularization penalty because https://arxiv.org/pdf/1612.00796.pdf#subsection.2.1
@@ -45,7 +45,7 @@ def main():
     # 400 (from https://arxiv.org/pdf/1612.00796.pdf#subsection.4.2)
     # 15 (from https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb) - see In [17]
     # inverse of learning rate (1.0 / lr) (from https://github.com/stokesj/EWC)- see readme
-    parser.add_argument('--lam', type=float, default=100, metavar='LAM',
+    parser.add_argument('--lam', type=float, default=15, metavar='LAM',
                         help='ewc lambda value (fisher multiplier) (default: 15)')
 
     # only necessary if optimizer SGD with momentum is desired, hence default is 0.0

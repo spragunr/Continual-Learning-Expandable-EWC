@@ -1,11 +1,9 @@
-import numpy as np
 import torch
 import utils
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.autograd import Variable
-from functools import reduce
 from copy import deepcopy
 
 
@@ -166,6 +164,17 @@ class Model(nn.Module):
                     pad_tuple = utils.pad_tuple(ewc_sum[parameter_index],parameter)
                     ewc_sum[parameter_index] = F.pad(ewc_sum[parameter_index], pad_tuple, mode='constant', value=0)
 
+    def ewc_loss_prev_tasks(self):
+        loss_prev_tasks = 0
+
+        for parameter_index, parameter in enumerate(self.parameters()):
+            # NOTE: * operator is element-wise multiplication
+            loss_prev_tasks += torch.sum(torch.pow(parameter, 2.0) * self.sum_Fx[parameter_index])
+            loss_prev_tasks -= 2 * torch.sum(parameter * self.sum_Fx_Wx[parameter_index])
+            loss_prev_tasks += torch.sum(self.sum_Fx_Wx_sq[parameter_index])
+
+        return loss_prev_tasks * (self.lam / 2.0)
+
     def train_model(self, args, device, train_loader, epoch, task_number):
         # Set the module in "training mode"
         # This is necessary because some network layers behave differently when training vs testing.
@@ -266,7 +275,7 @@ class Model(nn.Module):
             # See equation (3) at:
             #   https://arxiv.org/pdf/1612.00796.pdf#section.2
             if self.ewc and task_number > 1:
-                loss += utils.ewc_loss_prev_tasks(self)
+                loss += self.ewc_loss_prev_tasks()
 
             # Backward pass: compute gradient of the loss with respect to model
             # parameters
@@ -289,3 +298,4 @@ class Model(nn.Module):
                     'EWC' if self.ewc else 'SGD + DROPOUT', task_number,
                     epoch, batch_idx * len(data), len(train_loader.dataset), 100. * batch_idx / len(train_loader),
                     loss.item()))
+
