@@ -3,6 +3,8 @@ import torch
 import utils
 import numpy as np
 from model import Model
+from copy import deepcopy
+import plot
 
 def main():
     # Command Line args
@@ -75,7 +77,7 @@ def main():
     parser.add_argument('--fisher-num-samples', type=int, default=200)
 
     # weights in each hidden layer
-    parser.add_argument('--hidden-size', type=int, default=75)
+    parser.add_argument('--hidden-size', type=int, default=50)
 
     # number of hidden layers
     parser.add_argument('--hidden-layer-num', type=int, default=1)
@@ -156,6 +158,8 @@ def main():
     # todo comment
     model_size_dictionaries = []
 
+    task_post_training_weights = {}
+
     for model in models:
         model_size_dictionaries.append({})
 
@@ -181,8 +185,6 @@ def main():
 
         # for both SGD w/ Dropout and EWC models...
         for model_num in range(len(models)):
-            for parameter in models[model_num].parameters():
-                print(parameter.size())
 
             # for each desired epoch, train the model on the latest task, and then test the model on ALL tasks
             # trained thus far (including current task)
@@ -205,18 +207,21 @@ def main():
                 models[model_num].compute_fisher_prob_dist(device, validation_loader, args.fisher_num_samples)
                 models[model_num].update_ewc_sums()
 
-                # we are saving the theta star values for THIS task, which will be used in the fisher matrix
-                # computations for the NEXT task.
-                #utils.save_theta_stars(model)
+                current_weights = []
 
+                for parameter in models[model_num].parameters():
+                    current_weights.append(deepcopy(parameter.data.clone()))
 
+                task_post_training_weights.update({task_count: deepcopy(current_weights)})
+
+                plot.plot(current_weights, task_post_training_weights, task_count, model.sum_Fx)
 
 
         # just testing expansion...
-        if task_count == 4:
+        if task_count == 2:
             print("expanding...")
-            for model_num in range(len(models)):
-                models[model_num] = utils.expand_model(models[model_num])
+
+            models[model_num] = utils.expand_model(models[model_num])
 
 
         # increment the number of the current task before re-entering while loop

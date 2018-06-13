@@ -117,7 +117,7 @@ def generate_new_mnist_task(train_dataset_size, validation_dataset_size, batch_s
 
     return train_loader, validation_loader, test_loader
 
-
+# todo test this...
 def copy_weights_expanding(old_model, expanded_model):
 
     old_sizes = []
