@@ -73,15 +73,7 @@ def plot(weights, task_post_training_weights, task_count, task_fisher_diags):
 
         position += 1
 
-    plt.show()
+    fig.set_size_inches(36, 17)
+    fig.savefig('../../75_weights_lam 100_lr_ 0.01_10_epochs/task{}.png'.format(task_count))
 
 
-"""
-X, Y = np.meshgrid(x, y)
-Z = np.array([[.25,0,0,.25,0, 0, 0],[0, 0, .25, 0, 0, 0, 0],[0, 0, 1, 0, 0, 0, 0],[0, 0, .25, 0, 0, 0, 0],[0, 0, 0, .25, 0, 0, 0]])
-
-ax.plot_surface(X, Y, Z, rstride=1, cstride=1,
-                cmap='viridis', edgecolor='none')
-
-plt.show()
-"""
