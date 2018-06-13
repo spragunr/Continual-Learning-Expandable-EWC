@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import numpy as np
+from matplotlib import rc
 
 
 
@@ -31,6 +32,7 @@ def plot(weights, task_post_training_weights, task_count, task_fisher_diags):
         if len(list(parameter.shape)) == 2:
             ax = fig.add_subplot(len(weights) / 2, 2, position, projection='3d')
             ax.set_title('weights layer {}'.format(weight_count))
+            ax.set_zlabel(r'$\sum_{task=1}^{T-1} F_{task}(\theta - \theta_{task})^2$')
             weight_count += 1
             x = np.arange(list(parameter.shape)[1])
             y = np.arange(list(parameter.shape)[0])
@@ -52,6 +54,7 @@ def plot(weights, task_post_training_weights, task_count, task_fisher_diags):
         else:
             ax = fig.add_subplot(len(weights) / 2, 2, position)
             ax.set_title('bias layer {}'.format(bias_count))
+            ax.set_ylabel(r'$\sum_{task=1}^{T-1} F_{task}(\theta - \theta_{task})^2$')
             bias_count += 1
             x = np.arange(list(parameter.shape)[0])
 
