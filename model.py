@@ -303,31 +303,31 @@ class Model(nn.Module):
                     loss.item()))
 
 
-# try defining loss based on all extant Fisher diagonals and previous task weights (in lists in main.py)
-def alternative_ewc_loss(self, task_count):
-    loss_prev_tasks = 0
+    # try defining loss based on all extant Fisher diagonals and previous task weights (in lists in main.py)
+    def alternative_ewc_loss(self, task_count):
+        loss_prev_tasks = 0
 
-    for task in range(1, task_count):
+        for task in range(1, task_count):
 
-        task_weights = self.task_post_training_weights.get(task)
-        task_fisher = self.task_fisher_diags.get(task)
+            task_weights = self.task_post_training_weights.get(task)
+            task_fisher = self.task_fisher_diags.get(task)
 
-        for param_index, parameter in enumerate(self.parameters()):
-            task_weights_size = torch.Tensor(list(task_weights[param_index].size()))
-            task_fisher_size = torch.Tensor(list(task_fisher[param_index].size()))
+            for param_index, parameter in enumerate(self.parameters()):
+                task_weights_size = torch.Tensor(list(task_weights[param_index].size()))
+                task_fisher_size = torch.Tensor(list(task_fisher[param_index].size()))
 
-            parameter_size = torch.Tensor(list(parameter.size()))
+                parameter_size = torch.Tensor(list(parameter.size()))
 
-            if not torch.equal(task_weights_size, parameter_size):
-                pad_tuple = pad_tuple(task_weights[param_index], parameter)
-                task_weights[param_index] = nn.functional.pad(task_weights[param_index], pad_tuple, mode='constant', value=0)
+                if not torch.equal(task_weights_size, parameter_size):
+                    pad_tuple = pad_tuple(task_weights[param_index], parameter)
+                    task_weights[param_index] = nn.functional.pad(task_weights[param_index], pad_tuple, mode='constant', value=0)
 
-            if not torch.equal(task_fisher_size, parameter_size):
-                pad_tuple = pad_tuple(task_fisher[param_index], parameter)
-                task_fisher[param_index] = nn.functional.pad(task_fisher[param_index], pad_tuple, mode='constant', value=0)
+                if not torch.equal(task_fisher_size, parameter_size):
+                    pad_tuple = pad_tuple(task_fisher[param_index], parameter)
+                    task_fisher[param_index] = nn.functional.pad(task_fisher[param_index], pad_tuple, mode='constant', value=0)
 
-            loss_prev_tasks += ((parameter - task_weights[param_index]) ** 2) * task_fisher[param_index]
+                loss_prev_tasks += (((parameter - task_weights[param_index]) ** 2) * task_fisher[param_index]).sum()
 
-    return loss_prev_tasks * (self.lam / 2.0)
+        return loss_prev_tasks * (self.lam / 2.0)
 
 

@@ -19,7 +19,7 @@ def plot(weights, task_post_training_weights, task_count, task_fisher_diags):
         if len(list(parameter.shape)) == 2:
             ax = fig.add_subplot(len(weights) / 2, 2, position, projection='3d')
             ax.set_title('weights layer {}'.format(weight_count))
-            ax.set_zlim(0, z_limits[weight_count - 1])
+            #ax.set_zlim(0, z_limits[weight_count - 1])
             ax.set_zlabel(r'$\sum_{task=1}^{T-1} F_{task,\theta}(\theta - \theta_{task})^2$')
             weight_count += 1
             x = np.arange(list(parameter.shape)[1])
@@ -42,7 +42,7 @@ def plot(weights, task_post_training_weights, task_count, task_fisher_diags):
         else:
             ax = fig.add_subplot(len(weights) / 2, 2, position)
             ax.set_title('bias layer {}'.format(bias_count))
-            ax.set_ylim(0, y_limits[bias_count - 1])
+            #ax.set_ylim(0, y_limits[bias_count - 1])
             ax.set_ylabel(r'$\sum_{task=1}^{T-1} F_{task,\theta}(\theta - \theta_{task})^2$')
             bias_count += 1
             x = np.arange(list(parameter.shape)[0])
@@ -63,6 +63,6 @@ def plot(weights, task_post_training_weights, task_count, task_fisher_diags):
         position += 1
 
     fig.set_size_inches(36, 17)
-    fig.savefig('../../75_weights_lam_15_lr_0.1_epoch_same_axes/task{}.png'.format(task_count))
+    fig.savefig('../../task{}.png'.format(task_count))
 
 
