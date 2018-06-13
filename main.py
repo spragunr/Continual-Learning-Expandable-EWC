@@ -77,7 +77,7 @@ def main():
     parser.add_argument('--fisher-num-samples', type=int, default=200)
 
     # weights in each hidden layer
-    parser.add_argument('--hidden-size', type=int, default=100)
+    parser.add_argument('--hidden-size', type=int, default=75)
 
     # number of hidden layers
     parser.add_argument('--hidden-layer-num', type=int, default=1)
@@ -160,6 +160,9 @@ def main():
 
     task_post_training_weights = {}
 
+    task_fisher_diags = {}
+
+
     for model in models:
         model_size_dictionaries.append({})
 
@@ -213,9 +216,10 @@ def main():
                     current_weights.append(deepcopy(parameter.data.clone()))
 
                 task_post_training_weights.update({task_count: deepcopy(current_weights)})
+                task_fisher_diags.update({task_count: deepcopy(models[model_num].list_of_FIMs)})
 
                 if task_count > 1:
-                    plot.plot(current_weights, task_post_training_weights, task_count, models[model_num].sum_Fx)
+                    plot.plot(current_weights, task_post_training_weights, task_count, task_fisher_diags)
 
         """
         # just testing expansion...

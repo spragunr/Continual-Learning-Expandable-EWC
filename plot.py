@@ -18,7 +18,7 @@ import numpy as np
 
 
 
-def plot(weights, task_post_training_weights, task_count, sum_Fx):
+def plot(weights, task_post_training_weights, task_count, task_fisher_diags):
     fig = plt.figure()
     position = 1
     for param_index, parameter in enumerate(weights):
@@ -33,14 +33,14 @@ def plot(weights, task_post_training_weights, task_count, sum_Fx):
             for row in range(len(z_data)):
                 for col in range(len(z_data[row])):
                     for task in range(1, task_count):
-                        task_data = task_post_training_weights.get(task)
-                        z_data[row][col] += (parameter.data[row][col] - task_data[param_index][row][col]) ** 2
-                z_data[row][col] *= sum_Fx[param_index][row][col]
+                        task_weights = task_post_training_weights.get(task)
+                        task_fisher = task_fisher_diags.get(task)
+                        z_data[row][col] += ((parameter.data[row][col] - task_weights[param_index][row][col]) ** 2) \
+                                            * task_fisher[param_index][row][col]
 
             Z = z_data
 
-            ax.plot_surface(X, Y, Z, rstride=1, cstride=1,
-                            cmap='viridis', edgecolor='none')
+            ax.plot_wireframe(X, Y, Z, rstride=1, cstride=1)
 
         else:
             ax = fig.add_subplot(len(weights) / 2, 2, position)
@@ -51,10 +51,9 @@ def plot(weights, task_post_training_weights, task_count, sum_Fx):
 
             for index in range(len(y_data)):
                 for task in range(1, task_count):
-                    task_data = task_post_training_weights.get(task)
-                    y_data[index] += (parameter.data[index] - task_data[param_index][index]) ** 2
-
-                y_data[index] *= sum_Fx[param_index][index]
+                    task_weights = task_post_training_weights.get(task)
+                    task_fisher = task_fisher_diags.get(task)
+                    y_data[index] += ((parameter.data[index] - task_weights[param_index][index]) ** 2) * task_fisher[param_index][index]
 
             y = y_data
 
