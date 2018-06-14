@@ -18,7 +18,16 @@ class Model(nn.Module):
 
         self.lam = lam # the value of lambda (fisher multiplier) to be used in EWC loss computation, if EWC enabled
 
+        # If this is the original model in the experiment, the next two instance variables are, by default,
+        # instantiated as empty dictionaries. Otherwise, they will be copied from the parameters to the class
+        # constructor. This is used to copy data from a pre-existing model to a new, expanded version of the model.
+
+        # dictionary, format:
+        # {task number : list of Fisher diagonals calculated after model trained on task}
         self.task_fisher_diags = task_fisher_diags
+
+        # dictionary, format:
+        # {task number : list of learnable parameter weight values after model trained on task}
         self.task_post_training_weights = task_post_training_weights
 
         # copy specified model hyperparameters into instance variables
@@ -28,6 +37,8 @@ class Model(nn.Module):
         self.hidden_dropout_prob = hidden_dropout_prob
         self.output_size = output_size
 
+
+        # TODO alter these names and network structure
         self.fully_connected_input = nn.Linear(self.input_size, self.hidden_size)
 
         self.fully_connected_hidden = nn.Linear(self.hidden_size, self.hidden_size)
@@ -35,6 +46,7 @@ class Model(nn.Module):
         self.fully_connected_output = nn.Linear(self.hidden_size, self.output_size)
 
     def forward(self, x):
+        # TODO alter network structure
         x = self.fully_connected_input(x)
         x = F.relu(x)
         x = F.dropout(x, p=self.input_dropout_prob, training=self.training)
@@ -47,25 +59,40 @@ class Model(nn.Module):
 
         return self.y
 
-    # compute fisher by randomly sampling from probability distribution of outputs rather than the activations
-    # themselves
+    # Compute fisher by randomly sampling from probability distribution of outputs rather than the activations
+    # themselves. Replication of the sampling method used by:
+    # https://github.com/ariseff/overcoming-catastrophic/blob/afea2d3c9f926d4168cc51d56f1e9a92989d7af0/model.py#L44
     def compute_fisher_prob_dist(self, device, validation_loader, num_samples):
-        self.list_of_FIMs = []
 
+        # List to hold the computed fisher diagonals for the task on which the network was just trained.
+        # Fisher Information Matrix diagonals are stored as a list of tensors of the same dimensions and in the same
+        # order as the parameters of the model given by model.parameters()
+        self.list_of_fisher_diags = []
+
+        # populate self.list_of_fisher_diags with tensors of zeros of the appropriate sizes
         for parameter in self.parameters():
-            self.list_of_FIMs.append(torch.zeros(tuple(parameter.size())))
+            self.list_of_fisher_diags.append(torch.zeros(tuple(parameter.size())))
 
+        # dim=-1 uses the last dimension. This is the tensorflow default, so meant to mimic the behavior in:
+        # https://github.com/ariseff/overcoming-catastrophic/blob/afea2d3c9f926d4168cc51d56f1e9a92989d7af0/model.py#L53
         softmax = nn.Softmax(dim=-1)
 
+        # log and softmax together- computing them sequentially as separate computations can be mathematically unstable
+        # in edge-case scenarios
         log_softmax = nn.LogSoftmax(dim=-1)
 
+        # get softmax activations from output layer (probabilities)
         probs = softmax(self.y)
 
+        # sample a random class index from the softmax activations (.item() gets value in tensor as a scalar)
         class_index = (torch.multinomial(probs, 1)[0][0]).item()
 
+        # sample_number is running count of samples (used to ensure sampling continues until num_samples reached)
+        # data is an image
+        # _ is the label for the image (not needed)
         for sample_number, (data, _) in enumerate(validation_loader):
 
-            # For some reason, the data needs to be wrapped in another tensor to work with our network,
+            # The data needs to be wrapped in another tensor to work with our network,
             # otherwise it is not of the appropriate dimensions... I believe this statement effectively adds
             # a dimension.
             #
@@ -83,52 +110,71 @@ class Model(nn.Module):
             # set the device (CPU or GPU) to be used with data and target to device variable (defined in main())
             data = Variable(data).to(device)
 
+            # gradients of parameters with respect to log likelihoods (log_softmax applied to output layer),
+            # data for the sample from the validation set is sent through the network to mimic the behavior
+            # of the feed_dict argument at:
+            # https://github.com/ariseff/overcoming-catastrophic/blob/afea2d3c9f926d4168cc51d56f1e9a92989d7af0/model.py#L65
             loglikelihood_grads = torch.autograd.grad(log_softmax(self(data))[0, class_index], self.parameters())
 
-            for parameter in range(len(self.list_of_FIMs)):
-                self.list_of_FIMs[parameter] += torch.pow(loglikelihood_grads[parameter], 2.0)
+            # square the gradients computed above and add each of them to the index in list_of_fisher_diags that
+            # corresponds to the parameter for which the gradient was calculated
+            for parameter in range(len(self.list_of_fisher_diags)):
+                self.list_of_fisher_diags[parameter] += torch.pow(loglikelihood_grads[parameter], 2.0)
 
+            # stop iterating through loop if num_samples reached
             if sample_number == num_samples - 1:
                 break
 
-        for parameter in range(len(self.list_of_FIMs)):
-            self.list_of_FIMs[parameter] /= num_samples
+        # divide totals by number of samples, getting average squared gradient values across num_samples as the
+        # Fisher diagonal values
+        for parameter in range(len(self.list_of_fisher_diags)):
+            self.list_of_fisher_diags[parameter] /= num_samples
 
 
-    # NOTE: using parameter.data, so for autograd it is critical that we re-initilize the optimizer after calling this
-    # method during the training process!!! (we may already be doing this as long as we don't call it within the
-    # train() method...
+
+    # This method is used to update the summed error terms:
+    # The sums are actually lists of sums, with one entry per model parameter in the shape of that model parameter
+    #   sigma (Fisher_{task})
+    #   sigma (Fisher_{task} * Weights_{task})
+    #   sigma (Fisher_{task} * (Weights_{task}) ** 2)
+    #
+    #   NOTE: using parameter.data, so for pytorch autograd it is critical that we re-initilize the optimizer after calling this
+    #   method during the training process! Otherwise gradient tracking may not work and training may be disrupted.
+    #   We redefine the optimizer WITHIN the train method, so this is taken care of.
     def update_ewc_sums(self):
 
-        current_weights = []  # list of the current weights in the network
+        current_weights = []  # list of the current weights in the network (one entry per parameter)
 
+        # get deep copies of the values currently in the model parameters and append each of them to current_weights
         for parameter in self.parameters():
             current_weights.append(deepcopy(parameter.data.clone()))
 
+        # if no summed terms yet, initialize them...
         if not hasattr(self, 'sum_Fx'):
             self.initialize_fisher_sums()
 
-        # in-place addition of the Fisher diagonal for each parameter to the existing sum_Fx
+        # in-place addition of the Fisher diagonal for each parameter to the existing sum_Fx at corresponding
+        # parameter index
         for fisher_diagonal_index in range(len(self.sum_Fx)):
 
-            self.sum_Fx[fisher_diagonal_index].add_(self.list_of_FIMs[fisher_diagonal_index])
+            self.sum_Fx[fisher_diagonal_index].add_(self.list_of_fisher_diags[fisher_diagonal_index])
 
-        # add the element-wise multiplication of the fisher diagonal for each parameter and that parameter's current
-        # weight values to the existing sum_Fx_Wx
+        # add the fisher diagonal for each parameter multiplied (element-wise) by that parameter's current weight values
+        # to the existing sum_Fx_Wx entry at the corresponding parameter index
         for fisher_diagonal_index in range(len(self.sum_Fx_Wx)):
 
             self.sum_Fx_Wx[fisher_diagonal_index] = torch.addcmul(
                 self.sum_Fx_Wx[fisher_diagonal_index],
-                self.list_of_FIMs[fisher_diagonal_index],
+                self.list_of_fisher_diags[fisher_diagonal_index],
                 current_weights[fisher_diagonal_index])
 
-        # add the element-wise multiplication of the fisher diagonal for each parameter and the square of each of that
-        # parameter's current weight values to the existing sum_Fx_Wx_sq
+        # add the fisher diagonal for each parameter multiplied (element-wise) by the square of that parameter's
+        # current weight values to the existing sum_Fx_Wx_sq entry at the corresponding parameter index
         for fisher_diagonal_index in range(len(self.sum_Fx_Wx_sq)):
 
             self.sum_Fx_Wx_sq[fisher_diagonal_index] = torch.addcmul(
                 self.sum_Fx_Wx_sq[fisher_diagonal_index],
-                self.list_of_FIMs[fisher_diagonal_index],
+                self.list_of_fisher_diags[fisher_diagonal_index],
                 torch.pow(current_weights[fisher_diagonal_index], 2.0))
 
 
@@ -142,16 +188,18 @@ class Model(nn.Module):
 
         # the sum of each task's Fisher Information (list of Fisher diagonals for each parameter in the network,
         # and Fisher diagonals calculated for later tasks are summed with the fisher diagonal in the list at the
-        # appropriate network parameter index)
+        # appropriate parameter index)
         self.sum_Fx = deepcopy(empty_sums)
 
         # the sum of each task's Fisher Information multiplied by its respective post-training weights in the network
+        # (list of entries- one per parameter- of same size as model parameters)
         self.sum_Fx_Wx = deepcopy(empty_sums)
 
         # the sum of each task's Fisher Information multiplied by the square of its respective post-training weights
-        # in the network
+        # in the network (list of entries- one per parameter- of same size as model parameters)
         self.sum_Fx_Wx_sq = deepcopy(empty_sums)
 
+    # expand
     def expand_ewc_sums(self):
 
         ewc_sums = [self.sum_Fx, self.sum_Fx_Wx, self.sum_Fx_Wx_sq]

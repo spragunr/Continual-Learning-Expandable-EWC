@@ -217,7 +217,7 @@ def main():
                 models[model_num].compute_fisher_prob_dist(device, validation_loader, args.fisher_num_samples)
                 models[model_num].update_ewc_sums()
 
-                models[model_num].task_fisher_diags.update({task_count: deepcopy(models[model_num].list_of_FIMs)})
+                models[model_num].task_fisher_diags.update({task_count: deepcopy(models[model_num].list_of_fisher_diags)})
 
 
 
