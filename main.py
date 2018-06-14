@@ -9,8 +9,10 @@ import plot
 def main():
     # Command Line args
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
+
     parser.add_argument('--batch-size', type=int, default=64, metavar='N',
                         help='input batch size for training (default: 64)')
+
     parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
                         help='input batch size for testing (default: 1000)')
 
@@ -31,32 +33,31 @@ def main():
 
     # We don't want an L2 regularization penalty because https://arxiv.org/pdf/1612.00796.pdf#subsection.2.1
     # (see figure 2A) shows that this would prevent the network from learning another task.
-    #
-    # NOTE: Interestingly, this experiment DOES use an L2 regularization penalty (weight decay) and I honestly do not
-    # know why: https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/main.py#L21
     parser.add_argument('--l2-reg-penalty', type=float, default=0.0, metavar='L2',
                         help='l2 regularization penalty (weight decay) (default: 0.0)')
 
     # This is the lambda (fisher multiplier) value used by:
-    # https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/main.py#L19
+    # https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb - see In [17]
     #
-    # Empirically, other lambda values appeared to be too small to give EWC an edge over SGD w/ Dropout-
-    # I tried the following:
+    # some other examples:
     # 400 (from https://arxiv.org/pdf/1612.00796.pdf#subsection.4.2)
-    # 15 (from https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb) - see In [17]
-    # inverse of learning rate (1.0 / lr) (from https://github.com/stokesj/EWC)- see readme
+    #  inverse of learning rate (1.0 / lr) (from https://github.com/stokesj/EWC)- see readme
     parser.add_argument('--lam', type=float, default=15, metavar='LAM',
                         help='ewc lambda value (fisher multiplier) (default: 15)')
 
     # only necessary if optimizer SGD with momentum is desired, hence default is 0.0
     parser.add_argument('--momentum', type=float, default=0.0, metavar='M',
                         help='SGD momentum (default: 0.0)')
+
     parser.add_argument('--no-cuda', action='store_true', default=False,
                         help='disables CUDA training')
+
     parser.add_argument('--seed-torch', type=int, default=1, metavar='ST',
                         help='random seed for PyTorch (default: 1)')
+
     parser.add_argument('--seed-numpy', type=int, default=1, metavar='SN',
                         help='random seed for numpy (default: 1)')
+
     parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                         help='how many batches to wait before logging training status')
 
@@ -76,10 +77,11 @@ def main():
     # Fisher Information
     parser.add_argument('--fisher-num-samples', type=int, default=200)
 
-    # weights in each hidden layer
+    # size of hidden layer(s)
     parser.add_argument('--hidden-size', type=int, default=50)
 
     # number of hidden layers
+    # TODO implement this - currently does not actually modify network structure...
     parser.add_argument('--hidden-layer-num', type=int, default=1)
 
     # Dropout probability for hidden layers - see:
@@ -143,21 +145,20 @@ def main():
     # a list of the models we instantiated above
     models = [sgd_dropout_model, ewc_model]
 
-    # TODO UPDATE ALL COMMENTS TO REFLECT THE FACT THAT there are image/label combos(??) (tuple)...
-
     # A list of the different DataLoader objects that hold various permutations of the mnist testing dataset-
     # we keep these around in a persistent list here so that we can use them to test each of the models in the
     # list "models" after they are trained on the latest task's training dataset.
     # For more details, see: generate_new_mnist_task() in utils.py
     test_loaders = []
 
-    # the number of the task on which we are CURRENTLY training in the loop below (as opposed to a list of the number
+    # the number of the task on which we are CURRENTLY training in the loop below (as opposed to a count of the number
     # of tasks on which we have already trained) - e.g. when training on task 3 this value will be 3
     task_count = 1
 
-    # todo comment
+    # dictionary, format {task number: size of network parameters (weights) when the network was trained on the task}
     model_size_dictionaries = []
 
+    # initialize model size dictionaries
     for model in models:
         model_size_dictionaries.append({})
 
@@ -184,31 +185,42 @@ def main():
         # for both SGD w/ Dropout and EWC models...
         for model_num in range(len(models)):
 
-            # for each desired epoch, train the model on the latest task, and then test the model on ALL tasks
-            # trained thus far (including current task)
+            # for each desired epoch, train the model on the latest task
             for epoch in range(1, args.epochs + 1):
                 models[model_num].train_model(args, device, train_loader, epoch, task_count)
 
+            # update the model size dictionary
             model_size_dictionaries[model_num].update({task_count: models[model_num].hidden_size})
+
+            # generate a dictionary mapping tasks to models of the sizes that the network was when those tasks were
+            # trained, containing subsets of the weights currently in the model (to mask new, post-expansion weights
+            # when testing on tasks for which the weights did not exist during training)
             test_models = utils.generate_model_dictionary(models[model_num], model_size_dictionaries[model_num])
+
+            # test the model on ALL tasks trained thus far (including current task)
             utils.test(test_models, device, test_loaders)
 
 
             # If the model currently being used in the loop is using EWC, we need to compute the fisher information
-            # and save the theta* ("theta star") values after training
-            #
-            # NOTE: when I reference theta*, I am referring to the values represented by that variable in
-            # equation (3) at:
-            #   https://arxiv.org/pdf/1612.00796.pdf#section.2
             if models[model_num].ewc:
 
+                # save the theta* ("theta star") values after training - for plotting and comparative loss calculations
+                # using the method in model.alternative_ewc_loss()
+                #
+                # NOTE: when I reference theta*, I am referring to the values represented by that variable in
+                # equation (3) at:
+                #   https://arxiv.org/pdf/1612.00796.pdf#section.2
                 current_weights = []
 
                 for parameter in models[model_num].parameters():
                     current_weights.append(deepcopy(parameter.data.clone()))
 
+
                 models[model_num].task_post_training_weights.update({task_count: deepcopy(current_weights)})
 
+                # plotting of sum of how far each weight in each layer of the network has moved from each previous
+                # theta * value for that weight, multiplied by the fisher diagonal value for that weight computed for each
+                # of the tasks to which the theta * values correspond
                 if task_count > 1:
                     plot.plot(current_weights, models[model_num].task_post_training_weights, task_count, models[model_num].task_fisher_diags)
 
@@ -217,16 +229,15 @@ def main():
                 models[model_num].compute_fisher_prob_dist(device, validation_loader, args.fisher_num_samples)
                 models[model_num].update_ewc_sums()
 
+                # store the current fisher diagonals for use with plotting and comparative loss calculations
+                # using the method in model.alternative_ewc_loss()
                 models[model_num].task_fisher_diags.update({task_count: deepcopy(models[model_num].list_of_fisher_diags)})
 
-
-
-        # just testing expansion...
+        # expand each of the models (SGD + DROPOUT and EWC) after task 2 training and before task 3 training...
         if task_count == 2:
             print("expanding...")
             for model_num in range(len(models)):
                 models[model_num] = utils.expand_model(models[model_num])
-
 
         # increment the number of the current task before re-entering while loop
         task_count += 1
