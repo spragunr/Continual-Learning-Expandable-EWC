@@ -199,14 +199,17 @@ class Model(nn.Module):
         # in the network (list of entries- one per parameter- of same size as model parameters)
         self.sum_Fx_Wx_sq = deepcopy(empty_sums)
 
-    # expand
+    # expand the sums used to compute ewc loss to fit an expanded model
     def expand_ewc_sums(self):
 
         ewc_sums = [self.sum_Fx, self.sum_Fx_Wx, self.sum_Fx_Wx_sq]
 
         for ewc_sum in ewc_sums:
             for parameter_index, parameter in enumerate(self.parameters()):
+                # current size of entry at parameter_index in given list of sums
                 sum_size = torch.Tensor(list(ewc_sum[parameter_index].size()))
+
+                # current size of parameter in the model corresponding to the sum entry above
                 parameter_size = torch.Tensor(list(parameter.size()))
 
                 # pad the sum tensor at the current parameter index of the given sum list with zeros so that it matches the size in
@@ -215,15 +218,23 @@ class Model(nn.Module):
                     pad_tuple = utils.pad_tuple(ewc_sum[parameter_index],parameter)
                     ewc_sum[parameter_index] = F.pad(ewc_sum[parameter_index], pad_tuple, mode='constant', value=0)
 
+    # calculate the EWC loss on previous tasks only (not incorporating current task cross entropy)
     def ewc_loss_prev_tasks(self):
+
         loss_prev_tasks = 0
 
+        # this computes the ewc loss on previous tasks via the algebraically manipulated fisher sums method:
+        # (Weights_{current}) ** 2 * sigma (Fisher_{task}) - 2 * Weights_{current} * sigma (Fisher_{task} * Weights_{task}) +
+        #          sigma (Fisher_{task} * (Weights_{task}) ** 2)
+        #
+        # for each parameter, we add to the loss the above loss term calculated for each weight in the parameter (summed)
         for parameter_index, parameter in enumerate(self.parameters()):
             # NOTE: * operator is element-wise multiplication
             loss_prev_tasks += torch.sum(torch.pow(parameter, 2.0) * self.sum_Fx[parameter_index])
             loss_prev_tasks -= 2 * torch.sum(parameter * self.sum_Fx_Wx[parameter_index])
             loss_prev_tasks += torch.sum(self.sum_Fx_Wx_sq[parameter_index])
 
+        # mutliply error by fisher multiplier (lambda) divided by 2
         return loss_prev_tasks * (self.lam / 2.0)
 
     def train_model(self, args, device, train_loader, epoch, task_number):
@@ -274,7 +285,7 @@ class Model(nn.Module):
         # https://discuss.pytorch.org/t/why-does-the-minimal-pytorch-tutorial-not-have-mnist-images-be-onehot-for-logistic-regression/12562/6
         for batch_idx, (data, target) in enumerate(train_loader):
 
-            # For some reason, the data needs to be wrapped in another tensor to work with our network,
+            # The data needs to be wrapped in another tensor to work with our network,
             # otherwise it is not of the appropriate dimensions... I believe these two statements effectively add
             # a dimension.
             #
@@ -320,14 +331,22 @@ class Model(nn.Module):
             # apply the loss function to the predictions/labels for this batch to compute loss
             loss = criterion(output, target)
 
-            # if the model is using EWC, the summed loss term from the EWC equation must be calculated and
+            # if the model is using EWC, the summed loss term from the EWC equation (loss on previuous tasks) must be calculated and
             # added to the loss that will be minimized by the optimizer.
             #
             # See equation (3) at:
             #   https://arxiv.org/pdf/1612.00796.pdf#section.2
             if self.ewc and task_number > 1:
-                #loss += self.ewc_loss_prev_tasks()
-                loss += self.alternative_ewc_loss(task_number)
+                # This statement computed loss on previous tasks using the summed fisher terms as in ewc_loss_prev_tasks()
+                loss += self.ewc_loss_prev_tasks()
+
+                # Using the commented-out version statement below instead of the one above will calculate ewc loss
+                # on previous tasks by multiplying the square of the difference between the current network
+                # parameter weights and those after training each previously encountered task, multiplied by the
+                # Fisher diagonal computed for the respective previous task in each difference, all summed together.
+
+                # loss += self.alternative_ewc_loss(task_number)
+
             # Backward pass: compute gradient of the loss with respect to model
             # parameters
             loss.backward()
@@ -351,31 +370,52 @@ class Model(nn.Module):
                     loss.item()))
 
 
-    # try defining loss based on all extant Fisher diagonals and previous task weights (in lists in main.py)
+    # Defines loss based on all extant Fisher diagonals and previous task weights
     def alternative_ewc_loss(self, task_count):
+
         loss_prev_tasks = 0
 
+        # calculate ewc loss on previous tasks by multiplying the square of the difference between the current network
+        # parameter weights and those after training each previously encountered task, multiplied by the
+        # Fisher diagonal computed for the respective previous task in each difference, all summed together.
         for task in range(1, task_count):
 
-            task_weights = self.task_post_training_weights.get(task)
-            task_fisher = self.task_fisher_diags.get(task)
+            task_weights = self.task_post_training_weights.get(task) # weights after training network on task
+            task_fisher = self.task_fisher_diags.get(task) # fisher diagonals computed for task
 
             for param_index, parameter in enumerate(self.parameters()):
+
+                # size of weights at parameter_index stored after network was trained on the previous task in question
                 task_weights_size = torch.Tensor(list(task_weights[param_index].size()))
+
+                # size of the computed fisher diagonal for the parameter in question, for the given task (in outer for loop)
                 task_fisher_size = torch.Tensor(list(task_fisher[param_index].size()))
 
+                # current size of parameter in network corresponding to the weights and fisher info above
                 parameter_size = torch.Tensor(list(parameter.size()))
 
+                # If size of tensor of weights after training previous task does not match current parameter size at corresponding
+                # index (if, for example, we have expanded the network since training on that previous task),
+                # pad the tensor of weights from parameter after training on given task with zeros so that it matches the
+                # size in all dimensions of the corresponding parameter in the network
                 if not torch.equal(task_weights_size, parameter_size):
                     pad_tuple = utils.pad_tuple(task_weights[param_index], parameter)
-                    task_weights[param_index] = nn.functional.pad(task_weights[param_index], pad_tuple, mode='constant', value=0)
+                    task_weights[param_index] = F.pad(task_weights[param_index], pad_tuple, mode='constant', value=0)
 
+                # If size of fisher diagonal computed for previous task does not match current parameter size at corresponding
+                # index (if, for example, we have expanded the network since training on that previous task),
+                # pad the fisher diagonal for the parameter computed after training on the given task with zeros so that it matches the
+                # size in all dimensions of the corresponding parameter in the network
                 if not torch.equal(task_fisher_size, parameter_size):
                     pad_tuple = utils.pad_tuple(task_fisher[param_index], parameter)
-                    task_fisher[param_index] = nn.functional.pad(task_fisher[param_index], pad_tuple, mode='constant', value=0)
+                    task_fisher[param_index] = F.pad(task_fisher[param_index], pad_tuple, mode='constant', value=0)
 
+                # add to the loss the part of the original summed ewc loss term corresponding to the specific task and parameter
+                # in question (specified by the two for loops in this function)
+                # (see: https://arxiv.org/pdf/1612.00796.pdf#section.2  equation 3)
                 loss_prev_tasks += (((parameter - task_weights[param_index]) ** 2) * task_fisher[param_index]).sum()
 
+        # multiply summed loss term by fisher multiplier divided by 2
         return loss_prev_tasks * (self.lam / 2.0)
 
 
