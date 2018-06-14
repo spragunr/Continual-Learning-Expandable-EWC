@@ -192,6 +192,7 @@ def calculate_ewc_loss_prev_tasks(model):
 
     for parameter_index, parameter in enumerate(model.parameters()):
 
+
         theta_star = Variable(model.theta_stars[parameter_index])
         fisher = Variable(model.list_of_FIMs[parameter_index])
 
