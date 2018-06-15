@@ -1,4 +1,9 @@
-# code written but not currently being used in the experiment...
+"""
+code written but not currently being used in the experiment...
+
+just keeping it around in case it's needed later
+"""
+
 
 def train(model, args, device, train_loader, epoch, task_number):
     # Set the module in "training mode"

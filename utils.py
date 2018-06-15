@@ -224,7 +224,8 @@ def test(models, device, test_loaders):
             # target: a 1D tensor of dimension <test batch size> containing ground truth labels for each of the
             # images in the corresponding test batch in order
             for data, target in test_loader:
-                # For some reason, the data needs to be wrapped in another tensor to work with our network,
+
+                # The data needs to be wrapped in another tensor to work with our network,
                 # otherwise it is not of the appropriate dimensions... I believe this statement effectively
                 # adds a dimension.
                 #
@@ -259,7 +260,7 @@ def test(models, device, test_loaders):
                 # Here we use size_average = False because we want to SUM all testing batch losses and average those
                 # at the end of testing on the current task (by dividing by total number of testing SAMPLES (not batches) to obtain an
                 # average loss over all testing batches). Otherwise, if size_average == True, we would be getting average
-                # loss for each testing batch and then would average those at the end of traing on the current task
+                # loss for each testing batch and then would average those at the end of testing on the current task
                 # to obtain average testing loss, which could theoretically result in some comparative loss of accuracy
                 # in the calculation of the final testing loss value for this task.
                 #
@@ -364,6 +365,8 @@ def copy_weights_shrinking(big_model, small_model):
 
                 for column in range(len(parameter.data[row])):
 
+                    # copy each weight from larger network that should still be in the smaller model to matching index
+                    # in the smaller network
                     parameter.data[row][column] = big_weights[param_index][row][column]
 
         else:
@@ -371,6 +374,8 @@ def copy_weights_shrinking(big_model, small_model):
             # biases - one dim
             for value_index in range(len(parameter.data)):
 
+                # copy each weight from larger network that should still be in the smaller model to matching index
+                # in the smaller network
                 parameter.data[value_index] = big_weights[param_index][value_index]
 
 
@@ -402,11 +407,13 @@ def generate_model_dictionary(model, model_size_dictionary):
             )
         )
 
+    # copy subsets of weights from the largest model to all other models
     for to_model in models:
         copy_weights_shrinking(model, to_model)
 
     model_dictionary = {}
 
+    # build the model dictionary
     for model in models:
         for task_number in [k for k,v in model_size_dictionary.items() if v == model.hidden_size]:
             model_dictionary.update({task_number: model})
@@ -415,14 +422,27 @@ def generate_model_dictionary(model, model_size_dictionary):
     return model_dictionary
 
 
+# Generate and return a tuple representing the padding size to be used as an argument to torch.nn.functional.pad().
+# Tuple format and more in-depth explanation of the effects of pad() are in documentation of the pad() method here:
+# https://pytorch.org/docs/stable/nn.html#torch.nn.functional.pad
 def pad_tuple(smaller, larger):
 
     pads_required = []
 
+    # loop over the dimensions of the tensor we are padding so that this method can be used with both 2D weights and
+    # 1D biases
     for dim in range(len(list(smaller.size()))):
+
+        # pad by the difference between the existing and desired sizes in the given dimension
         pads_required.append(list(larger.size())[dim] - list(smaller.size())[dim])
+
+        # After following reversal, will result in NO zero padding to the left of a 1D tensor (only extend to the right) and NO zero padding on
+        # the left or top of a 2D tensor (only extend to the right and down). For instance, if a 2D tensor is
+        # quadrupling in size, the original values in the tensor will be in the upper-left quadrant, and the other
+        # three quadrants will be padded with zeros.
         pads_required.append(0)
 
+    # this will correct the order of the values in the resulting list to produce the desired output
     pads_required.reverse()
 
     return tuple(pads_required)

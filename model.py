@@ -37,16 +37,17 @@ class Model(nn.Module):
         self.hidden_dropout_prob = hidden_dropout_prob
         self.output_size = output_size
 
-
-        # TODO alter these names and network structure
+        # input to hidden
         self.fully_connected_input = nn.Linear(self.input_size, self.hidden_size)
 
+        # hidden to hidden
         self.fully_connected_hidden = nn.Linear(self.hidden_size, self.hidden_size)
 
+        # hidden to output
         self.fully_connected_output = nn.Linear(self.hidden_size, self.output_size)
 
     def forward(self, x):
-        # TODO alter network structure
+        # pass the data through all layers of the network
         x = self.fully_connected_input(x)
         x = F.relu(x)
         x = F.dropout(x, p=self.input_dropout_prob, training=self.training)
