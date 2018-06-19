@@ -145,6 +145,11 @@ def main():
     # a list of the models we instantiated above
     models = [sgd_dropout_model, ewc_model]
 
+    for model in models:
+        for parameter in model.parameters():
+            utils.init_weights(parameter)
+            print(parameter)
+
     # A list of the different DataLoader objects that hold various permutations of the mnist testing dataset-
     # we keep these around in a persistent list here so that we can use them to test each of the models in the
     # list "models" after they are trained on the latest task's training dataset.

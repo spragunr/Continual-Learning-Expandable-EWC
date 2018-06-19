@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import numpy as np
+import scipy.stats as stats
 import torch.utils.data as D
 from torch.autograd import Variable
 from torchvision import datasets, transforms
@@ -465,4 +466,5 @@ def initialize_weights(shape, mean=0.0, stdev=0.1):
 
     return torch.Tensor(samples.reshape(tuple(shape)))
 
-
+def init_weights(m):
+    m.weight.data.fill_(1.0)
