@@ -101,34 +101,17 @@ def generate_new_mnist_task(train_dataset_size, validation_dataset_size, batch_s
 # copy weights from a smaller to a larger model
 def copy_weights_expanding(old_model, expanded_model):
 
-    old_sizes = [] # sizes of smaller model parameters
     old_weights = [] # weights in smaller model parameters
 
     # save data from old model
     for parameter in old_model.parameters():
-        old_sizes.append(np.array(list(parameter.size())))
         old_weights.append(parameter.data.clone())
 
     # transfer that data to the expanded model
     for param_index, parameter in enumerate(expanded_model.parameters()):
 
-        # weights - 2 dims
-        if list(old_sizes[param_index].shape)[0] == 2:
+        parameter.data[tuple(slice(0, n) for n in old_weights[param_index].shape)] = old_weights[param_index][...]
 
-            # copy each weight from smaller network to matching index in the larger network
-            for row in range(len(old_weights[param_index])):
-
-                for column in range(len(old_weights[param_index][row])):
-
-                    parameter.data[row][column] = (old_weights[param_index][row][column])
-
-        else:
-
-            # biases - one dim
-            for value_index in range(len(old_weights[param_index])):
-
-                # copy each weight from smaller network to matching index in the larger network
-                parameter.data[value_index] = (old_weights[param_index][value_index])
 
 # return an expanded model containing the weights from the given model at their corresponding indices within the
 # larger expanded model parameters
