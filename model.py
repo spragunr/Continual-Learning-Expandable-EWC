@@ -9,6 +9,8 @@ from copy import deepcopy
 
 
 class Model(nn.Module):
+
+    # TODO remove the dropout probability parameters
     def __init__(self, hidden_size, hidden_dropout_prob, input_dropout_prob, input_size, output_size,
                  ewc, lam=0, task_fisher_diags ={}, task_post_training_weights={}):
 

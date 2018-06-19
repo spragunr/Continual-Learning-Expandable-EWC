@@ -146,8 +146,8 @@ def main():
     models = [sgd_dropout_model, ewc_model]
 
     for model in models:
+        model.main.apply(utils.init_weights)
         for parameter in model.parameters():
-            utils.init_weights(parameter)
             print(parameter)
 
     # A list of the different DataLoader objects that hold various permutations of the mnist testing dataset-
