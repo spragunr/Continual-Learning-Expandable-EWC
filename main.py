@@ -219,12 +219,6 @@ def main():
 
                 models[model_num].task_post_training_weights.update({task_count: deepcopy(current_weights)})
 
-                # plotting of sum of how far each weight in each layer of the network has moved from each previous
-                # theta* value for that weight, multiplied by the fisher diagonal value for that weight computed for each
-                # of the tasks to which the theta* values correspond
-                if task_count > 1:
-                    plot.plot(current_weights, models[model_num].task_post_training_weights, task_count, models[model_num].task_fisher_diags)
-
                 # using validation set in Fisher Information Matrix computation as specified by:
                 # https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
                 models[model_num].compute_fisher_prob_dist(device, validation_loader, args.fisher_num_samples)
@@ -239,7 +233,7 @@ def main():
 
 
         # expand each of the models (SGD + DROPOUT and EWC) after task 2 training and before task 3 training...
-        if task_count == 4:
+        if task_count == 2:
             print("expanding...")
             for model_num in range(len(models)):
                 models[model_num] = utils.expand_model(models[model_num])
