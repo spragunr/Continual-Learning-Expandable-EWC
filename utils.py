@@ -443,5 +443,5 @@ def trunc_normal_weights(shape, mean=0.0, stdev=0.1):
 # https://github.com/ariseff/overcoming-catastrophic/blob/afea2d3c9f926d4168cc51d56f1e9a92989d7af0/model.py#L7
 def init_weights(m):
     if type(m) == nn.Linear:
-        m.weight.data.copy_(trunc_normal_weights(m.weight.size()))
+        m.weight.data.copy_(trunc_normal_weights(m.weight.size())) # todo maybe initialize these differently... (only the parts we need to)
         m.bias.data.fill_(0.1)
