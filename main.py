@@ -146,9 +146,6 @@ def main():
     # a list of the models we instantiated above
     models = [sgd_dropout_model, ewc_model]
 
-    for model in models:
-        model.main.apply(utils.init_weights)
-
     # A list of the different DataLoader objects that hold various permutations of the mnist testing dataset-
     # we keep these around in a persistent list here so that we can use them to test each of the models in the
     # list "models" after they are trained on the latest task's training dataset.
@@ -240,13 +237,14 @@ def main():
                 # using the method in model.alternative_ewc_loss()
                 models[model_num].task_fisher_diags.update({task_count: deepcopy(models[model_num].list_of_fisher_diags)})
 
-
+        """
         # expand each of the models (SGD + DROPOUT and EWC) after task 2 training and before task 3 training...
         if task_count == 2:
             print("expanding...")
             for model_num in range(len(models)):
                 models[model_num] = utils.expand_model(models[model_num])
 
+        """
 
         # increment the number of the current task before re-entering while loop
         task_count += 1

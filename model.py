@@ -43,6 +43,7 @@ class Model(nn.Module):
             nn.Linear(self.hidden_size, self.output_size)
         )
 
+        self.main.apply(utils.init_weights)
 
     def forward(self, x):
 
