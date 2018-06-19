@@ -237,13 +237,13 @@ def main():
                 # using the method in model.alternative_ewc_loss()
                 models[model_num].task_fisher_diags.update({task_count: deepcopy(models[model_num].list_of_fisher_diags)})
 
-        """
+
         # expand each of the models (SGD + DROPOUT and EWC) after task 2 training and before task 3 training...
-        if task_count == 2:
+        if task_count == 4:
             print("expanding...")
             for model_num in range(len(models)):
                 models[model_num] = utils.expand_model(models[model_num])
-        """
+
 
         # increment the number of the current task before re-entering while loop
         task_count += 1

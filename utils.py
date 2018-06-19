@@ -35,15 +35,16 @@ def generate_new_mnist_task(train_dataset_size, validation_dataset_size, batch_s
     #
     # transforms.Lambda() applies the enclosed lambda function to each image (x) in the DataLoader
     # todo comment on sequential mnist and pixel permuation
+    # permutation from: https://discuss.pytorch.org/t/sequential-mnist/2108 (first response)
     transformations = transforms.Compose(
         [
             transforms.ToTensor(),
-            transforms.Normalize((0.1307,), (0.3081,)),
+            #transforms.Normalize((0.1307,), (0.3081,)), # TODO determine why network performs better w/o normalization
             transforms.Lambda(lambda x: x.view(-1, 1))
         ]) if first_task else transforms.Compose(
         [
             transforms.ToTensor(),
-            transforms.Normalize((0.1307,), (0.3081,)),
+            #transforms.Normalize((0.1307,), (0.3081,)), # TODO determine why network performs better w/o normalization
             transforms.Lambda(lambda x: x.view(-1, 1)[pixel_permutation])
         ])
 
