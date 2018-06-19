@@ -8,42 +8,12 @@ from torchvision import datasets, transforms
 from copy import deepcopy
 from model import Model
 
-# apply a specified permutation (numpy array containing 0 - 783 in random order - a permutation "mask" to be applied to each image
-# in the MNIST dataset) to a given image
-def apply_permutation(image, permutation):
-
-    # original dimensions of image data
-    orig_shape = image.size()
-
-    # make the image into a 1D numpy array of 784 pixels
-    image = image.numpy()
-
-    image.resize(784)
-
-    # get a deepcopy of the image which will become the permuted image
-    perm_image = (deepcopy(image))
-
-    # each pixel in the permuted image will be the pixel from the original image
-    # located at the index (0-783) given by the pixel number in permutation at pixel_index
-    for pixel_index, pixel in enumerate(perm_image):
-        perm_image[pixel_index] = image[permutation[pixel_index]]
-
-    # make the image back into a tensor
-    image = torch.Tensor(perm_image)
-
-    # resize image to original shape
-    image.resize_(orig_shape)
-
-    return image
 
 # generate the DataLoaders corresponding to a permuted mnist task
 def generate_new_mnist_task(train_dataset_size, validation_dataset_size, batch_size, test_batch_size, kwargs, first_task):
 
-    # Note that, as in experiment from github/ariseff, these are permutations of the ORIGINAL dataset
-    #
-    # Generate numpy array containing 0 - 783 in random order - a permutation "mask" to be applied to each image
-    # in the MNIST dataset
-    permutation = np.random.permutation(784)
+    # permutation to be applied to all images in the dataset (if this is not the first dataset being generated)
+    pixel_permutation = torch.randperm(28 * 28)
 
     # transforms.Compose() composes several transforms together.
     #
@@ -64,15 +34,17 @@ def generate_new_mnist_task(train_dataset_size, validation_dataset_size, batch_s
     #           SOURCE: https://discuss.pytorch.org/t/normalization-in-the-mnist-example/457
     #
     # transforms.Lambda() applies the enclosed lambda function to each image (x) in the DataLoader
+    # todo comment on sequential mnist and pixel permuation
     transformations = transforms.Compose(
         [
             transforms.ToTensor(),
-            transforms.Normalize((0.1307,), (0.3081,))
+            transforms.Normalize((0.1307,), (0.3081,)),
+            transforms.Lambda(lambda x: x.view(-1, 1))
         ]) if first_task else transforms.Compose(
         [
             transforms.ToTensor(),
             transforms.Normalize((0.1307,), (0.3081,)),
-            transforms.Lambda(lambda x: apply_permutation(x, permutation))
+            transforms.Lambda(lambda x: x.view(-1, 1)[pixel_permutation])
         ])
 
     # Split the PyTorch MNIST training dataset into training and validation datasets, and transform the data.

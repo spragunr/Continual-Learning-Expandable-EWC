@@ -243,7 +243,6 @@ def main():
             print("expanding...")
             for model_num in range(len(models)):
                 models[model_num] = utils.expand_model(models[model_num])
-
         """
 
         # increment the number of the current task before re-entering while loop
