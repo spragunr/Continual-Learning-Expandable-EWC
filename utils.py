@@ -448,3 +448,21 @@ def pad_tuple(smaller, larger):
     return tuple(pads_required)
 
 
+# This function is intended to mimic the behavior of TensorFlow's tf.truncated_normal(), returning
+# a tensor of the specified shape containing values sampled from a truncated normal distribution with the
+# specified mean and standard deviation. Sampled values which fall outside of the range of +/- 2 standard deviations
+# from the mean are dropped and re-picked.
+def initialize_weights(shape, mean=0.0, stdev=0.1):
+
+    num_samples = 1
+
+    for dim in list(shape):
+        num_samples *= dim
+
+    a, b = ((mean - 2 * stdev) - mean) / stdev, ((mean + 2 * stdev) - mean) / stdev
+
+    samples = stats.truncnorm.rvs(a, b, scale=stdev, loc=mean, size=num_samples)
+
+    return torch.Tensor(samples.reshape(tuple(shape)))
+
+
