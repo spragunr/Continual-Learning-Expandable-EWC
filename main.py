@@ -6,6 +6,7 @@ from model import Model
 from copy import deepcopy
 import plot
 
+
 def main():
     # Command Line args
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
@@ -147,8 +148,6 @@ def main():
 
     for model in models:
         model.main.apply(utils.init_weights)
-        for parameter in model.parameters():
-            print(parameter)
 
     # A list of the different DataLoader objects that hold various permutations of the mnist testing dataset-
     # we keep these around in a persistent list here so that we can use them to test each of the models in the

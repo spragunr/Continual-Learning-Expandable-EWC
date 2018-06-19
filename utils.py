@@ -453,7 +453,7 @@ def pad_tuple(smaller, larger):
 # a tensor of the specified shape containing values sampled from a truncated normal distribution with the
 # specified mean and standard deviation. Sampled values which fall outside of the range of +/- 2 standard deviations
 # from the mean are dropped and re-picked.
-def initialize_weights(shape, mean=0.0, stdev=0.1):
+def trunc_normal_weights(shape, mean=0.0, stdev=0.1):
 
     num_samples = 1
 
@@ -466,7 +466,9 @@ def initialize_weights(shape, mean=0.0, stdev=0.1):
 
     return torch.Tensor(samples.reshape(tuple(shape)))
 
+# initialize weights in the network in the same manner as in:
+# https://github.com/ariseff/overcoming-catastrophic/blob/afea2d3c9f926d4168cc51d56f1e9a92989d7af0/model.py#L7
 def init_weights(m):
     if type(m) == nn.Linear:
-        m.weight.data.fill_(1.0)
-        m.bias.data.fill_(1.0)
+        m.weight.data.copy_(trunc_normal_weights(m.weight.size()))
+        m.bias.data.fill_(0.1)
