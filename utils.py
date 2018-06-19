@@ -324,33 +324,11 @@ def copy_weights_shrinking(big_model, small_model):
     for parameter in big_model.parameters():
         big_weights.append(parameter.data.clone())
 
-    small_sizes = []
-
-    for parameter in small_model.parameters():
-        small_sizes.append(np.array(list(parameter.size())))
-
-    # transfer that data to the smaller model
+    # transfer that data to the smaller model -
+    # copy each weight from larger network that should still be in the smaller model to matching index
+    # in the smaller network
     for param_index, parameter in enumerate(small_model.parameters()):
-
-        # weights - 2 dims
-        if list(small_sizes[param_index].shape)[0] == 2:
-
-            for row in range(len(parameter.data)):
-
-                for column in range(len(parameter.data[row])):
-
-                    # copy each weight from larger network that should still be in the smaller model to matching index
-                    # in the smaller network
-                    parameter.data[row][column] = big_weights[param_index][row][column]
-
-        else:
-
-            # biases - one dim
-            for value_index in range(len(parameter.data)):
-
-                # copy each weight from larger network that should still be in the smaller model to matching index
-                # in the smaller network
-                parameter.data[value_index] = big_weights[param_index][value_index]
+        parameter.data[...] = big_weights[param_index][tuple(slice(0, n) for n in list(parameter.size()))]
 
 
 # given a dictionary with task numbers as keys and model sizes (size of hidden layer(s) in the model when the model was
