@@ -233,7 +233,7 @@ def main():
 
 
         # expand each of the models (SGD + DROPOUT and EWC) after task 2 training and before task 3 training...
-        if task_count == 2:
+        if task_count == 4:
             print("expanding...")
             for model_num in range(len(models)):
                 models[model_num] = utils.expand_model(models[model_num])
