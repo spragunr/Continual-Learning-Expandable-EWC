@@ -40,12 +40,7 @@ class Model(nn.Module):
         self.hidden_dropout_prob = hidden_dropout_prob
         self.output_size = output_size
 
-        self.modulelist = nn.ModuleList()
-
-        self.modulelist.append(nn.Linear(input_size, hidden_size))
-        self.modulelist.append(nn.ReLU())
-        self.modulelist.append(nn.Linear(hidden_size, output_size))
-
+        self.initialize_module_list()
 
     def forward(self, x):
 
@@ -416,30 +411,18 @@ class Model(nn.Module):
         # multiply summed loss term by fisher multiplier divided by 2
         return loss_prev_tasks * (self.lam / 2.0)
 
-    """
+
+    def initialize_module_list(self):
+
+        self.modulelist = nn.ModuleList()
+
+        self.modulelist.append(nn.Linear(self.input_size, self.hidden_size))
+        self.modulelist.append(nn.ReLU())
+        self.modulelist.append(nn.Linear(self.hidden_size, self.output_size))
+
     def expand(self):
-        expanded_sizes = []
 
-        for parameter in self.parameters():
-            expanded_sizes.append(list(parameter.size()))
+        self.hidden_size *= 2
+        self.initialize_module_list()
 
-        for i in range(len(expanded_sizes)):
-            if i != 0 and i != len(expanded_sizes) - 1:
-                expanded_sizes[i][-1] *= 2
-            elif i == 0:
-                expanded_sizes[i][0] *= 2
 
-        for param_index, (name, parameter) in enumerate(self.named_parameters()):
-            print(name)
-            print(tuple(expanded_sizes[param_index]))
-            print(parameter.size())
-            parameter.detach()
-            parameter.requires_grad = False
-            data = parameter.data.clone()
-            data.resize_(tuple(expanded_sizes[param_index]))
-            self.register_parameter('{}'.format(param_index), torch.nn.Parameter(data=data, requires_grad=True))
-
-        for parameter in self.parameters():
-            print(parameter.size(), parameter.requires_grad)
-
-    """
