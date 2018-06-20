@@ -163,30 +163,6 @@ def main():
     for model in models:
         model_size_dictionaries.append({})
 
-    """
-    for model in models:
-        print("MODEL:\n")
-
-        expanded_sizes = []
-
-        for parameter in model.parameters():
-           expanded_sizes.append(list(parameter.size()))
-
-        for i in range(len(expanded_sizes)):
-            if i != 0 and i != len(expanded_sizes) - 1:
-                expanded_sizes[i][-1] *= 2
-            elif i == 0:
-                expanded_sizes[i][0] *= 2
-
-        for param_index, parameter in enumerate(model.parameters()):
-            print(parameter.size())
-            pad_tuple = utils.pad_tuple(parameter, torch.zeros(tuple(expanded_sizes[param_index])))
-            parameter.data.copy_(torch.nn.functional.pad(parameter.data, pad_tuple, mode='constant', value=0))
-
-        for parameter in model.parameters():
-            print(parameter.size())
-    """
-
     # keep learning tasks ad infinitum
     while(True):
 
@@ -255,6 +231,7 @@ def main():
                 # using the method in model.alternative_ewc_loss()
                 models[model_num].task_fisher_diags.update({task_count: deepcopy(models[model_num].list_of_fisher_diags)})
 
+            # verify
             for parameter in model.parameters():
                 print(parameter.size())
                 print(parameter.data)
@@ -263,8 +240,7 @@ def main():
         if task_count == 2:
             print("expanding...")
             for model_num in range(len(models)):
-                models[model_num] = utils.expand_model(models[model_num])
-
+                models[model_num].expand()
 
         # increment the number of the current task before re-entering while loop
         task_count += 1

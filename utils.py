@@ -117,6 +117,11 @@ def copy_weights_expanding(old_model, expanded_model):
 # larger expanded model parameters
 def expand_model(model):
 
+    """
+    for parameter in model.parameters():
+        parameter.detach()
+    """
+
     # make new model of expanded size, copy hyperparameters
     expanded_model = Model(
         model.hidden_size * 2,

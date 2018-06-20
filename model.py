@@ -257,7 +257,7 @@ class Model(nn.Module):
         #        weights between last hidden layer and output,
         #        bias b/w hidden layer and output]
         #   )
-        optimizer = optim.SGD(self.parameters(), lr=args.lr, momentum=args.momentum)
+        optimizer = optim.SGD(self.parameters(), lr=args.lr, momentum=args.momentum) # can use filter and requires_grad=False to freeze part of the network...
 
         # Enumerate will keep an automatic loop counter and store it in batch_idx.
         # The (data, target) pair returned by DataLoader train_loader each iteration consists
@@ -413,4 +413,30 @@ class Model(nn.Module):
         # multiply summed loss term by fisher multiplier divided by 2
         return loss_prev_tasks * (self.lam / 2.0)
 
+    """
+    def expand(self):
+        expanded_sizes = []
 
+        for parameter in self.parameters():
+            expanded_sizes.append(list(parameter.size()))
+
+        for i in range(len(expanded_sizes)):
+            if i != 0 and i != len(expanded_sizes) - 1:
+                expanded_sizes[i][-1] *= 2
+            elif i == 0:
+                expanded_sizes[i][0] *= 2
+
+        for param_index, (name, parameter) in enumerate(self.named_parameters()):
+            print(name)
+            print(tuple(expanded_sizes[param_index]))
+            print(parameter.size())
+            parameter.detach()
+            parameter.requires_grad = False
+            data = parameter.data.clone()
+            data.resize_(tuple(expanded_sizes[param_index]))
+            self.register_parameter('{}'.format(param_index), torch.nn.Parameter(data=data, requires_grad=True))
+
+        for parameter in self.parameters():
+            print(parameter.size(), parameter.requires_grad)
+
+    """
