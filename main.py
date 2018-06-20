@@ -14,7 +14,7 @@ def main():
     # Command Line args
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
 
-    parser.add_argument('--batch-size', type=int, default=64, metavar='N',
+    parser.add_argument('--batch-size', type=int, default=100, metavar='N',
                         help='input batch size for training (default: 64)')
 
     parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
@@ -166,7 +166,7 @@ def main():
     for model in models:
         model_size_dictionaries.append({})
 
-    dummy_input = Variable(torch.rand(64, 784))
+    dummy_input = Variable(torch.rand(args.batch_size, 784))
 
     for model in models:
         with SummaryWriter(comment='model ewc: {}'.format(model.ewc)) as w:
