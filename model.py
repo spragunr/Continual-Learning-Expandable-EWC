@@ -104,28 +104,26 @@ class Model(nn.Module):
             # set the device (CPU or GPU) to be used with data and target to device variable (defined in main())
             data = Variable(data).to(device)
 
-            for sample in range(len(data)):
-                self.zero_grad()
 
-                image = data[sample].unsqueeze(0)
+            # gradients of parameters with respect to log likelihoods (log_softmax applied to output layer),
+            # data for the sample from the validation set is sent through the network to mimic the behavior
+            # of the feed_dict argument at:
+            # https://github.com/ariseff/overcoming-catastrophic/blob/afea2d3c9f926d4168cc51d56f1e9a92989d7af0/model.py#L65
+            loglikelihood_grads = torch.autograd.grad(F.log_softmax(self(data), dim=-1)[0, class_index],
+                                                      self.parameters())
 
-                # gradients of parameters with respect to log likelihoods (log_softmax applied to output layer),
-                # data for the sample from the validation set is sent through the network to mimic the behavior
-                # of the feed_dict argument at:
-                # https://github.com/ariseff/overcoming-catastrophic/blob/afea2d3c9f926d4168cc51d56f1e9a92989d7af0/model.py#L65
-                loglikelihood_grads = torch.autograd.grad(F.log_softmax(self(image), dim=-1)[0, class_index],
-                                                          self.parameters())
-
-                # square the gradients computed above and add each of them to the index in list_of_fisher_diags that
-                # corresponds to the parameter for which the gradient was calculated
-                for parameter in range(len(self.list_of_fisher_diags)):
-                    self.list_of_fisher_diags[parameter] += torch.pow(loglikelihood_grads[parameter], 2.0)
+            # square the gradients computed above and add each of them to the index in list_of_fisher_diags that
+            # corresponds to the parameter for which the gradient was calculated
+            for parameter in range(len(self.list_of_fisher_diags)):
+                self.list_of_fisher_diags[parameter] += torch.pow(loglikelihood_grads[parameter], 2.0)
 
             sample_count += validation_loader.batch_size
 
+            """
             # stop iterating through loop if at least num_samples reached
             if sample_count >= num_samples:
                 break
+            """
 
         print(sample_count)
 
@@ -447,30 +445,3 @@ class Model(nn.Module):
 
         if self.ewc:
             self.expand_ewc_sums()
-
-        """
-
-        expanded_sizes = []
-        for parameter in self.parameters():
-            expanded_sizes.append(list(parameter.size()))
-
-        for i in range(len(expanded_sizes)):
-            if i != 0 and i != len(expanded_sizes) - 1:
-                expanded_sizes[i][-1] *= 2
-            elif i == 0:
-                expanded_sizes[i][0] *= 2
-
-        print(expanded_sizes)
-
-        count = 0
-
-        for module in self.modulelist:
-            if type(module) == nn.Linear:
-                module.in_features = torch.size()
-                module.out_features =
-                module.weight.data.resize_(tuple(expanded_sizes[count]))
-                count += 1
-                module.bias.data.resize_(tuple(expanded_sizes[count]))
-                count += 1
-
-        """

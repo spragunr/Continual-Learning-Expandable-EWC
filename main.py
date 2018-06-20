@@ -241,7 +241,7 @@ def main():
                 models[model_num].task_fisher_diags.update({task_count: deepcopy(models[model_num].list_of_fisher_diags)})
 
 
-
+        """
         # expand each of the models (SGD + DROPOUT and EWC) after task 2 training and before task 3 training...
         if task_count == 2:
             print("expanding...")
@@ -250,7 +250,7 @@ def main():
                 with SummaryWriter(comment='model ewc: {}'.format(models[model_num].ewc)) as w:
                         w.add_graph(models[model_num], (dummy_input,))
 
-
+        """
 
         # increment the number of the current task before re-entering while loop
         task_count += 1
