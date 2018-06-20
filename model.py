@@ -42,6 +42,8 @@ class Model(nn.Module):
 
         self.initialize_module_list()
 
+        self.apply(utils.init_weights)
+
     def forward(self, x):
 
         # pass the data through all layers of the network
@@ -422,7 +424,18 @@ class Model(nn.Module):
 
     def expand(self):
 
+        old_weights = []
+
+        for parameter in self.parameters():
+            old_weights.append(parameter.data.clone())
+
         self.hidden_size *= 2
         self.initialize_module_list()
+        self.apply(utils.init_weights())
 
+        # copy weights from smaller, old model into proper locations in the new, expanded model
+        utils.copy_weights_expanding(old_weights, self)
+
+        if self.ewc:
+            self.expand_ewc_sums()
 

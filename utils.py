@@ -99,56 +99,12 @@ def generate_new_mnist_task(train_dataset_size, validation_dataset_size, batch_s
 
 
 # copy weights from a smaller to a larger model
-def copy_weights_expanding(old_model, expanded_model):
+def copy_weights_expanding(old_weights, expanded_model):
 
-    old_weights = [] # weights in smaller model parameters
-
-    # save data from old model
-    for parameter in old_model.parameters():
-        old_weights.append(parameter.data.clone())
-
-    # transfer that data to the expanded model
     for param_index, parameter in enumerate(expanded_model.parameters()):
 
         parameter.data[tuple(slice(0, n) for n in old_weights[param_index].shape)] = old_weights[param_index][...]
 
-
-# return an expanded model containing the weights from the given model at their corresponding indices within the
-# larger expanded model parameters
-def expand_model(model):
-
-    """
-    for parameter in model.parameters():
-        parameter.detach()
-    """
-
-    # make new model of expanded size, copy hyperparameters
-    expanded_model = Model(
-        model.hidden_size * 2,
-        model.hidden_dropout_prob,
-        model.input_dropout_prob,
-        model.input_size,
-        model.output_size,
-        model.ewc,
-        model.lam,
-        deepcopy(model.task_fisher_diags),
-        deepcopy(model.task_post_training_weights)
-    )
-
-    if model.ewc:
-        # copy over old model Fisher info and ewc loss sums
-        expanded_model.list_of_fisher_diags = model.list_of_fisher_diags
-        expanded_model.sum_Fx = model.sum_Fx
-        expanded_model.sum_Fx_Wx = model.sum_Fx_Wx
-        expanded_model.sum_Fx_Wx_sq = model.sum_Fx_Wx_sq
-
-        # expand the new model's ewc loss sums to match dimensions of expanded model parameters
-        expanded_model.expand_ewc_sums()
-
-    # copy weights from smaller, old model into proper locations in the new, expanded model
-    copy_weights_expanding(model, expanded_model)
-
-    return expanded_model
 
 
 def test(models, device, test_loaders):
@@ -405,11 +361,10 @@ def trunc_normal_weights(shape, mean=0.0, stdev=0.1):
 
     return torch.Tensor(samples.reshape(tuple(shape)))
 
-"""
+
 # initialize weights in the network in the same manner as in:
 # https://github.com/ariseff/overcoming-catastrophic/blob/afea2d3c9f926d4168cc51d56f1e9a92989d7af0/model.py#L7
 def init_weights(m):
-    if type(m) == nn.Parameter:
+    if type(m) == nn.Linear:
         m.weight.data.copy_(trunc_normal_weights(m.weight.size())) # todo maybe initialize these differently... (only the parts we need to)
         m.bias.data.fill_(0.1)
-"""

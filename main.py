@@ -166,6 +166,11 @@ def main():
     # keep learning tasks ad infinitum
     while(True):
 
+        # verify
+        for parameter in model.parameters():
+            print(parameter.size())
+            print(parameter.data)
+
         # get the DataLoaders for the training, validation, and testing data
         train_loader, validation_loader, test_loader = utils.generate_new_mnist_task(
             args.train_dataset_size,
@@ -231,10 +236,7 @@ def main():
                 # using the method in model.alternative_ewc_loss()
                 models[model_num].task_fisher_diags.update({task_count: deepcopy(models[model_num].list_of_fisher_diags)})
 
-            # verify
-            for parameter in model.parameters():
-                print(parameter.size())
-                print(parameter.data)
+
 
         # expand each of the models (SGD + DROPOUT and EWC) after task 2 training and before task 3 training...
         if task_count == 2:
