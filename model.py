@@ -71,14 +71,8 @@ class Model(nn.Module):
 
         # dim=-1 uses the last dimension. This is the tensorflow default, so meant to mimic the behavior in:
         # https://github.com/ariseff/overcoming-catastrophic/blob/afea2d3c9f926d4168cc51d56f1e9a92989d7af0/model.py#L53
-        softmax = nn.Softmax(dim=-1)
-
-        # log and softmax together- computing them sequentially as separate computations can be mathematically unstable
-        # in edge-case scenarios
-        log_softmax = nn.LogSoftmax(dim=-1)
-
-        # get softmax activations from output layer (probabilities)
-        probs = softmax(self.y)
+        # get softmax activations, d from output layer (probabilities)
+        probs = F.softmax(self.y, dim=-1)
 
         # sample a random class index from the softmax activations (.item() gets value in tensor as a scalar)
         class_index = (torch.multinomial(probs, 1)[0][0]).item()
@@ -110,7 +104,7 @@ class Model(nn.Module):
             # data for the sample from the validation set is sent through the network to mimic the behavior
             # of the feed_dict argument at:
             # https://github.com/ariseff/overcoming-catastrophic/blob/afea2d3c9f926d4168cc51d56f1e9a92989d7af0/model.py#L65
-            loglikelihood_grads = torch.autograd.grad(log_softmax(self(data))[0, class_index], self.parameters())
+            loglikelihood_grads = torch.autograd.grad(F.log_softmax(self(data), dim=-1)[0, class_index], self.parameters())
 
             # square the gradients computed above and add each of them to the index in list_of_fisher_diags that
             # corresponds to the parameter for which the gradient was calculated
@@ -324,10 +318,8 @@ class Model(nn.Module):
             # and ground truth labels. This loss function only takes into account loss on the most recent task.
             #
             # NOTE: torch.nn.CrossEntropyLoss combines torch.nn.LogSoftmax() and torch.nn.NLLLoss() in one single class.
-            criterion = nn.CrossEntropyLoss()
-
             # apply the loss function to the predictions/labels for this batch to compute loss
-            loss = criterion(output, target)
+            loss = F.cross_entropy(output, target)
 
             # if the model is using EWC, the summed loss term from the EWC equation (loss on previuous tasks) must be calculated and
             # added to the loss that will be minimized by the optimizer.

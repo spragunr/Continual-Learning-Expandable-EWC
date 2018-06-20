@@ -175,12 +175,6 @@ def main():
     # keep learning tasks ad infinitum
     while(True):
 
-        # verify
-        for model in models:
-            for parameter in model.parameters():
-                print(parameter.size())
-                print(parameter.data)
-
         # get the DataLoaders for the training, validation, and testing data
         train_loader, validation_loader, test_loader = utils.generate_new_mnist_task(
             args.train_dataset_size,
