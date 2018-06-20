@@ -5,6 +5,9 @@ import numpy as np
 from model import Model
 from copy import deepcopy
 import plot
+from torch.autograd import Variable
+from tensorboardX import SummaryWriter
+
 
 
 def main():
@@ -163,6 +166,12 @@ def main():
     for model in models:
         model_size_dictionaries.append({})
 
+    dummy_input = Variable(torch.rand(64, 784))
+
+    for model in models:
+        with SummaryWriter(comment='model ewc: {}'.format(model.ewc)) as w:
+            w.add_graph(model, (dummy_input,))
+
     # keep learning tasks ad infinitum
     while(True):
 
@@ -244,6 +253,10 @@ def main():
             print("expanding...")
             for model_num in range(len(models)):
                 models[model_num].expand()
+                with SummaryWriter(comment='model ewc: {}'.format(models[model_num].ewc)) as w:
+                        w.add_graph(models[model_num], (dummy_input,))
+
+
 
         # increment the number of the current task before re-entering while loop
         task_count += 1

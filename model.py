@@ -6,6 +6,7 @@ import torch.optim as optim
 import numpy as np
 from torch.autograd import Variable
 from copy import deepcopy
+from tensorboardX import SummaryWriter
 
 
 
@@ -199,10 +200,10 @@ class Model(nn.Module):
 
         ewc_sums = [self.sum_Fx, self.sum_Fx_Wx, self.sum_Fx_Wx_sq]
 
-        for ewc_sum in ewc_sums:
+        for ewc_sum in range(len(ewc_sums)):
             for parameter_index, parameter in enumerate(self.parameters()):
                 # current size of entry at parameter_index in given list of sums
-                sum_size = torch.Tensor(list(ewc_sum[parameter_index].size()))
+                sum_size = torch.Tensor(list(ewc_sums[ewc_sum][parameter_index].size()))
 
                 # current size of parameter in the model corresponding to the sum entry above
                 parameter_size = torch.Tensor(list(parameter.size()))
@@ -210,8 +211,8 @@ class Model(nn.Module):
                 # pad the sum tensor at the current parameter index of the given sum list with zeros so that it matches the size in
                 # all dimensions of the corresponding parameter
                 if not torch.equal(sum_size, parameter_size):
-                    pad_tuple = utils.pad_tuple(ewc_sum[parameter_index],parameter)
-                    ewc_sum[parameter_index] = F.pad(ewc_sum[parameter_index], pad_tuple, mode='constant', value=0)
+                    pad_tuple = utils.pad_tuple(ewc_sums[ewc_sum][parameter_index],parameter)
+                    ewc_sums[ewc_sum][parameter_index] = F.pad(ewc_sums[ewc_sum][parameter_index], pad_tuple, mode='constant', value=0)
 
     # calculate the EWC loss on previous tasks only (not incorporating current task cross entropy)
     def ewc_loss_prev_tasks(self):
@@ -233,6 +234,8 @@ class Model(nn.Module):
         return loss_prev_tasks * (self.lam / 2.0)
 
     def train_model(self, args, device, train_loader, epoch, task_number):
+        first_train = True
+
         # Set the module in "training mode"
         # This is necessary because some network layers behave differently when training vs testing.
         # Dropout, for example, is used to zero/mask certain weights during TRAINING to prevent overfitting.
@@ -439,3 +442,29 @@ class Model(nn.Module):
         if self.ewc:
             self.expand_ewc_sums()
 
+        """
+
+        expanded_sizes = []
+        for parameter in self.parameters():
+            expanded_sizes.append(list(parameter.size()))
+
+        for i in range(len(expanded_sizes)):
+            if i != 0 and i != len(expanded_sizes) - 1:
+                expanded_sizes[i][-1] *= 2
+            elif i == 0:
+                expanded_sizes[i][0] *= 2
+
+        print(expanded_sizes)
+
+        count = 0
+
+        for module in self.modulelist:
+            if type(module) == nn.Linear:
+                module.in_features = torch.size()
+                module.out_features =
+                module.weight.data.resize_(tuple(expanded_sizes[count]))
+                count += 1
+                module.bias.data.resize_(tuple(expanded_sizes[count]))
+                count += 1
+
+        """
