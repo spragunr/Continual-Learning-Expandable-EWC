@@ -3,6 +3,7 @@ import utils
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+import numpy as np
 from torch.autograd import Variable
 from copy import deepcopy
 
@@ -39,18 +40,20 @@ class Model(nn.Module):
         self.hidden_dropout_prob = hidden_dropout_prob
         self.output_size = output_size
 
-        self.main = nn.Sequential(
-            nn.Linear(self.input_size, self.hidden_size),
-            nn.ReLU(),
-            nn.Linear(self.hidden_size, self.output_size)
-        )
+        self.modulelist = nn.ModuleList()
 
-        self.main.apply(utils.init_weights)
+        self.modulelist.append(nn.Linear(input_size, hidden_size))
+        self.modulelist.append(nn.ReLU())
+        self.modulelist.append(nn.Linear(hidden_size, output_size))
+
 
     def forward(self, x):
 
         # pass the data through all layers of the network
-        self.y = self.main(x) # TODO consider this in relation to compute_fisher_prob_dist()
+        for module in self.modulelist:
+            x = module(x)
+
+        self.y = x
 
         return self.y
 
