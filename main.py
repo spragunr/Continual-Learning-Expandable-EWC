@@ -167,9 +167,10 @@ def main():
     while(True):
 
         # verify
-        for parameter in model.parameters():
-            print(parameter.size())
-            print(parameter.data)
+        for model in models:
+            for parameter in model.parameters():
+                print(parameter.size())
+                print(parameter.data)
 
         # get the DataLoaders for the training, validation, and testing data
         train_loader, validation_loader, test_loader = utils.generate_new_mnist_task(
