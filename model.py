@@ -77,11 +77,13 @@ class Model(nn.Module):
         # sample a random class index from the softmax activations (.item() gets value in tensor as a scalar)
         class_index = (torch.multinomial(probs, 1)[0][0]).item()
 
+        count = 0
         # sample_number is running count of samples (used to ensure sampling continues until num_samples reached)
         # data is an image
         # _ is the label for the image (not needed)
         for sample_number, (data, _) in enumerate(validation_loader):
 
+            count += 1
             # The data needs to be wrapped in another tensor to work with our network,
             # otherwise it is not of the appropriate dimensions... I believe this statement effectively adds
             # a dimension.
@@ -93,6 +95,7 @@ class Model(nn.Module):
             # https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/model.py#L61
             data = data.view(validation_loader.batch_size, -1)
 
+
             # wrap data and target in variables- again, from the following experiment:
             #   https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/model.py#L62
             #
@@ -100,21 +103,28 @@ class Model(nn.Module):
             # set the device (CPU or GPU) to be used with data and target to device variable (defined in main())
             data = Variable(data).to(device)
 
+            # TODO see if batches vs individual pics SHOULD make a difference...
+
+            # self.zero_grad()
+
             # gradients of parameters with respect to log likelihoods (log_softmax applied to output layer),
             # data for the sample from the validation set is sent through the network to mimic the behavior
             # of the feed_dict argument at:
             # https://github.com/ariseff/overcoming-catastrophic/blob/afea2d3c9f926d4168cc51d56f1e9a92989d7af0/model.py#L65
-            loglikelihood_grads = torch.autograd.grad(F.log_softmax(self(data), dim=-1)[0, class_index], self.parameters())
+            loglikelihood_grads = torch.autograd.grad(F.log_softmax(self(data), dim=-1)[0, class_index],
+                                                      self.parameters())
 
             # square the gradients computed above and add each of them to the index in list_of_fisher_diags that
             # corresponds to the parameter for which the gradient was calculated
             for parameter in range(len(self.list_of_fisher_diags)):
                 self.list_of_fisher_diags[parameter] += torch.pow(loglikelihood_grads[parameter], 2.0)
 
+
             # stop iterating through loop if num_samples reached
             if sample_number == num_samples - 1:
                 break
 
+        print(count)
         # divide totals by number of samples, getting average squared gradient values across num_samples as the
         # Fisher diagonal values
         for parameter in range(len(self.list_of_fisher_diags)):
@@ -328,14 +338,14 @@ class Model(nn.Module):
             #   https://arxiv.org/pdf/1612.00796.pdf#section.2
             if self.ewc and task_number > 1:
                 # This statement computes loss on previous tasks using the summed fisher terms as in ewc_loss_prev_tasks()
-                #loss += self.ewc_loss_prev_tasks()
+                loss += self.ewc_loss_prev_tasks()
 
                 # Using the commented-out version statement below instead of the one above will calculate ewc loss
                 # on previous tasks by multiplying the square of the difference between the current network
                 # parameter weights and those after training each previously encountered task, multiplied by the
                 # Fisher diagonal computed for the respective previous task in each difference, all summed together.
 
-                loss += self.alternative_ewc_loss(task_number)
+                #loss += self.alternative_ewc_loss(task_number)
 
             # Backward pass: compute gradient of the loss with respect to model
             # parameters

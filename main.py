@@ -14,7 +14,7 @@ def main():
     # Command Line args
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
 
-    parser.add_argument('--batch-size', type=int, default=100, metavar='N',
+    parser.add_argument('--batch-size', type=int, default=64, metavar='N',
                         help='input batch size for training (default: 64)')
 
     parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
@@ -67,14 +67,14 @@ def main():
 
     # since validation set, which is drawn from training set, is size 1024, the rest of the data from the training set
     # are used as the actual data on which the network is trained: 60000 - 1024 = 58976
-    parser.add_argument('--train-dataset-size', type=int, default=58976, metavar='TDS',
+    parser.add_argument('--train-dataset-size', type=int, default=47200, metavar='TDS',
                         help='how many images to put in the training dataset')
 
     # size of the validation set
     #
     # I got the value 1024 from:
     #    https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/main.py#L24
-    parser.add_argument('--validation-dataset-size', type=int, default=1024, metavar='VDS',
+    parser.add_argument('--validation-dataset-size', type=int, default=12800, metavar='VDS',
                         help='how many images to put in the validation dataset')
 
     # the number of samples used in computation of
