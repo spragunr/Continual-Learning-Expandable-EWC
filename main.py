@@ -14,7 +14,7 @@ def main():
     # Command Line args
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
 
-    parser.add_argument('--batch-size', type=int, default=64, metavar='N',
+    parser.add_argument('--batch-size', type=int, default=100, metavar='N',
                         help='input batch size for training (default: 64)')
 
     parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
@@ -246,9 +246,9 @@ def main():
 
 
         # expand each of the models (SGD + DROPOUT and EWC) after task 2 training and before task 3 training...
-        if task_count == 4:
-            print("EXPANDING...")
-            for model_num in range(len(models)):
+        # if task_count == 4:
+        #     print("EXPANDING...")
+        #     for model_num in range(len(models)):
                 
                 # if models[model_num].ewc:
                 #     for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx):
@@ -269,7 +269,7 @@ def main():
                 #         print(ewc_sum.size())
                 #         print(ewc_sum)
                 #
-                models[model_num].expand()
+                #models[model_num].expand()
                 
                 # if models[model_num].ewc:
                 #     for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx):
@@ -293,8 +293,8 @@ def main():
                 
                 
 
-                with SummaryWriter(comment='model ewc: {}'.format(models[model_num].ewc)) as w:
-                        w.add_graph(models[model_num], (dummy_input,))
+                # with SummaryWriter(comment='model ewc: {}'.format(models[model_num].ewc)) as w:
+                #         w.add_graph(models[model_num], (dummy_input,))
 
 
 

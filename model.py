@@ -263,6 +263,7 @@ class Model(nn.Module):
         #   )
         optimizer = optim.SGD(self.parameters(), lr=args.lr, momentum=args.momentum) # can use filter and requires_grad=False to freeze part of the network...
 
+
         # Enumerate will keep an automatic loop counter and store it in batch_idx.
         # The (data, target) pair returned by DataLoader train_loader each iteration consists
         # of an MNIST image data sample and an associated label classifying it as a digit 0-9.
@@ -365,6 +366,7 @@ class Model(nn.Module):
                     'EWC' if self.ewc else 'SGD + DROPOUT', task_number,
                     epoch, batch_idx * len(data), len(train_loader.dataset), 100. * batch_idx / len(train_loader),
                     loss.item()))
+
 
 
     # Defines loss based on all extant Fisher diagonals and previous task weights
