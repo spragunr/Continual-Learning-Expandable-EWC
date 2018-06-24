@@ -111,6 +111,9 @@ def main():
     # based on the value determined here
     device = torch.device("cuda" if use_cuda else "cpu")
 
+    # print 8 digits of precision when displaying floating point output from tensors
+    torch.set_printoptions(precision=8)
+
     # set a manual seed for PyTorch random number generation
     torch.manual_seed(args.seed_torch)
 
@@ -243,23 +246,24 @@ def main():
 
 
         # expand each of the models (SGD + DROPOUT and EWC) after task 2 training and before task 3 training...
-        if task_count == 4:
+        if task_count == 2:
             print("EXPANDING...")
             for model_num in range(len(models)):
-                if model.ewc:
-                    for sum_number, ewc_sum in enumerate(model.sum_Fx):
+
+                if models[model_num].ewc:
+                    for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx):
                         print("SUM_FX pre-expansion:\n")
                         print(sum_number)
                         print(ewc_sum.size())
                         print(ewc_sum)
 
-                    for sum_number, ewc_sum in enumerate(model.sum_Fx_Wx):
+                    for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx_Wx):
                         print("SUM_FX_WX pre-expansion:\n")
                         print(sum_number)
                         print(ewc_sum.size())
                         print(ewc_sum)
 
-                    for sum_number, ewc_sum in enumerate(model.sum_Fx_Wx_sq):
+                    for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx_Wx_sq):
                         print("SUM_FX_WX_SQ pre-expansion:\n")
                         print(sum_number)
                         print(ewc_sum.size())
@@ -267,20 +271,20 @@ def main():
 
                 models[model_num].expand()
 
-                if model.ewc:
-                    for sum_number, ewc_sum in enumerate(model.sum_Fx):
+                if models[model_num].ewc:
+                    for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx):
                         print("SUM_FX post-expansion:\n")
                         print(sum_number)
                         print(ewc_sum.size())
                         print(ewc_sum)
 
-                    for sum_number, ewc_sum in enumerate(model.sum_Fx_Wx):
+                    for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx_Wx):
                         print("SUM_FX_WX post-expansion:\n")
                         print(sum_number)
                         print(ewc_sum.size())
                         print(ewc_sum)
 
-                    for sum_number, ewc_sum in enumerate(model.sum_Fx_Wx_sq):
+                    for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx_Wx_sq):
                         print("SUM_FX_WX_SQ post-expansion:\n")
                         print(sum_number)
                         print(ewc_sum.size())

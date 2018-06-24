@@ -339,14 +339,14 @@ class Model(nn.Module):
             #   https://arxiv.org/pdf/1612.00796.pdf#section.2
             if self.ewc and task_number > 1:
                 # This statement computes loss on previous tasks using the summed fisher terms as in ewc_loss_prev_tasks()
-                #loss += self.ewc_loss_prev_tasks()
+                loss += self.ewc_loss_prev_tasks()
 
                 # Using the commented-out version statement below instead of the one above will calculate ewc loss
                 # on previous tasks by multiplying the square of the difference between the current network
                 # parameter weights and those after training each previously encountered task, multiplied by the
                 # Fisher diagonal computed for the respective previous task in each difference, all summed together.
 
-                loss += self.alternative_ewc_loss(task_number)
+                #loss += self.alternative_ewc_loss(task_number)
 
             # Backward pass: compute gradient of the loss with respect to model
             # parameters
@@ -443,4 +443,10 @@ class Model(nn.Module):
         utils.copy_weights_expanding(old_weights, self)
 
         if self.ewc:
+            for ewc_sum in self.sum_Fx:
+                print("pre-expansion type:", ewc_sum.type())
+
             self.expand_ewc_sums()
+
+            for ewc_sum in self.sum_Fx:
+                print("post-expansion type:", ewc_sum.type())
