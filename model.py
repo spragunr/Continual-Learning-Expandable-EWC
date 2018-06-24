@@ -76,8 +76,6 @@ class Model(nn.Module):
         # _ is the label for the image (not needed)
         for data, _ in validation_loader:
 
-            print(data.size()) # [1, 784, 1]
-
             # The data needs to be wrapped in another tensor to work with our network,
             # otherwise it is not of the appropriate dimensions... I believe this statement effectively adds
             # a dimension.
@@ -106,19 +104,17 @@ class Model(nn.Module):
             # sample a random class index from the softmax activations (.item() gets value in tensor as a scalar)
             class_index = (torch.multinomial(probs, 1)[0][0]).item()
 
-            print(class_index)
 
             # gradients of parameters with respect to log likelihoods (log_softmax applied to output layer),
             # data for the sample from the validation set is sent through the network to mimic the behavior
             # of the feed_dict argument at:
             # https://github.com/ariseff/overcoming-catastrophic/blob/afea2d3c9f926d4168cc51d56f1e9a92989d7af0/model.py#L65
-            loglikelihood_grads = torch.autograd.grad(F.log_softmax(self.y, dim=-1)[0, class_index],
-                                                      self.parameters())
+            loglikelihood_grads = torch.autograd.grad(F.log_softmax(self.y, dim=-1)[0, class_index], self.parameters())
 
             # square the gradients computed above and add each of them to the index in list_of_fisher_diags that
             # corresponds to the parameter for which the gradient was calculated
             for parameter in range(len(self.list_of_fisher_diags)):
-                self.list_of_fisher_diags[parameter] += torch.pow(loglikelihood_grads[parameter], 2.0)
+                self.list_of_fisher_diags[parameter].add_(torch.pow(loglikelihood_grads[parameter], 2.0))
 
             sample_count += 1
 
@@ -443,10 +439,73 @@ class Model(nn.Module):
         utils.copy_weights_expanding(old_weights, self)
 
         if self.ewc:
-            for ewc_sum in self.sum_Fx:
-                print("pre-expansion type:", ewc_sum.type())
 
             self.expand_ewc_sums()
 
-            for ewc_sum in self.sum_Fx:
-                print("post-expansion type:", ewc_sum.type())
+    def estimate_fisher(self, device, validation_loader, num_samples):
+
+
+        # List to hold the computed fisher diagonals for the task on which the network was just trained.
+        # Fisher Information Matrix diagonals are stored as a list of tensors of the same dimensions and in the same
+        # order as the parameters of the model given by model.parameters()
+        self.list_of_fisher_diags = []
+
+        # populate self.list_of_fisher_diags with tensors of zeros of the appropriate sizes
+        for parameter in self.parameters():
+            self.list_of_fisher_diags.append(torch.zeros(tuple(parameter.size())))
+
+        softmax_activations = []
+
+        # sample_count is running count of samples (used to ensure sampling continues until num_samples reached)
+        # data is an image
+        # _ is the label for the image (not needed)
+        for data, label in validation_loader:
+
+            # The data needs to be wrapped in another tensor to work with our network,
+            # otherwise it is not of the appropriate dimensions... I believe this statement effectively adds
+            # a dimension.
+            #
+            # For an explanation of the meaning of this statement, see:
+            #   https://stackoverflow.com/a/42482819/9454504
+            #
+            # This code was used here in another experiment:
+            # https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/model.py#L61
+            data = data.view(validation_loader.batch_size, -1)
+
+            # wrap data and target in variables- again, from the following experiment:
+            #   https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/model.py#L62
+            #
+            # .to(device):
+            # set the device (CPU or GPU) to be used with data and target to device variable (defined in main())
+            data = Variable(data).to(device)
+
+            softmax_activations.append(
+                F.softmax(self(data))
+            )
+
+        class_indices = torch.multinomial(softmax_activations[0], 1)
+
+        random_log_likelihoods = []
+
+        for row in range(len(class_indices)):
+            random_log_likelihoods.append(torch.log(softmax_activations[0][row].index_select(0, class_indices[row][0])))
+
+        # gradients of parameters with respect to log likelihoods (log_softmax applied to output layer),
+        # data for the sample from the validation set is sent through the network to mimic the behavior
+        # of the feed_dict argument at:
+        # https://github.com/ariseff/overcoming-catastrophic/blob/afea2d3c9f926d4168cc51d56f1e9a92989d7af0/model.py#L65
+        loglikelihood_grads = torch.autograd.grad(random_log_likelihoods, self.parameters())
+
+        print(len(loglikelihood_grads))
+
+        # square the gradients computed above and add each of them to the index in list_of_fisher_diags that
+        # corresponds to the parameter for which the gradient was calculated
+        for parameter in range(len(self.list_of_fisher_diags)):
+            self.list_of_fisher_diags[parameter].add_(torch.pow(loglikelihood_grads[parameter], 2.0))
+
+        """
+        # divide totals by number of samples, getting average squared gradient values across sample_count as the
+        # Fisher diagonal values
+        for parameter in range(len(self.list_of_fisher_diags)):
+            self.list_of_fisher_diags[parameter] /= sample_count
+        """
