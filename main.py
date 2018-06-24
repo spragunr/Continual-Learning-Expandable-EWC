@@ -233,7 +233,7 @@ def main():
 
                 # using validation set in Fisher Information Matrix computation as specified by:
                 # https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
-                models[model_num].estimate_fisher(device, validation_loader, args.fisher_num_samples)
+                models[model_num].compute_fisher_prob_dist(device, validation_loader, args.fisher_num_samples)
 
                 # update the ewc loss sums in the model to incorporate weights and fisher info from the task on which
                 # we just trained the network
@@ -244,58 +244,58 @@ def main():
                 models[model_num].task_fisher_diags.update({task_count: deepcopy(models[model_num].list_of_fisher_diags)})
 
 
-        """
+
         # expand each of the models (SGD + DROPOUT and EWC) after task 2 training and before task 3 training...
         if task_count == 4:
             print("EXPANDING...")
             for model_num in range(len(models)):
                 
-                if models[model_num].ewc:
-                    for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx):
-                        print("SUM_FX pre-expansion:\n")
-                        print(sum_number)
-                        print(ewc_sum.size())
-                        print(ewc_sum)
-
-                    for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx_Wx):
-                        print("SUM_FX_WX pre-expansion:\n")
-                        print(sum_number)
-                        print(ewc_sum.size())
-                        print(ewc_sum)
-
-                    for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx_Wx_sq):
-                        print("SUM_FX_WX_SQ pre-expansion:\n")
-                        print(sum_number)
-                        print(ewc_sum.size())
-                        print(ewc_sum)
-                
+                # if models[model_num].ewc:
+                #     for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx):
+                #         print("SUM_FX pre-expansion:\n")
+                #         print(sum_number)
+                #         print(ewc_sum.size())
+                #         print(ewc_sum)
+                #
+                #     for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx_Wx):
+                #         print("SUM_FX_WX pre-expansion:\n")
+                #         print(sum_number)
+                #         print(ewc_sum.size())
+                #         print(ewc_sum)
+                #
+                #     for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx_Wx_sq):
+                #         print("SUM_FX_WX_SQ pre-expansion:\n")
+                #         print(sum_number)
+                #         print(ewc_sum.size())
+                #         print(ewc_sum)
+                #
                 models[model_num].expand()
                 
-                if models[model_num].ewc:
-                    for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx):
-                        print("SUM_FX post-expansion:\n")
-                        print(sum_number)
-                        print(ewc_sum.size())
-                        print(ewc_sum)
-
-                    for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx_Wx):
-                        print("SUM_FX_WX post-expansion:\n")
-                        print(sum_number)
-                        print(ewc_sum.size())
-                        print(ewc_sum)
-
-                    for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx_Wx_sq):
-                        print("SUM_FX_WX_SQ post-expansion:\n")
-                        print(sum_number)
-                        print(ewc_sum.size())
-                        print(ewc_sum)
+                # if models[model_num].ewc:
+                #     for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx):
+                #         print("SUM_FX post-expansion:\n")
+                #         print(sum_number)
+                #         print(ewc_sum.size())
+                #         print(ewc_sum)
+                #
+                #     for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx_Wx):
+                #         print("SUM_FX_WX post-expansion:\n")
+                #         print(sum_number)
+                #         print(ewc_sum.size())
+                #         print(ewc_sum)
+                #
+                #     for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx_Wx_sq):
+                #         print("SUM_FX_WX_SQ post-expansion:\n")
+                #         print(sum_number)
+                #         print(ewc_sum.size())
+                #         print(ewc_sum)
 
                 
                 
 
                 with SummaryWriter(comment='model ewc: {}'.format(models[model_num].ewc)) as w:
                         w.add_graph(models[model_num], (dummy_input,))
-                """
+
 
 
         # increment the number of the current task before re-entering while loop

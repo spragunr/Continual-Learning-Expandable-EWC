@@ -490,22 +490,24 @@ class Model(nn.Module):
         for row in range(len(class_indices)):
             random_log_likelihoods.append(torch.log(softmax_activations[0][row].index_select(0, class_indices[row][0])))
 
-        # gradients of parameters with respect to log likelihoods (log_softmax applied to output layer),
-        # data for the sample from the validation set is sent through the network to mimic the behavior
-        # of the feed_dict argument at:
-        # https://github.com/ariseff/overcoming-catastrophic/blob/afea2d3c9f926d4168cc51d56f1e9a92989d7af0/model.py#L65
-        loglikelihood_grads = torch.autograd.grad(random_log_likelihoods, self.parameters())
 
-        print(len(loglikelihood_grads))
+        for loglikelihood in random_log_likelihoods:
 
-        # square the gradients computed above and add each of them to the index in list_of_fisher_diags that
-        # corresponds to the parameter for which the gradient was calculated
-        for parameter in range(len(self.list_of_fisher_diags)):
-            self.list_of_fisher_diags[parameter].add_(torch.pow(loglikelihood_grads[parameter], 2.0))
+            # gradients of parameters with respect to log likelihoods (log_softmax applied to output layer),
+            # data for the sample from the validation set is sent through the network to mimic the behavior
+            # of the feed_dict argument at:
+            # https://github.com/ariseff/overcoming-catastrophic/blob/afea2d3c9f926d4168cc51d56f1e9a92989d7af0/model.py#L65
+            loglikelihood_grads = torch.autograd.grad(loglikelihood, self.parameters(), retain_graph=True)
 
-        """
+            # square the gradients computed above and add each of them to the index in list_of_fisher_diags that
+            # corresponds to the parameter for which the gradient was calculated
+            for parameter in range(len(self.list_of_fisher_diags)):
+                self.list_of_fisher_diags[parameter].add_(torch.pow(loglikelihood_grads[parameter], 2.0))
+
+            #self.zero_grad()
+
         # divide totals by number of samples, getting average squared gradient values across sample_count as the
         # Fisher diagonal values
         for parameter in range(len(self.list_of_fisher_diags)):
-            self.list_of_fisher_diags[parameter] /= sample_count
-        """
+            self.list_of_fisher_diags[parameter] /= validation_loader.batch_size
+
