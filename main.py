@@ -67,14 +67,14 @@ def main():
 
     # since validation set, which is drawn from training set, is size 1024, the rest of the data from the training set
     # are used as the actual data on which the network is trained: 60000 - 1024 = 58976
-    parser.add_argument('--train-dataset-size', type=int, default=47200, metavar='TDS',
+    parser.add_argument('--train-dataset-size', type=int, default=58976, metavar='TDS',
                         help='how many images to put in the training dataset')
 
     # size of the validation set
     #
     # I got the value 1024 from:
     #    https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/main.py#L24
-    parser.add_argument('--validation-dataset-size', type=int, default=12800, metavar='VDS',
+    parser.add_argument('--validation-dataset-size', type=int, default=1024, metavar='VDS',
                         help='how many images to put in the validation dataset')
 
     # the number of samples used in computation of
@@ -241,16 +241,57 @@ def main():
                 models[model_num].task_fisher_diags.update({task_count: deepcopy(models[model_num].list_of_fisher_diags)})
 
 
-        """
+
         # expand each of the models (SGD + DROPOUT and EWC) after task 2 training and before task 3 training...
-        if task_count == 2:
-            print("expanding...")
+        if task_count == 3:
+            print("EXPANDING...")
             for model_num in range(len(models)):
+                if model.ewc:
+                    for sum_number, ewc_sum in enumerate(model.sum_Fx):
+                        print("SUM_FX pre-expansion:\n")
+                        print(sum_number)
+                        print(ewc_sum.size())
+                        print(ewc_sum)
+
+                    for sum_number, ewc_sum in enumerate(model.sum_Fx_Wx):
+                        print("SUM_FX_WX pre-expansion:\n")
+                        print(sum_number)
+                        print(ewc_sum.size())
+                        print(ewc_sum)
+
+                    for sum_number, ewc_sum in enumerate(model.sum_Fx_Wx_sq):
+                        print("SUM_FX_WX_SQ pre-expansion:\n")
+                        print(sum_number)
+                        print(ewc_sum.size())
+                        print(ewc_sum)
+
                 models[model_num].expand()
+
+                if model.ewc:
+                    for sum_number, ewc_sum in enumerate(model.sum_Fx):
+                        print("SUM_FX post-expansion:\n")
+                        print(sum_number)
+                        print(ewc_sum.size())
+                        print(ewc_sum)
+
+                    for sum_number, ewc_sum in enumerate(model.sum_Fx_Wx):
+                        print("SUM_FX_WX post-expansion:\n")
+                        print(sum_number)
+                        print(ewc_sum.size())
+                        print(ewc_sum)
+
+                    for sum_number, ewc_sum in enumerate(model.sum_Fx_Wx_sq):
+                        print("SUM_FX_WX_SQ post-expansion:\n")
+                        print(sum_number)
+                        print(ewc_sum.size())
+                        print(ewc_sum)
+
+
+
                 with SummaryWriter(comment='model ewc: {}'.format(models[model_num].ewc)) as w:
                         w.add_graph(models[model_num], (dummy_input,))
 
-        """
+
 
         # increment the number of the current task before re-entering while loop
         task_count += 1
