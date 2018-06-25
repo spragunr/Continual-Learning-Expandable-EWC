@@ -432,6 +432,8 @@ class Model(nn.Module):
 
         for parameter in self.parameters():
             old_weights.append(parameter.data.clone())
+            parameter.requires_grad = False
+            parameter.detach()
 
         self.hidden_size *= 2
         self.initialize_module_list()

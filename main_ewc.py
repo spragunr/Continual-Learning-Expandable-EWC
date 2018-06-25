@@ -152,6 +152,9 @@ def main():
     # keep learning tasks ad infinitum
     while (True):
 
+        print(ewc_model)
+
+
         # get the DataLoaders for the training, validation, and testing data
         train_loader, validation_loader, test_loader = utils.generate_new_mnist_task(
             args.train_dataset_size,
@@ -184,18 +187,6 @@ def main():
         # test the model on ALL tasks trained thus far (including current task)
         utils.test(test_models, device, test_loaders)
 
-        # save the theta* ("theta star") values after training - for plotting and comparative loss calculations
-        # using the method in model.alternative_ewc_loss()
-        #
-        # NOTE: when I reference theta*, I am referring to the values represented by that variable in
-        # equation (3) at:
-        #   https://arxiv.org/pdf/1612.00796.pdf#section.2
-        current_weights = []
-
-        for parameter in ewc_model.parameters():
-            current_weights.append(deepcopy(parameter.data.clone()))
-
-        ewc_model.task_post_training_weights.update({task_count: deepcopy(current_weights)})
 
         # using validation set in Fisher Information Matrix computation as specified by:
         # https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
@@ -210,12 +201,21 @@ def main():
         ewc_model.task_fisher_diags.update(
             {task_count: deepcopy(ewc_model.list_of_fisher_diags)})
 
+        # save the theta* ("theta star") values after training - for plotting and comparative loss calculations
+        # using the method in model.alternative_ewc_loss()
+        #
+        # NOTE: when I reference theta*, I am referring to the values represented by that variable in
+        # equation (3) at:
+        #   https://arxiv.org/pdf/1612.00796.pdf#section.2
+        current_weights = []
 
+        for parameter in ewc_model.parameters():
+            current_weights.append(deepcopy(parameter.data.clone()))
+
+        ewc_model.task_post_training_weights.update({task_count: deepcopy(current_weights)})
 
         # expand each of the models (SGD + DROPOUT and EWC) after task 2 training and before task 3 training...
-        if task_count == 4:
-
-            print("EXPANDING...")
+        if task_count == 2:
 
             ewc_model.expand()
 
