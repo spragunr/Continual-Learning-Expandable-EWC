@@ -9,7 +9,6 @@ from torch.autograd import Variable
 from tensorboardX import SummaryWriter
 
 
-
 def main():
     # Command Line args
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
@@ -32,7 +31,7 @@ def main():
     #
     # The original EWC paper hyperparameters are here:
     # https://arxiv.org/pdf/1612.00796.pdf#section.4
-    parser.add_argument('--lr', type=float, default= 0.1, metavar='LR',
+    parser.add_argument('--lr', type=float, default=0.1, metavar='LR',
                         help='learning rate (default: 0.1)')
 
     # We don't want an L2 regularization penalty because https://arxiv.org/pdf/1612.00796.pdf#subsection.2.1
@@ -106,7 +105,6 @@ def main():
     # pin_memory: if True, the DataLoader will copy tensors into CUDA pinned memory before returning them
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
 
-
     # set the device on which to perform computations - later calls to .to(device) will move tensors to GPU or CPU
     # based on the value determined here
     device = torch.device("cuda" if use_cuda else "cpu")
@@ -120,37 +118,20 @@ def main():
     # set a manual seed for numpy random number generation
     np.random.seed(args.seed_numpy)
 
-    # Instantiate a model that will be trained using only SGD with dropout (no EWC).
-    #
-    # .to(device):
-    #   Move all parameters and buffers in the module Net to device (CPU or GPU- set above).
-    #   Both integral and floating point values are moved.
-    sgd_dropout_model = Model(
-                  args.hidden_size,
-                  args.hidden_dropout_prob,
-                  args.input_dropout_prob,
-                  input_size=784, # 28 x 28 pixels = 784 pixels per MNIST image
-                  output_size=10,  # 10 classes - digits 0-9
-                  ewc=False # don't use EWC
-                  ).to(device)
-
     # Instantiate a model that will be trained using EWC.
     #
     # .to(device):
     #   Move all parameters and buffers in the module Net to device (CPU or GPU- set above).
     #   Both integral and floating point values are moved.
     ewc_model = Model(
-                  args.hidden_size,
-                  args.hidden_dropout_prob,
-                  args.input_dropout_prob,
-                  input_size=784,  # 28 x 28 pixels = 784 pixels per MNIST image
-                  output_size=10,  # 10 classes - digits 0-9
-                  ewc=True, # use EWC
-                  lam=args.lam # the lambda (fisher multiplier) value to be used in the EWC loss formula
-                  ).to(device)
-
-    # a list of the models we instantiated above
-    models = [sgd_dropout_model, ewc_model]
+        args.hidden_size,
+        args.hidden_dropout_prob,
+        args.input_dropout_prob,
+        input_size=784,  # 28 x 28 pixels = 784 pixels per MNIST image
+        output_size=10,  # 10 classes - digits 0-9
+        ewc=True,  # use EWC
+        lam=args.lam  # the lambda (fisher multiplier) value to be used in the EWC loss formula
+    ).to(device)
 
     # A list of the different DataLoader objects that hold various permutations of the mnist testing dataset-
     # we keep these around in a persistent list here so that we can use them to test each of the models in the
@@ -166,17 +147,10 @@ def main():
     model_size_dictionaries = []
 
     # initialize model size dictionaries
-    for model in models:
-        model_size_dictionaries.append({})
-
-    dummy_input = Variable(torch.rand(args.batch_size, 784))
-
-    for model in models:
-        with SummaryWriter(comment='model ewc: {}'.format(model.ewc)) as w:
-            w.add_graph(model, (dummy_input,))
+    model_size_dictionaries.append({})
 
     # keep learning tasks ad infinitum
-    while(True):
+    while (True):
 
         # get the DataLoaders for the training, validation, and testing data
         train_loader, validation_loader, test_loader = utils.generate_new_mnist_task(
@@ -185,7 +159,7 @@ def main():
             args.batch_size,
             args.test_batch_size,
             kwargs,
-            first_task=(task_count == 1) # if first_task is True, we won't permute the MNIST dataset.
+            first_task=(task_count == 1)  # if first_task is True, we won't permute the MNIST dataset.
         )
 
         # add the new test_loader for this task to the list of testing dataset DataLoaders for later re-use
@@ -195,111 +169,59 @@ def main():
         # need to test each network on the current task after training
         test_loaders.append(test_loader)
 
-        # for both SGD w/ Dropout and EWC models...
-        for model_num in range(len(models)):
+        # for each desired epoch, train the model on the latest task
+        for epoch in range(1, args.epochs + 1):
+            ewc_model.train_model(args, device, train_loader, epoch, task_count)
 
-            # for each desired epoch, train the model on the latest task
-            for epoch in range(1, args.epochs + 1):
-                models[model_num].train_model(args, device, train_loader, epoch, task_count)
+        # update the model size dictionary
+        model_size_dictionaries[0].update({task_count: ewc_model.hidden_size})
 
-            # update the model size dictionary
-            model_size_dictionaries[model_num].update({task_count: models[model_num].hidden_size})
+        # generate a dictionary mapping tasks to models of the sizes that the network was when those tasks were
+        # trained, containing subsets of the weights currently in the model (to mask new, post-expansion weights
+        # when testing on tasks for which the weights did not exist during training)
+        test_models = utils.generate_model_dictionary(ewc_model, model_size_dictionaries[0])
 
-            # generate a dictionary mapping tasks to models of the sizes that the network was when those tasks were
-            # trained, containing subsets of the weights currently in the model (to mask new, post-expansion weights
-            # when testing on tasks for which the weights did not exist during training)
-            test_models = utils.generate_model_dictionary(models[model_num], model_size_dictionaries[model_num])
+        # test the model on ALL tasks trained thus far (including current task)
+        utils.test(test_models, device, test_loaders)
 
-            # test the model on ALL tasks trained thus far (including current task)
-            utils.test(test_models, device, test_loaders)
+        # save the theta* ("theta star") values after training - for plotting and comparative loss calculations
+        # using the method in model.alternative_ewc_loss()
+        #
+        # NOTE: when I reference theta*, I am referring to the values represented by that variable in
+        # equation (3) at:
+        #   https://arxiv.org/pdf/1612.00796.pdf#section.2
+        current_weights = []
 
+        for parameter in ewc_model.parameters():
+            current_weights.append(deepcopy(parameter.data.clone()))
 
-            # If the model currently being used in the loop is using EWC, we need to compute the fisher information
-            if models[model_num].ewc:
+        ewc_model.task_post_training_weights.update({task_count: deepcopy(current_weights)})
 
-                # save the theta* ("theta star") values after training - for plotting and comparative loss calculations
-                # using the method in model.alternative_ewc_loss()
-                #
-                # NOTE: when I reference theta*, I am referring to the values represented by that variable in
-                # equation (3) at:
-                #   https://arxiv.org/pdf/1612.00796.pdf#section.2
-                current_weights = []
+        # using validation set in Fisher Information Matrix computation as specified by:
+        # https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
+        ewc_model.compute_fisher_prob_dist(device, validation_loader, args.fisher_num_samples)
 
-                for parameter in models[model_num].parameters():
-                    current_weights.append(deepcopy(parameter.data.clone()))
+        # update the ewc loss sums in the model to incorporate weights and fisher info from the task on which
+        # we just trained the network
+        ewc_model.update_ewc_sums()
 
-
-                models[model_num].task_post_training_weights.update({task_count: deepcopy(current_weights)})
-
-                # using validation set in Fisher Information Matrix computation as specified by:
-                # https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
-                models[model_num].compute_fisher_prob_dist(device, validation_loader, args.fisher_num_samples)
-
-                # update the ewc loss sums in the model to incorporate weights and fisher info from the task on which
-                # we just trained the network
-                models[model_num].update_ewc_sums()
-
-                # store the current fisher diagonals for use with plotting and comparative loss calculations
-                # using the method in model.alternative_ewc_loss()
-                models[model_num].task_fisher_diags.update({task_count: deepcopy(models[model_num].list_of_fisher_diags)})
+        # store the current fisher diagonals for use with plotting and comparative loss calculations
+        # using the method in model.alternative_ewc_loss()
+        ewc_model.task_fisher_diags.update(
+            {task_count: deepcopy(ewc_model.list_of_fisher_diags)})
 
 
 
         # expand each of the models (SGD + DROPOUT and EWC) after task 2 training and before task 3 training...
         if task_count == 4:
+
             print("EXPANDING...")
-            for model_num in range(len(models)):
-                
-                # if models[model_num].ewc:
-                #     for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx):
-                #         print("SUM_FX pre-expansion:\n")
-                #         print(sum_number)
-                #         print(ewc_sum.size())
-                #         print(ewc_sum)
-                #
-                #     for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx_Wx):
-                #         print("SUM_FX_WX pre-expansion:\n")
-                #         print(sum_number)
-                #         print(ewc_sum.size())
-                #         print(ewc_sum)
-                #
-                #     for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx_Wx_sq):
-                #         print("SUM_FX_WX_SQ pre-expansion:\n")
-                #         print(sum_number)
-                #         print(ewc_sum.size())
-                #         print(ewc_sum)
-                #
-                models[model_num].expand()
-                
-                # if models[model_num].ewc:
-                #     for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx):
-                #         print("SUM_FX post-expansion:\n")
-                #         print(sum_number)
-                #         print(ewc_sum.size())
-                #         print(ewc_sum)
-                #
-                #     for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx_Wx):
-                #         print("SUM_FX_WX post-expansion:\n")
-                #         print(sum_number)
-                #         print(ewc_sum.size())
-                #         print(ewc_sum)
-                #
-                #     for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx_Wx_sq):
-                #         print("SUM_FX_WX_SQ post-expansion:\n")
-                #         print(sum_number)
-                #         print(ewc_sum.size())
-                #         print(ewc_sum)
 
-                
-                
-
-                # with SummaryWriter(comment='model ewc: {}'.format(models[model_num].ewc)) as w:
-                #         w.add_graph(models[model_num], (dummy_input,))
-
-
+            ewc_model.expand()
 
         # increment the number of the current task before re-entering while loop
         task_count += 1
+
 
 if __name__ == '__main__':
     main()
