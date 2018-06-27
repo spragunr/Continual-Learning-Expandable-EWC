@@ -82,7 +82,7 @@ def main():
     parser.add_argument('--fisher-num-samples', type=int, default=200)
 
     # size of hidden layer(s)
-    parser.add_argument('--hidden-size', type=int, default=50)
+    parser.add_argument('--hidden-size', type=int, default=30)
 
     # number of hidden layers
     # TODO implement this - currently does not actually modify network structure...
@@ -246,9 +246,10 @@ def main():
 
 
         # expand each of the models (SGD + DROPOUT and EWC) after task 2 training and before task 3 training...
-        if task_count == 4:
-            print("EXPANDING...")
-            for model_num in range(len(models)):
+         if task_count == 4:
+             print("EXPANDING...")
+             for model_num in range(len(models)):
+
                 
                 # if models[model_num].ewc:
                 #     for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx):
@@ -269,7 +270,7 @@ def main():
                 #         print(ewc_sum.size())
                 #         print(ewc_sum)
                 #
-                models[model_num].expand()
+                 models[model_num].expand()
                 
                 # if models[model_num].ewc:
                 #     for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx):
