@@ -46,10 +46,8 @@ def main():
     while(True):
 
         # get the DataLoaders for the training, validation, and testing data
-        train_loader, validation_loader, test_loader = utils.generate_new_mnist_task(
-            args,
-            kwargs,
-            first_task=(task_count == 1) # if first_task is True, we won't permute the MNIST dataset.
+        train_loader, validation_loader, test_loader = utils.generate_new_mnist_task(args, kwargs,
+            first_task=(task_count == 1)
         )
 
         # add the new test_loader for this task to the list of testing dataset DataLoaders for later re-use
@@ -59,7 +57,6 @@ def main():
         # need to test each network on the current task after training
         test_loaders.append(test_loader)
 
-        # for both SGD w/ Dropout and EWC models...
         for model_num in range(len(models)):
 
             # for each desired epoch, train the model on the latest task
@@ -109,54 +106,12 @@ def main():
 
 
 
-         # expand each of the models (SGD + DROPOUT and EWC) after task 2 training and before task 3 training...
+        # expand all models before training the next task
         if task_count == 4:
             print("EXPANDING...")
             for model_num in range(len(models)):
 
-                
-                # if models[model_num].ewc:
-                #     for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx):
-                #         print("SUM_FX pre-expansion:\n")
-                #         print(sum_number)
-                #         print(ewc_sum.size())
-                #         print(ewc_sum)
-                #
-                #     for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx_Wx):
-                #         print("SUM_FX_WX pre-expansion:\n")
-                #         print(sum_number)
-                #         print(ewc_sum.size())
-                #         print(ewc_sum)
-                #
-                #     for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx_Wx_sq):
-                #         print("SUM_FX_WX_SQ pre-expansion:\n")
-                #         print(sum_number)
-                #         print(ewc_sum.size())
-                #         print(ewc_sum)
-                #
                 models[model_num].expand()
-                
-                # if models[model_num].ewc:
-                #     for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx):
-                #         print("SUM_FX post-expansion:\n")
-                #         print(sum_number)
-                #         print(ewc_sum.size())
-                #         print(ewc_sum)
-                #
-                #     for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx_Wx):
-                #         print("SUM_FX_WX post-expansion:\n")
-                #         print(sum_number)
-                #         print(ewc_sum.size())
-                #         print(ewc_sum)
-                #
-                #     for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx_Wx_sq):
-                #         print("SUM_FX_WX_SQ post-expansion:\n")
-                #         print(sum_number)
-                #         print(ewc_sum.size())
-                #         print(ewc_sum)
-
-                
-                
 
                 # with SummaryWriter(comment='model ewc: {}'.format(models[model_num].ewc)) as w:
                 #         w.add_graph(models[model_num], (dummy_input,))
@@ -165,6 +120,7 @@ def main():
 
         # increment the number of the current task before re-entering while loop
         task_count += 1
+
 
 if __name__ == '__main__':
     main()
