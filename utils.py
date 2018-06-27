@@ -1,11 +1,9 @@
 import torch
 import torch.nn as nn
-import numpy as np
 import scipy.stats as stats
 import torch.utils.data as D
 from torch.autograd import Variable
 from torchvision import datasets, transforms
-from copy import deepcopy
 from model import Model
 from tensorboardX import SummaryWriter
 

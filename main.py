@@ -1,12 +1,6 @@
 import torch
 import utils
 import setup
-import numpy as np
-from model import Model
-from copy import deepcopy
-from torch.autograd import Variable
-
-
 
 def main():
 
