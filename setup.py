@@ -40,7 +40,7 @@ def parse_arguments():
                         help='random seed for NumPy (default: 1)')
 
     parser.add_argument('--log-interval', type=int, default=10, metavar='N',
-                        help='how many batches to wait before logging training status')
+                        help='how many batches to wait before logging training status (default 10)')
 
     # [train dataset size] = [full MNIST train set (60,000)] - [validation set size]
     parser.add_argument('--train-dataset-size', type=int, default=59800, metavar='TDS',

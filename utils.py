@@ -10,7 +10,7 @@ from model import Model
 
 
 # generate the DataLoaders corresponding to a permuted mnist task
-def generate_new_mnist_task(train_dataset_size, validation_dataset_size, batch_size, test_batch_size, kwargs, first_task):
+def generate_new_mnist_task(args, kwargs, first_task):
 
     # permutation to be applied to all images in the dataset (if this is not the first dataset being generated)
     pixel_permutation = torch.randperm(28 * 28)
@@ -63,12 +63,11 @@ def generate_new_mnist_task(train_dataset_size, validation_dataset_size, batch_s
     #                                       If dataset is already downloaded, it is not downloaded again.
     train_data, validation_data = \
         D.dataset.random_split(datasets.MNIST('../data', train=True, transform=transformations, download=True),
-            [train_dataset_size, validation_dataset_size])
+            [args.train_dataset_size, args.validation_dataset_size])
 
     # Testing dataset.
     # train=False, because we want to draw the data here from <root>/test.pt (as opposed to <root>/training.pt)
-    test_data = \
-        datasets.MNIST('../data', train=False, transform=transformations, download=True)
+    test_data = datasets.MNIST('../data', train=False, transform=transformations, download=True)
 
     # A PyTorch DataLoader combines a dataset and a sampler, and returns single- or multi-process iterators over
     # the dataset.
@@ -79,21 +78,20 @@ def generate_new_mnist_task(train_dataset_size, validation_dataset_size, batch_s
     # batch_size (int, optional) – how many samples per batch to load (default: 1).
     # shuffle (bool, optional) – set to True to have the data reshuffled at every epoch (default: False).
     # kwargs - see above definition
-    train_loader = D.DataLoader(train_data, batch_size=batch_size, shuffle=True, **kwargs)
+    train_loader = D.DataLoader(train_data, batch_size=args.batch_size, shuffle=True, **kwargs)
 
     # Dataloader for the validation dataset-
     # ARGUMENTS (in order):
     # 1) validation_data as the dataset
-    # 2) batch_size is same as that provided for the training dataset
+    # 2) batch_size is the entire validation set in one batch
     # 3) shuffle=True ensures we are drawing random samples by shuffling the data each time we contstruct a new iterator
-    #       over the data, and is implemented in the source code as a RandomSampler() - see comments in compute_fisher
-    #       for more details and a link to the source code
+    #       over the data, and is implemented in the source code as a RandomSampler()
     # 4) kwargs defined above
-    validation_loader = D.DataLoader(validation_data, batch_size=200, shuffle=True, **kwargs)
+    validation_loader = D.DataLoader(validation_data, batch_size=args.validation_dataset_size, shuffle=True, **kwargs)
 
     # Instantiate a DataLoader for the testing data in the same manner as above for training data, with two exceptions:
     #   Here, we use test_data rather than train_data, and we use test_batch_size
-    test_loader = D.DataLoader(test_data, batch_size=test_batch_size, shuffle=True, **kwargs)
+    test_loader = D.DataLoader(test_data, batch_size=args.test_batch_size, shuffle=True, **kwargs)
 
     return train_loader, validation_loader, test_loader
 
@@ -364,5 +362,5 @@ def trunc_normal_weights(shape, mean=0.0, stdev=0.1):
 # https://github.com/ariseff/overcoming-catastrophic/blob/afea2d3c9f926d4168cc51d56f1e9a92989d7af0/model.py#L7
 def init_weights(m):
     if type(m) == nn.Linear:
-        m.weight.data.copy_(trunc_normal_weights(m.weight.size())) # todo maybe initialize these differently... (only the parts we need to)
+        m.weight.data.copy_(trunc_normal_weights(m.weight.size()))
         m.bias.data.fill_(0.1)

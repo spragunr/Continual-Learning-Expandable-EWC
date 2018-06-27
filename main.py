@@ -47,10 +47,7 @@ def main():
 
         # get the DataLoaders for the training, validation, and testing data
         train_loader, validation_loader, test_loader = utils.generate_new_mnist_task(
-            args.train_dataset_size,
-            args.validation_dataset_size,
-            args.batch_size,
-            args.test_batch_size,
+            args,
             kwargs,
             first_task=(task_count == 1) # if first_task is True, we won't permute the MNIST dataset.
         )
