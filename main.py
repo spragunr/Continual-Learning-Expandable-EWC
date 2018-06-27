@@ -45,47 +45,48 @@ def main():
         # need to test each network on the current task after training
         test_loaders.append(test_loader)
 
-        for model_num in range(len(models)):
+        for model in models:
 
             # for each desired epoch, train the model on the latest task
             for epoch in range(1, args.epochs + 1):
-                models[model_num].train_model(args, device, train_loader, epoch, task_count)
+                model.train_model(args, device, train_loader, epoch, task_count)
 
             # update the model size dictionary
-            models[model_num].update_size_dict(task_count)
+            model.update_size_dict(task_count)
 
             # generate a dictionary mapping tasks to models of the sizes that the network was when those tasks were
             # trained, containing subsets of the weights currently in the model (to mask new, post-expansion weights
             # when testing on tasks for which the weights did not exist during training)
-            test_models = utils.generate_model_dictionary(models[model_num])
+            test_models = utils.generate_model_dictionary(model)
 
             # test the model on ALL tasks trained thus far (including current task)
             utils.test(test_models, device, test_loaders)
 
 
             # If the model currently being used in the loop is using EWC, we need to compute the fisher information
-            if models[model_num].ewc:
+            if model.ewc:
 
-                models[model_num].save_theta_stars(task_count)
+                model.save_theta_stars(task_count)
 
                 # using validation set in Fisher Information Matrix computation as specified by:
                 # https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
-                models[model_num].estimate_fisher(device, validation_loader)
+                model.estimate_fisher(device, validation_loader)
 
                 # update the ewc loss sums in the model to incorporate weights and fisher info from the task on which
                 # we just trained the network
-                models[model_num].update_ewc_sums()
+                model.update_ewc_sums()
 
                 # store the current fisher diagonals for use with plotting and comparative loss calculations
                 # using the method in model.alternative_ewc_loss()
-                models[model_num].save_fisher_diags(task_count)
+                model.save_fisher_diags(task_count)
 
         # expand all models before training the next task
         if task_count == 2:
 
             print("EXPANDING...")
-            for model_num in range(len(models)):
-                models[model_num].expand()
+
+            for model in models:
+                model.expand()
                 utils.output_tensorboard_graph(args, models, task_count)
 
         # increment the number of the current task before re-entering while loop
