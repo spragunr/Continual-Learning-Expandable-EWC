@@ -14,55 +14,19 @@ def main():
 
     kwargs, device = setup.set_gpu_options(args)
 
+    setup.seed_rngs(args)
+
     # print 8 digits of precision when displaying floating point output from tensors
     torch.set_printoptions(precision=8)
 
-    # set a manual seed for PyTorch random number generation
-    torch.manual_seed(args.seed_torch)
-
-    # set a manual seed for numpy random number generation
-    np.random.seed(args.seed_numpy)
-
-    # Instantiate a model that will be trained using only SGD with dropout (no EWC).
-    #
-    # .to(device):
-    #   Move all parameters and buffers in the module Net to device (CPU or GPU- set above).
-    #   Both integral and floating point values are moved.
-    sgd_dropout_model = Model(
-                  args.hidden_size,
-                  args.hidden_dropout_prob,
-                  args.input_dropout_prob,
-                  input_size=784, # 28 x 28 pixels = 784 pixels per MNIST image
-                  output_size=10,  # 10 classes - digits 0-9
-                  ewc=False # don't use EWC
-                  ).to(device)
-
-    # Instantiate a model that will be trained using EWC.
-    #
-    # .to(device):
-    #   Move all parameters and buffers in the module Net to device (CPU or GPU- set above).
-    #   Both integral and floating point values are moved.
-    ewc_model = Model(
-                  args.hidden_size,
-                  args.hidden_dropout_prob,
-                  args.input_dropout_prob,
-                  input_size=784,  # 28 x 28 pixels = 784 pixels per MNIST image
-                  output_size=10,  # 10 classes - digits 0-9
-                  ewc=True, # use EWC
-                  lam=args.lam # the lambda (fisher multiplier) value to be used in the EWC loss formula
-                  ).to(device)
-
-    # a list of the models we instantiated above
-    models = [sgd_dropout_model, ewc_model]
+    models = setup.build_models(args, device)
 
     # A list of the different DataLoader objects that hold various permutations of the mnist testing dataset-
-    # we keep these around in a persistent list here so that we can use them to test each of the models in the
-    # list "models" after they are trained on the latest task's training dataset.
-    # For more details, see: generate_new_mnist_task() in utils.py
+    # used for testing models on all previously encountered tasks
     test_loaders = []
 
-    # the number of the task on which we are CURRENTLY training in the loop below (as opposed to a count of the number
-    # of tasks on which we have already trained) - e.g. when training on task 3 this value will be 3
+    # The number of the task on which we are CURRENTLY training in the loop below-
+    # e.g. when training on task 3 this value will be 3
     task_count = 1
 
     # dictionary, format {task number: size of network parameters (weights) when the network was trained on the task}
@@ -136,7 +100,7 @@ def main():
 
                 # using validation set in Fisher Information Matrix computation as specified by:
                 # https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
-                models[model_num].compute_fisher_prob_dist(device, validation_loader, args.fisher_num_samples)
+                models[model_num].estimate_fisher(device, validation_loader)
 
                 # update the ewc loss sums in the model to incorporate weights and fisher info from the task on which
                 # we just trained the network

@@ -13,8 +13,7 @@ from tensorboardX import SummaryWriter
 class Model(nn.Module):
 
     # TODO remove the dropout probability parameters
-    def __init__(self, hidden_size, hidden_dropout_prob, input_dropout_prob, input_size, output_size,
-                 ewc, lam=0, task_fisher_diags ={}, task_post_training_weights={}):
+    def __init__(self, hidden_size, input_size, output_size, ewc, lam=0, task_fisher_diags ={}, task_post_training_weights={}):
 
         super().__init__()
 
@@ -36,9 +35,7 @@ class Model(nn.Module):
 
         # copy specified model hyperparameters into instance variables
         self.input_size = input_size
-        self.input_dropout_prob = input_dropout_prob
         self.hidden_size = hidden_size
-        self.hidden_dropout_prob = hidden_dropout_prob
         self.output_size = output_size
 
         self.initialize_module_list()
@@ -446,7 +443,9 @@ class Model(nn.Module):
 
             self.expand_ewc_sums()
 
-    def estimate_fisher(self, device, validation_loader, num_samples):
+
+    # used for whole batch
+    def estimate_fisher(self, device, validation_loader):
 
 
         # List to hold the computed fisher diagonals for the task on which the network was just trained.
@@ -484,7 +483,7 @@ class Model(nn.Module):
             data = Variable(data).to(device)
 
             softmax_activations.append(
-                F.softmax(self(data))
+                F.softmax(self(data), dim=-1)
             )
 
         class_indices = torch.multinomial(softmax_activations[0], 1)
@@ -508,10 +507,9 @@ class Model(nn.Module):
             for parameter in range(len(self.list_of_fisher_diags)):
                 self.list_of_fisher_diags[parameter].add_(torch.pow(loglikelihood_grads[parameter], 2.0))
 
-            #self.zero_grad()
-
         # divide totals by number of samples, getting average squared gradient values across sample_count as the
         # Fisher diagonal values
         for parameter in range(len(self.list_of_fisher_diags)):
             self.list_of_fisher_diags[parameter] /= validation_loader.batch_size
+
 

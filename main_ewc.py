@@ -125,8 +125,6 @@ def main():
     #   Both integral and floating point values are moved.
     ewc_model = Model(
         args.hidden_size,
-        args.hidden_dropout_prob,
-        args.input_dropout_prob,
         input_size=784,  # 28 x 28 pixels = 784 pixels per MNIST image
         output_size=10,  # 10 classes - digits 0-9
         ewc=True,  # use EWC
@@ -190,7 +188,7 @@ def main():
 
         # using validation set in Fisher Information Matrix computation as specified by:
         # https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
-        ewc_model.estimate_fisher(device, validation_loader, args.fisher_num_samples)
+        ewc_model.estimate_fisher(device, validation_loader)
 
         # update the ewc loss sums in the model to incorporate weights and fisher info from the task on which
         # we just trained the network
@@ -215,7 +213,7 @@ def main():
         ewc_model.task_post_training_weights.update({task_count: deepcopy(current_weights)})
 
         # expand each of the models (SGD + DROPOUT and EWC) after task 2 training and before task 3 training...
-        if task_count == 2:
+        if task_count == 20:
 
             ewc_model.expand()
 

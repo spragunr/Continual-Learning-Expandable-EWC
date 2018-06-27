@@ -294,8 +294,6 @@ def generate_model_dictionary(model, model_size_dictionary):
         models.append(
             Model(
                 hidden_size,
-                model.hidden_dropout_prob,
-                model.input_dropout_prob,
                 model.input_size,
                 model.output_size,
                 model.ewc,
