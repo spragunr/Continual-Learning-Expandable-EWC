@@ -38,8 +38,6 @@ def main():
     for model in models:
         model_size_dictionaries.append({})
 
-
-    # keep learning tasks ad infinitum
     while(True):
 
         # get the DataLoaders for the training, validation, and testing data
@@ -101,16 +99,12 @@ def main():
                 # using the method in model.alternative_ewc_loss()
                 models[model_num].task_fisher_diags.update({task_count: deepcopy(models[model_num].list_of_fisher_diags)})
 
-
-
         # expand all models before training the next task
         if task_count == 4:
             print("EXPANDING...")
             for model_num in range(len(models)):
                 models[model_num].expand()
                 utils.output_tensorboard_graph(args, models, task_count)
-
-
 
         # increment the number of the current task before re-entering while loop
         task_count += 1
