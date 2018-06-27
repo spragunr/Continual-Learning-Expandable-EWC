@@ -12,7 +12,6 @@ from tensorboardX import SummaryWriter
 
 class Model(nn.Module):
 
-    # TODO remove the dropout probability parameters
     def __init__(self, hidden_size, input_size, output_size, ewc, lam=0):
 
         super().__init__()
