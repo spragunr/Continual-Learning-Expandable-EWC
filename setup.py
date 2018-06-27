@@ -53,6 +53,14 @@ def parse_arguments():
     parser.add_argument('--hidden-size', type=int, default=50, metavar='HS',
                         help='number of neurons in each hidden layer of the network')
 
+    # 28 x 28 pixels = 784 pixels per MNIST image
+    parser.add_argument('--input-size', type=int, default=784, metavar='IS',
+                        help='size of each input data sampe to the network (default 784 (28 * 28))')
+
+    # 10 classes - digits 0-9
+    parser.add_argument('--output-size', type=int, default=10, metavar='OS',
+                        help='size of the output of the network (default 10)')
+
     return parser.parse_args()
 
 
@@ -89,8 +97,8 @@ def build_models(args, device):
     #   Both integral and floating point values are moved.
     vanilla_sgd_model = Model(
         args.hidden_size,
-        input_size=784,  # 28 x 28 pixels = 784 pixels per MNIST image
-        output_size=10,  # 10 classes - digits 0-9
+        args.input_size,
+        args.output_size,
         ewc=False  # don't use EWC
     ).to(device)
 
@@ -101,8 +109,8 @@ def build_models(args, device):
     #   Both integral and floating point values are moved.
     ewc_model = Model(
         args.hidden_size,
-        input_size=784,  # 28 x 28 pixels = 784 pixels per MNIST image
-        output_size=10,  # 10 classes - digits 0-9
+        args.input_size,
+        args.output_size,
         ewc=True,  # use EWC
         lam=args.lam  # the lambda (fisher multiplier) value to be used in the EWC loss formula
     ).to(device)

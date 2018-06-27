@@ -7,13 +7,14 @@ from torch.autograd import Variable
 from torchvision import datasets, transforms
 from copy import deepcopy
 from model import Model
+from tensorboardX import SummaryWriter
 
 
 # generate the DataLoaders corresponding to a permuted mnist task
 def generate_new_mnist_task(args, kwargs, first_task):
 
     # permutation to be applied to all images in the dataset (if this is not the first dataset being generated)
-    pixel_permutation = torch.randperm(28 * 28)
+    pixel_permutation = torch.randperm(args.input_size)
 
     # transforms.Compose() composes several transforms together.
     #
@@ -364,3 +365,11 @@ def init_weights(m):
     if type(m) == nn.Linear:
         m.weight.data.copy_(trunc_normal_weights(m.weight.size()))
         m.bias.data.fill_(0.1)
+
+def output_tensorboard_graph(args, models, task_count):
+
+    dummy_input = Variable(torch.rand(args.batch_size, args.input_size))
+
+    for model in models:
+        with SummaryWriter(comment='MODEL task count: {}, ewc: {}, structure:{}'.format(task_count, model.ewc, model)) as w:
+            w.add_graph(model, (dummy_input,))

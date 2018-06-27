@@ -5,7 +5,7 @@ import numpy as np
 from model import Model
 from copy import deepcopy
 from torch.autograd import Variable
-from tensorboardX import SummaryWriter
+
 
 
 def main():
@@ -29,6 +29,8 @@ def main():
     # e.g. when training on task 3 this value will be 3
     task_count = 1
 
+    utils.output_tensorboard_graph(args, models, task_count)
+
     # dictionary, format {task number: size of network parameters (weights) when the network was trained on the task}
     model_size_dictionaries = []
 
@@ -36,11 +38,6 @@ def main():
     for model in models:
         model_size_dictionaries.append({})
 
-    dummy_input = Variable(torch.rand(args.batch_size, 784))
-
-    for model in models:
-        with SummaryWriter(comment='model ewc: {}'.format(model.ewc)) as w:
-            w.add_graph(model, (dummy_input,))
 
     # keep learning tasks ad infinitum
     while(True):
@@ -110,11 +107,8 @@ def main():
         if task_count == 4:
             print("EXPANDING...")
             for model_num in range(len(models)):
-
                 models[model_num].expand()
-
-                # with SummaryWriter(comment='model ewc: {}'.format(models[model_num].ewc)) as w:
-                #         w.add_graph(models[model_num], (dummy_input,))
+                utils.output_tensorboard_graph(args, models, task_count)
 
 
 
