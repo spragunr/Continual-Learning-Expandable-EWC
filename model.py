@@ -459,32 +459,31 @@ class Model(nn.Module):
 
         softmax_activations = []
 
-        # sample_count is running count of samples (used to ensure sampling continues until num_samples reached)
-        # data is an image
-        # _ is the label for the image (not needed)
-        for data, label in validation_loader:
+        # data is an batch of images
+        # _ is a batch of labels for the images in the data batch (not needed)
+        data, _ = next(iter(validation_loader))
 
-            # The data needs to be wrapped in another tensor to work with our network,
-            # otherwise it is not of the appropriate dimensions... I believe this statement effectively adds
-            # a dimension.
-            #
-            # For an explanation of the meaning of this statement, see:
-            #   https://stackoverflow.com/a/42482819/9454504
-            #
-            # This code was used here in another experiment:
-            # https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/model.py#L61
-            data = data.view(validation_loader.batch_size, -1)
+        # The data needs to be wrapped in another tensor to work with our network,
+        # otherwise it is not of the appropriate dimensions... I believe this statement effectively adds
+        # a dimension.
+        #
+        # For an explanation of the meaning of this statement, see:
+        #   https://stackoverflow.com/a/42482819/9454504
+        #
+        # This code was used here in another experiment:
+        # https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/model.py#L61
+        data = data.view(validation_loader.batch_size, -1)
 
-            # wrap data and target in variables- again, from the following experiment:
-            #   https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/model.py#L62
-            #
-            # .to(device):
-            # set the device (CPU or GPU) to be used with data and target to device variable (defined in main())
-            data = Variable(data).to(device)
+        # wrap data and target in variables- again, from the following experiment:
+        #   https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/model.py#L62
+        #
+        # .to(device):
+        # set the device (CPU or GPU) to be used with data and target to device variable (defined in main())
+        data = Variable(data).to(device)
 
-            softmax_activations.append(
-                F.softmax(self(data), dim=-1)
-            )
+        softmax_activations.append(
+            F.softmax(self(data), dim=-1)
+        )
 
         class_indices = torch.multinomial(softmax_activations[0], 1)
 
