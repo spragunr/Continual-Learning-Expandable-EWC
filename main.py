@@ -1,115 +1,18 @@
-import argparse
 import torch
 import utils
+import setup
 import numpy as np
 from model import Model
 from copy import deepcopy
-import plot
 from torch.autograd import Variable
 from tensorboardX import SummaryWriter
 
 
-
 def main():
-    # Command Line args
-    parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
 
-    parser.add_argument('--batch-size', type=int, default=100, metavar='N',
-                        help='input batch size for training (default: 64)')
+    args = setup.parse_arguments()
 
-    parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
-                        help='input batch size for testing (default: 1000)')
-
-    # 1 is just for speed when testing - the original EWC paper hyperparameters are here:
-    # https://arxiv.org/pdf/1612.00796.pdf#section.4
-    # This experiment uses 100 epochs:
-    # https://github.com/stokesj/EWC
-    parser.add_argument('--epochs', type=int, default=1, metavar='N',
-                        help='number of epochs to train (default: 1)')
-
-    # This learning rate is the same as the one used by:
-    # https://github.com/ariseff/overcoming-catastrophic/blob/afea2d3c9f926d4168cc51d56f1e9a92989d7af0/model.py#L114
-    #
-    # The original EWC paper hyperparameters are here:
-    # https://arxiv.org/pdf/1612.00796.pdf#section.4
-    parser.add_argument('--lr', type=float, default= 0.1, metavar='LR',
-                        help='learning rate (default: 0.1)')
-
-    # We don't want an L2 regularization penalty because https://arxiv.org/pdf/1612.00796.pdf#subsection.2.1
-    # (see figure 2A) shows that this would prevent the network from learning another task.
-    parser.add_argument('--l2-reg-penalty', type=float, default=0.0, metavar='L2',
-                        help='l2 regularization penalty (weight decay) (default: 0.0)')
-
-    # This is the lambda (fisher multiplier) value used by:
-    # https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb - see In [17]
-    #
-    # some other examples:
-    # 400 (from https://arxiv.org/pdf/1612.00796.pdf#subsection.4.2)
-    #  inverse of learning rate (1.0 / lr) (from https://github.com/stokesj/EWC)- see readme
-    parser.add_argument('--lam', type=float, default=15, metavar='LAM',
-                        help='ewc lambda value (fisher multiplier) (default: 15)')
-
-    # only necessary if optimizer SGD with momentum is desired, hence default is 0.0
-    parser.add_argument('--momentum', type=float, default=0.0, metavar='M',
-                        help='SGD momentum (default: 0.0)')
-
-    parser.add_argument('--no-cuda', action='store_true', default=False,
-                        help='disables CUDA training')
-
-    parser.add_argument('--seed-torch', type=int, default=1, metavar='ST',
-                        help='random seed for PyTorch (default: 1)')
-
-    parser.add_argument('--seed-numpy', type=int, default=1, metavar='SN',
-                        help='random seed for numpy (default: 1)')
-
-    parser.add_argument('--log-interval', type=int, default=10, metavar='N',
-                        help='how many batches to wait before logging training status')
-
-    # since validation set, which is drawn from training set, is size 1024, the rest of the data from the training set
-    # are used as the actual data on which the network is trained: 60000 - 1024 = 58976
-    parser.add_argument('--train-dataset-size', type=int, default=59800, metavar='TDS',
-                        help='how many images to put in the training dataset')
-
-    # size of the validation set
-    #
-    # I got the value 1024 from:
-    #    https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/main.py#L24
-    parser.add_argument('--validation-dataset-size', type=int, default=200, metavar='VDS',
-                        help='how many images to put in the validation dataset')
-
-    # the number of samples used in computation of
-    # Fisher Information
-    parser.add_argument('--fisher-num-samples', type=int, default=200)
-
-    # size of hidden layer(s)
-    parser.add_argument('--hidden-size', type=int, default=30)
-
-    # number of hidden layers
-    # TODO implement this - currently does not actually modify network structure...
-    parser.add_argument('--hidden-layer-num', type=int, default=1)
-
-    # Dropout probability for hidden layers - see:
-    # https://arxiv.org/pdf/1612.00796.pdf#section.4
-    parser.add_argument('--hidden-dropout-prob', type=float, default=.5)
-
-    # Dropout probability for input layer - see:
-    # https://arxiv.org/pdf/1612.00796.pdf#section.4
-    parser.add_argument('--input-dropout-prob', type=float, default=.2)
-
-    args = parser.parse_args()
-
-    # determines if CUDA should be used - only if available AND not disabled via arguments
-    use_cuda = not args.no_cuda and torch.cuda.is_available()
-
-    # arguments specific to CUDA computation
-    # num_workers: how many subprocesses to use for data loading - if set to 0, data will be loaded in the main process
-    # pin_memory: if True, the DataLoader will copy tensors into CUDA pinned memory before returning them
-    kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
-
-
-    # set the device on which to perform computations - later calls to .to(device) will move tensors to GPU or CPU
-    # based on the value determined here
-    device = torch.device("cuda" if use_cuda else "cpu")
+    kwargs, device = setup.set_gpu_options(args)
 
     # print 8 digits of precision when displaying floating point output from tensors
     torch.set_printoptions(precision=8)
@@ -245,10 +148,10 @@ def main():
 
 
 
-        # expand each of the models (SGD + DROPOUT and EWC) after task 2 training and before task 3 training...
-         if task_count == 4:
-             print("EXPANDING...")
-             for model_num in range(len(models)):
+         # expand each of the models (SGD + DROPOUT and EWC) after task 2 training and before task 3 training...
+        if task_count == 4:
+            print("EXPANDING...")
+            for model_num in range(len(models)):
 
                 
                 # if models[model_num].ewc:
@@ -270,7 +173,7 @@ def main():
                 #         print(ewc_sum.size())
                 #         print(ewc_sum)
                 #
-                 models[model_num].expand()
+                models[model_num].expand()
                 
                 # if models[model_num].ewc:
                 #     for sum_number, ewc_sum in enumerate(models[model_num].sum_Fx):

@@ -190,7 +190,7 @@ def main():
 
         # using validation set in Fisher Information Matrix computation as specified by:
         # https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
-        ewc_model.compute_fisher_prob_dist(device, validation_loader, args.fisher_num_samples)
+        ewc_model.estimate_fisher(device, validation_loader, args.fisher_num_samples)
 
         # update the ewc loss sums in the model to incorporate weights and fisher info from the task on which
         # we just trained the network
