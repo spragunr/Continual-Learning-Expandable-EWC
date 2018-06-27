@@ -13,7 +13,7 @@ from tensorboardX import SummaryWriter
 class Model(nn.Module):
 
     # TODO remove the dropout probability parameters
-    def __init__(self, hidden_size, input_size, output_size, ewc, lam=0, task_fisher_diags ={}, task_post_training_weights={}):
+    def __init__(self, hidden_size, input_size, output_size, ewc, lam=0):
 
         super().__init__()
 
@@ -21,17 +21,17 @@ class Model(nn.Module):
 
         self.lam = lam # the value of lambda (fisher multiplier) to be used in EWC loss computation, if EWC enabled
 
-        # If this is the original model in the experiment, the next two instance variables are, by default,
-        # instantiated as empty dictionaries. Otherwise, they will be copied from the parameters to the class
-        # constructor. This is used to copy data from a pre-existing model to a new, expanded version of the model.
-
         # dictionary, format:
         # {task number : list of Fisher diagonals calculated after model trained on task}
-        self.task_fisher_diags = task_fisher_diags
+        self.task_fisher_diags = {}
 
         # dictionary, format:
         # {task number : list of learnable parameter weight values after model trained on task}
-        self.task_post_training_weights = task_post_training_weights
+        self.task_post_training_weights = {}
+
+        # dictionary, format:
+        #  {task number: size of network parameters (weights) when the network was trained on the task}
+        self.size_dictionary = {}
 
         # copy specified model hyperparameters into instance variables
         self.input_size = input_size
@@ -438,3 +438,27 @@ class Model(nn.Module):
             self.list_of_fisher_diags[parameter] /= validation_loader.batch_size
 
 
+    def save_theta_stars(self, task_count):
+
+        # save the theta* ("theta star") values after training - for plotting and comparative loss calculations
+        # using the method in model.alternative_ewc_loss()
+        #
+        # NOTE: when I reference theta*, I am referring to the values represented by that variable in
+        # equation (3) at:
+        #   https://arxiv.org/pdf/1612.00796.pdf#section.2
+        current_weights = []
+
+        for parameter in self.parameters():
+            current_weights.append(deepcopy(parameter.data.clone()))
+
+        self.task_post_training_weights.update({task_count: deepcopy(current_weights)})
+
+
+    def save_fisher_diags(self, task_count):
+
+        self.task_fisher_diags.update({task_count: deepcopy(self.list_of_fisher_diags)})
+
+
+    def update_size_dict(self, task_count):
+
+        self.size_dictionary.update({task_count: self.hidden_size})

@@ -277,14 +277,14 @@ def copy_weights_shrinking(big_model, small_model):
 # given a dictionary with task numbers as keys and model sizes (size of hidden layer(s) in the model when the model was
 # trained on a given task) as values, generate and return a dictionary correlating task numbers with model.Model
 # objects of the appropriate sizes, containing subsets of the weights currently in model
-def generate_model_dictionary(model, model_size_dictionary):
+def generate_model_dictionary(m):
 
     model_sizes = []
 
     # fetch all unique model sizes from the model size dictionary and store them in a list (model_sizes)
-    for key in model_size_dictionary.keys():
-        if not model_size_dictionary.get(key) in model_sizes:
-            model_sizes.append(model_size_dictionary.get(key))
+    for key in m.size_dictionary.keys():
+        if not m.size_dictionary.get(key) in model_sizes:
+            model_sizes.append(m.size_dictionary.get(key))
 
     models = []
 
@@ -293,24 +293,23 @@ def generate_model_dictionary(model, model_size_dictionary):
         models.append(
             Model(
                 hidden_size,
-                model.input_size,
-                model.output_size,
-                model.ewc,
-                model.lam
+                m.input_size,
+                m.output_size,
+                m.ewc,
+                m.lam
             )
         )
 
     # copy subsets of weights from the largest model to all other models
     for to_model in models:
-        copy_weights_shrinking(model, to_model)
+        copy_weights_shrinking(m, to_model)
 
     model_dictionary = {}
 
     # build the model dictionary
     for model in models:
-        for task_number in [k for k,v in model_size_dictionary.items() if v == model.hidden_size]:
+        for task_number in [k for k,v in m.size_dictionary.items() if v == model.hidden_size]:
             model_dictionary.update({task_number: model})
-
 
     return model_dictionary
 

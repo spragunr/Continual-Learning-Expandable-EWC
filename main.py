@@ -31,13 +31,6 @@ def main():
 
     utils.output_tensorboard_graph(args, models, task_count)
 
-    # dictionary, format {task number: size of network parameters (weights) when the network was trained on the task}
-    model_size_dictionaries = []
-
-    # initialize model size dictionaries
-    for model in models:
-        model_size_dictionaries.append({})
-
     while(True):
 
         # get the DataLoaders for the training, validation, and testing data
@@ -59,12 +52,12 @@ def main():
                 models[model_num].train_model(args, device, train_loader, epoch, task_count)
 
             # update the model size dictionary
-            model_size_dictionaries[model_num].update({task_count: models[model_num].hidden_size})
+            models[model_num].update_size_dict(task_count)
 
             # generate a dictionary mapping tasks to models of the sizes that the network was when those tasks were
             # trained, containing subsets of the weights currently in the model (to mask new, post-expansion weights
             # when testing on tasks for which the weights did not exist during training)
-            test_models = utils.generate_model_dictionary(models[model_num], model_size_dictionaries[model_num])
+            test_models = utils.generate_model_dictionary(models[model_num])
 
             # test the model on ALL tasks trained thus far (including current task)
             utils.test(test_models, device, test_loaders)
@@ -73,19 +66,7 @@ def main():
             # If the model currently being used in the loop is using EWC, we need to compute the fisher information
             if models[model_num].ewc:
 
-                # save the theta* ("theta star") values after training - for plotting and comparative loss calculations
-                # using the method in model.alternative_ewc_loss()
-                #
-                # NOTE: when I reference theta*, I am referring to the values represented by that variable in
-                # equation (3) at:
-                #   https://arxiv.org/pdf/1612.00796.pdf#section.2
-                current_weights = []
-
-                for parameter in models[model_num].parameters():
-                    current_weights.append(deepcopy(parameter.data.clone()))
-
-
-                models[model_num].task_post_training_weights.update({task_count: deepcopy(current_weights)})
+                models[model_num].save_theta_stars(task_count)
 
                 # using validation set in Fisher Information Matrix computation as specified by:
                 # https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
@@ -97,10 +78,11 @@ def main():
 
                 # store the current fisher diagonals for use with plotting and comparative loss calculations
                 # using the method in model.alternative_ewc_loss()
-                models[model_num].task_fisher_diags.update({task_count: deepcopy(models[model_num].list_of_fisher_diags)})
+                models[model_num].save_fisher_diags(task_count)
 
         # expand all models before training the next task
-        if task_count == 4:
+        if task_count == 2:
+
             print("EXPANDING...")
             for model_num in range(len(models)):
                 models[model_num].expand()
