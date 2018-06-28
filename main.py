@@ -26,6 +26,18 @@ def main():
     utils.output_tensorboard_graph(args, models, task_count)
 
     while(True):
+        # expand all models before training the next task
+        if task_count == 20:
+
+            print("EXPANDING...")
+
+            for model in models:
+                model.expand()
+                utils.output_tensorboard_graph(args, models, task_count + 1)
+
+        for model in models:
+            for parameter in model.parameters():
+                print(parameter.size())
 
         # get the DataLoaders for the training, validation, and testing data
         train_loader, validation_loader, test_loader = utils.generate_new_mnist_task(args, kwargs,
@@ -73,15 +85,6 @@ def main():
                 # store the current fisher diagonals for use with plotting and comparative loss calculations
                 # using the method in model.alternative_ewc_loss()
                 model.save_fisher_diags(task_count)
-
-        # expand all models before training the next task
-        if task_count == 2:
-
-            print("EXPANDING...")
-
-            for model in models:
-                model.expand()
-                utils.output_tensorboard_graph(args, models, task_count)
 
         # increment the number of the current task before re-entering while loop
         task_count += 1

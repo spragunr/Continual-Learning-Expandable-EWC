@@ -361,12 +361,13 @@ def trunc_normal_weights(shape, mean=0.0, stdev=0.1):
 def init_weights(m):
     if type(m) == nn.Linear:
         m.weight.data.copy_(trunc_normal_weights(m.weight.size()))
-        m.bias.data.fill_(0.1)
+        if m.bias is not None:
+            m.bias.data.fill_(0.1)
 
 def output_tensorboard_graph(args, models, task_count):
 
     dummy_input = Variable(torch.rand(args.batch_size, args.input_size))
 
     for model in models:
-        with SummaryWriter(comment='MODEL task count: {}, ewc: {}, structure:{}'.format(task_count, model.ewc, model)) as w:
+        with SummaryWriter(comment='MODEL task count: {}, ewc: {}'.format(task_count, model.ewc)) as w:
             w.add_graph(model, (dummy_input,))

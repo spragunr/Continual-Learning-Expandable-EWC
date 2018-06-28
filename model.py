@@ -41,6 +41,8 @@ class Model(nn.Module):
 
         self.apply(utils.init_weights)
 
+        self.initialize_fisher_sums()
+
     def forward(self, x):
 
         # pass the data through all layers of the network
@@ -68,10 +70,6 @@ class Model(nn.Module):
         # get deep copies of the values currently in the model parameters and append each of them to current_weights
         for parameter in self.parameters():
             current_weights.append(deepcopy(parameter.data.clone()))
-
-        # if no summed terms yet, initialize them...
-        if not hasattr(self, 'sum_Fx'):
-            self.initialize_fisher_sums()
 
         # in-place addition of the Fisher diagonal for each parameter to the existing sum_Fx at corresponding
         # parameter index

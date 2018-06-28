@@ -1,6 +1,7 @@
 import argparse
 import torch
 import numpy as np
+import scipy as sp
 from model import Model
 
 
@@ -39,6 +40,9 @@ def parse_arguments():
     parser.add_argument('--seed-numpy', type=int, default=1, metavar='SN',
                         help='random seed for NumPy (default: 1)')
 
+    parser.add_argument('--seed-scipy', type=int, default=1, metavar='SS',
+                        help='random seed for SciPy (default: 1)')
+
     parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                         help='how many batches to wait before logging training status (default 10)')
 
@@ -50,7 +54,7 @@ def parse_arguments():
                         help='number of images in the validation dataset')
 
     # size of hidden layer(s)
-    parser.add_argument('--hidden-size', type=int, default=50, metavar='HS',
+    parser.add_argument('--hidden-size', type=int, default=100, metavar='HS',
                         help='number of neurons in each hidden layer of the network')
 
     # 28 x 28 pixels = 784 pixels per MNIST image
@@ -71,6 +75,9 @@ def seed_rngs(args):
 
     # set a manual seed for NumPy random number generation
     np.random.seed(args.seed_numpy)
+
+    # set a manual seed for SciPy random number generation
+    sp.random.seed(args.seed_scipy)
 
 def set_gpu_options(args):
 
