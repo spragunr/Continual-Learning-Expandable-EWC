@@ -55,7 +55,7 @@ def parse_arguments():
                         help='number of images in the validation dataset')
 
     # size of hidden layer(s)
-    parser.add_argument('--hidden-size', type=int, default=50, metavar='HS',
+    parser.add_argument('--hidden-size', type=int, default=100, metavar='HS',
                         help='number of neurons in each hidden layer of the network')
 
     # 28 x 28 pixels = 784 pixels per MNIST image

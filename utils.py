@@ -333,14 +333,14 @@ def output_tensorboard_graph(args, models, task_count):
     dummy_input = Variable(torch.rand(args.batch_size, args.input_size))
 
     for model in models:
-        with SummaryWriter(comment='MODEL task count: {}, ewc: {}'.format(task_count, model.ewc)) as w:
+        with SummaryWriter(comment='MODEL task count: {}, type: {}'.format(task_count, model.__class__.__name__)) as w:
             w.add_graph(model, (dummy_input,))
 
 def expand(models, args):
 
     expanded_models = []
 
-    for model in models:
-        expanded_models.append(model.__class__.from_exisiting_model(model, model.hidden_size * args.scale_factor))
+    for model_num, model in enumerate(models):
+        expanded_models.append(model.__class__.from_existing_model(model, model.hidden_size * args.scale_factor))
 
     return expanded_models

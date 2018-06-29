@@ -28,7 +28,7 @@ def main():
 
     while(True):
         # expand all models before training the next task
-        if task_count == 20:
+        if task_count == 3:
 
             print("EXPANDING...")
 
