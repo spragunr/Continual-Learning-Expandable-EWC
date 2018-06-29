@@ -357,6 +357,11 @@ class Model(nn.Module):
 
         self.hidden_size *= 2
         self.initialize_module_list()
+
+        for module in self.modulelist:
+            if type(module) == nn.Linear:
+                module.reset_parameters()
+
         self.apply(utils.init_weights)
 
         # copy weights from smaller, old model into proper locations in the new, expanded model
