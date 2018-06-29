@@ -36,6 +36,8 @@ class EWCModel(ExpandableModel):
 
         model.task_post_training_weights = deepcopy(m.task_post_training_weights)
 
+        model.size_dictionary = deepcopy(m.size_dictionary)
+
         model.sum_Fx = deepcopy(m.sum_Fx)
         model.sum_Fx_Wx = deepcopy(m.sum_Fx_Wx)
         model.sum_Fx_Wx_sq = deepcopy(m.sum_Fx_Wx_sq)

@@ -19,6 +19,8 @@ class NoRegModel(ExpandableModel):
 
         model = cls(new_hidden_size, m.input_size, m.output_size)
 
+        model.size_dictionary = deepcopy(m.size_dictionary)
+
         model.copy_weights_expanding(m)
 
         return model
