@@ -41,6 +41,9 @@ class EWCModel(ExpandableModel):
         self.sum_Fx_Wx = deepcopy(m.sum_Fx_Wx)
         self.sum_Fx_Wx_sq = deepcopy(m.sum_Fx_Wx_sq)
 
+        self.copy_weights_expanding(m)
+
+        self.expand_ewc_sums()
 
     # This method is used to update the summed error terms:
     # The sums are actually lists of sums, with one entry per model parameter in the shape of that model parameter

@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import scipy.stats as stats
 import torch.utils.data as D
 from torch.autograd import Variable
 from torchvision import datasets, transforms
@@ -93,15 +92,6 @@ def generate_new_mnist_task(args, kwargs, first_task):
     test_loader = D.DataLoader(test_data, batch_size=args.test_batch_size, shuffle=True, **kwargs)
 
     return train_loader, validation_loader, test_loader
-
-
-# copy weights from a smaller to a larger model
-def copy_weights_expanding(old_weights, expanded_model):
-
-    for param_index, parameter in enumerate(expanded_model.parameters()):
-
-        parameter.data[tuple(slice(0, n) for n in old_weights[param_index].shape)] = old_weights[param_index][...]
-
 
 
 def test(models, device, test_loaders):
@@ -337,32 +327,6 @@ def pad_tuple(smaller, larger):
 
     return tuple(pads_required)
 
-
-# This function is intended to mimic the behavior of TensorFlow's tf.truncated_normal(), returning
-# a tensor of the specified shape containing values sampled from a truncated normal distribution with the
-# specified mean and standard deviation. Sampled values which fall outside of the range of +/- 2 standard deviations
-# from the mean are dropped and re-picked.
-def trunc_normal_weights(shape, mean=0.0, stdev=0.1):
-
-    num_samples = 1
-
-    for dim in list(shape):
-        num_samples *= dim
-
-    a, b = ((mean - 2 * stdev) - mean) / stdev, ((mean + 2 * stdev) - mean) / stdev
-
-    samples = stats.truncnorm.rvs(a, b, scale=stdev, loc=mean, size=num_samples)
-
-    return torch.Tensor(samples.reshape(tuple(shape)))
-
-
-# initialize weights in the network in the same manner as in:
-# https://github.com/ariseff/overcoming-catastrophic/blob/afea2d3c9f926d4168cc51d56f1e9a92989d7af0/model.py#L7
-def init_weights(m):
-    if type(m) == nn.Linear:
-        m.weight.data.copy_(trunc_normal_weights(m.weight.size()))
-        if m.bias is not None:
-            m.bias.data.fill_(0.1)
 
 def output_tensorboard_graph(args, models, task_count):
 

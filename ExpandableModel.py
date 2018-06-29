@@ -5,6 +5,8 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.autograd import Variable
 from copy import deepcopy
+import scipy.stats as stats
+
 
 
 
@@ -45,33 +47,45 @@ class ExpandableModel(nn.Module):
         self.modulelist.append(nn.ReLU())
         self.modulelist.append(nn.Linear(self.hidden_size, self.output_size))
 
-    def expand(self):
-
-        old_weights = []
-
-        for parameter in self.parameters():
-            old_weights.append(parameter.data.clone())
-            parameter.requires_grad = False
-            parameter.detach()
-
-        self.hidden_size *= 2
-        self.initialize_module_list()
-
-        for module in self.modulelist:
-            if type(module) == nn.Linear:
-                module.reset_parameters()
-
-        self.apply(utils.init_weights)
-
-        # copy weights from smaller, old model into proper locations in the new, expanded model
-        utils.copy_weights_expanding(old_weights, self)
-
-        if self.ewc:
-
-            self.expand_ewc_sums()
-
     def update_size_dict(self, task_count):
 
         self.size_dictionary.update({task_count: self.hidden_size})
 
-    def copy_weights_expanding(self):
+    def copy_weights_expanding(self, small_model):
+
+        old_weights = []
+
+        for parameter in small_model.parameters():
+            old_weights.append(parameter.data.clone())
+            parameter.requires_grad = False
+            parameter.detach()
+
+        for param_index, parameter in enumerate(self.parameters()):
+            parameter.data[tuple(slice(0, n) for n in old_weights[param_index].shape)] = old_weights[param_index][...]
+
+    # initialize weights in the network in the same manner as in:
+    # https://github.com/ariseff/overcoming-catastrophic/blob/afea2d3c9f926d4168cc51d56f1e9a92989d7af0/model.py#L7
+    @staticmethod
+    def init_weights(m):
+
+        # This function is intended to mimic the behavior of TensorFlow's tf.truncated_normal(), returning
+        # a tensor of the specified shape containing values sampled from a truncated normal distribution with the
+        # specified mean and standard deviation. Sampled values which fall outside of the range of +/- 2 standard deviations
+        # from the mean are dropped and re-picked.
+        def trunc_normal_weights(shape, mean=0.0, stdev=0.1):
+
+            num_samples = 1
+
+            for dim in list(shape):
+                num_samples *= dim
+
+            a, b = ((mean - 2 * stdev) - mean) / stdev, ((mean + 2 * stdev) - mean) / stdev
+
+            samples = stats.truncnorm.rvs(a, b, scale=stdev, loc=mean, size=num_samples)
+
+            return torch.Tensor(samples.reshape(tuple(shape)))
+
+        if type(m) == nn.Linear:
+            m.weight.data.copy_(trunc_normal_weights(m.weight.size()))
+            if m.bias is not None:
+                m.bias.data.fill_(0.1)
