@@ -4,6 +4,8 @@ import torch.utils.data as D
 from torch.autograd import Variable
 from torchvision import datasets, transforms
 from ExpandableModel import ExpandableModel
+from EWCModel import EWCModel
+from NoRegModel import NoRegModel
 from tensorboardX import SummaryWriter
 
 
@@ -334,3 +336,11 @@ def output_tensorboard_graph(args, models, task_count):
         with SummaryWriter(comment='MODEL task count: {}, ewc: {}'.format(task_count, model.ewc)) as w:
             w.add_graph(model, (dummy_input,))
 
+def expand(models, args):
+
+    expanded_models = []
+
+    for model in models:
+        expanded_models.append(model.__class__.from_exisiting_model(model, model.hidden_size * args.scale_factor))
+
+    return expanded_models

@@ -67,7 +67,7 @@ def parse_arguments():
                         help='size of the output of the network (default 10)')
 
     # e.g. 2 to double the size of the network when expansion occurs
-    parser.add_argument('--expansion-scale', type=int, default=2, metavar='ES',
+    parser.add_argument('--scale-factor', type=int, default=2, metavar='ES',
                         help='the factor by which to scale the size of network layers upon expansion')
 
     return parser.parse_args()
