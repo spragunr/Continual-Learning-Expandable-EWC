@@ -37,6 +37,15 @@ class ExpandableModel(nn.Module):
 
         return self.y
 
+    @classmethod
+    def from_existing_model(cls, m, new_hidden_size):
+
+        raise NotImplementedError("from_existing_model() is not implemented in ExpandableModel")
+
+    def train_model(self, args, device, train_loader, epoch, task_number):
+
+        raise NotImplementedError("train_model() is not implemented in ExpandableModel")
+
     def initialize_module_list(self):
 
         self.modulelist = nn.ModuleList()
