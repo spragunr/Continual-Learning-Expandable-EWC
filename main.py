@@ -1,6 +1,7 @@
 import torch
 import utils
 import setup
+from EWCModel import EWCModel
 
 def main():
 
@@ -31,9 +32,9 @@ def main():
 
             print("EXPANDING...")
 
-            for model in models:
-                model.expand()
-                utils.output_tensorboard_graph(args, models, task_count + 1)
+            models = utils.expand(models, args)
+
+            utils.output_tensorboard_graph(args, models, task_count + 1)
 
         for model in models:
             for parameter in model.parameters():
@@ -70,7 +71,7 @@ def main():
 
 
             # If the model currently being used in the loop is using EWC, we need to compute the fisher information
-            if model.ewc:
+            if type(model) == EWCModel:
 
                 model.save_theta_stars(task_count)
 
