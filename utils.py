@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.utils.data as D
 from torch.autograd import Variable
 from torchvision import datasets, transforms
-from model import Model
+from ExpandableModel import ExpandableModel
 from tensorboardX import SummaryWriter
 
 
@@ -239,8 +239,8 @@ def test(models, device, test_loaders):
         accuracy = 100. * correct / len(test_loader.dataset)
 
         # For task_number's complete test set (all batches), display the average loss and accuracy
-        print('\n{} Test set {}: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-            'EWC' if model.ewc else 'SGD + DROPOUT', task_number + 1, test_loss, correct, len(test_loader.dataset),
+        print('\nTest set {}: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+            task_number + 1, test_loss, correct, len(test_loader.dataset),
             accuracy))
 
 
@@ -279,12 +279,10 @@ def generate_model_dictionary(m):
     # make a model of each size specified in model_sizes, add them to models list
     for hidden_size in model_sizes:
         models.append(
-            Model(
+            ExpandableModel(
                 hidden_size,
                 m.input_size,
                 m.output_size,
-                m.ewc,
-                m.lam
             )
         )
 
@@ -335,3 +333,4 @@ def output_tensorboard_graph(args, models, task_count):
     for model in models:
         with SummaryWriter(comment='MODEL task count: {}, ewc: {}'.format(task_count, model.ewc)) as w:
             w.add_graph(model, (dummy_input,))
+

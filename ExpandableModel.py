@@ -1,10 +1,5 @@
 import torch
-import utils
 import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-from torch.autograd import Variable
-from copy import deepcopy
 import scipy.stats as stats
 
 

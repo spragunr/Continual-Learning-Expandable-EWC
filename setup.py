@@ -2,7 +2,8 @@ import argparse
 import torch
 import numpy as np
 import scipy as sp
-from model import Model
+from EWCModel import EWCModel
+from NoRegModel import NoRegModel
 
 
 def parse_arguments():
@@ -65,6 +66,10 @@ def parse_arguments():
     parser.add_argument('--output-size', type=int, default=10, metavar='OS',
                         help='size of the output of the network (default 10)')
 
+    # e.g. 2 to double the size of the network when expansion occurs
+    parser.add_argument('--expansion-scale', type=int, default=2, metavar='ES',
+                        help='the factor by which to scale the size of network layers upon expansion')
+
     return parser.parse_args()
 
 
@@ -102,11 +107,10 @@ def build_models(args, device):
     # .to(device):
     #   Move all parameters and buffers in the module Net to device (CPU or GPU- set above).
     #   Both integral and floating point values are moved.
-    vanilla_sgd_model = Model(
+    no_reg_model = NoRegModel(
         args.hidden_size,
         args.input_size,
         args.output_size,
-        ewc=False  # don't use EWC
     ).to(device)
 
     # Instantiate a model that will be trained using EWC.
@@ -114,12 +118,11 @@ def build_models(args, device):
     # .to(device):
     #   Move all parameters and buffers in the module Net to device (CPU or GPU- set above).
     #   Both integral and floating point values are moved.
-    ewc_model = Model(
+    ewc_model = EWCModel(
         args.hidden_size,
         args.input_size,
         args.output_size,
-        ewc=True,  # use EWC
         lam=args.lam  # the lambda (fisher multiplier) value to be used in the EWC loss formula
     ).to(device)
 
-    return [vanilla_sgd_model, ewc_model]
+    return [no_reg_model, ewc_model]
