@@ -8,8 +8,6 @@ from copy import deepcopy
 import scipy.stats as stats
 
 
-
-
 class ExpandableModel(nn.Module):
 
     def __init__(self, hidden_size, input_size, output_size):
@@ -27,7 +25,7 @@ class ExpandableModel(nn.Module):
 
         self.initialize_module_list()
 
-        self.apply(utils.init_weights)
+        self.apply(self.init_weights)
 
     def forward(self, x):
 

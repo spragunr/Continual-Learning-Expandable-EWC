@@ -27,23 +27,24 @@ class EWCModel(ExpandableModel):
 
         self.initialize_fisher_sums()
 
-    def __init__(self, m, new_hidden_size):
+    @classmethod
+    def from_existing_model(cls, m, new_hidden_size):
 
-        super().__init__(new_hidden_size, m.input_size, m.output_size)
+        model = cls(new_hidden_size, m.input_size, m.output_size, m.lam)
 
-        self.lam = m.lam
+        model.task_fisher_diags = deepcopy(m.task_fisher_diags)
 
-        self.task_fisher_diags = deepcopy(m.task_fisher_diags)
+        model.task_post_training_weights = deepcopy(m.task_post_training_weights)
 
-        self.task_post_training_weights = deepcopy(m.task_post_training_weights)
+        model.sum_Fx = deepcopy(m.sum_Fx)
+        model.sum_Fx_Wx = deepcopy(m.sum_Fx_Wx)
+        model.sum_Fx_Wx_sq = deepcopy(m.sum_Fx_Wx_sq)
 
-        self.sum_Fx = deepcopy(m.sum_Fx)
-        self.sum_Fx_Wx = deepcopy(m.sum_Fx_Wx)
-        self.sum_Fx_Wx_sq = deepcopy(m.sum_Fx_Wx_sq)
+        model.copy_weights_expanding(m)
 
-        self.copy_weights_expanding(m)
+        model.expand_ewc_sums()
 
-        self.expand_ewc_sums()
+        return model
 
     # This method is used to update the summed error terms:
     # The sums are actually lists of sums, with one entry per model parameter in the shape of that model parameter

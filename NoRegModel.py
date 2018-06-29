@@ -14,6 +14,15 @@ class NoRegModel(ExpandableModel):
 
         super().__init__(hidden_size, input_size, output_size)
 
+    @classmethod
+    def from_existing_model(cls, m, new_hidden_size):
+
+        model = cls(new_hidden_size, m.input_size, m.output_size)
+
+        model.copy_weights_expanding(m)
+
+        return model
+
     def train_model(self, args, device, train_loader, epoch, task_number):
 
         # Set the module in "training mode"
@@ -126,7 +135,7 @@ class NoRegModel(ExpandableModel):
             # print a message indicating progress AND which network (model) is reporting values.
             if batch_idx % args.log_interval == 0:
                 print('{} Task: {} Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                                                                                'EWC',
+                                                                                'NoReg',
                                                                                 task_number,
                                                                                 epoch,
                                                                                 batch_idx * len(data),
