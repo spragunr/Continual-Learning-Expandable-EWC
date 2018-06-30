@@ -100,6 +100,7 @@ class EWCModel(ExpandableModel):
                 zeros = torch.zeros(tuple(parameter.size()))
 
                 if parameter.is_cuda:
+                    print('hello')
                     zeros = zeros.cuda()
 
                 empty_sums[empty_sum].append(zeros)
