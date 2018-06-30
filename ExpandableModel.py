@@ -22,6 +22,7 @@ class ExpandableModel(nn.Module):
 
         self.apply(self.init_weights)
 
+
     def forward(self, x):
 
         # pass the data through all layers of the network

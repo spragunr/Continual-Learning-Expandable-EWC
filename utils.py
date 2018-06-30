@@ -267,7 +267,7 @@ def copy_weights_shrinking(big_model, small_model):
 # given a dictionary with task numbers as keys and model sizes (size of hidden layer(s) in the model when the model was
 # trained on a given task) as values, generate and return a dictionary correlating task numbers with model.Model
 # objects of the appropriate sizes, containing subsets of the weights currently in model
-def generate_model_dictionary(m):
+def generate_model_dictionary(m, device):
 
     model_sizes = []
 
@@ -285,7 +285,7 @@ def generate_model_dictionary(m):
                 hidden_size,
                 m.input_size,
                 m.output_size,
-            )
+            ).to(device)
         )
 
     # copy subsets of weights from the largest model to all other models

@@ -75,8 +75,11 @@ def parse_arguments():
 
 def seed_rngs(args):
 
-    # set a manual seed for PyTorch random number generation
+    # set a manual seed for PyTorch CPU random number generation
     torch.manual_seed(args.seed_torch)
+
+    # set a manual seed for PyTorch GPU random number generation
+    torch.cuda.manual_seed_all(args.seed_torch)
 
     # set a manual seed for NumPy random number generation
     np.random.seed(args.seed_numpy)
