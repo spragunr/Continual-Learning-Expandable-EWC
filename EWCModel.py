@@ -102,7 +102,7 @@ class EWCModel(ExpandableModel):
                 if parameter.is_cuda:
                     zeros = zeros.cuda()
 
-                empty_sum.append(zeros)
+                empty_sums[empty_sum].append(zeros)
 
         # the sum of each task's Fisher Information (list of Fisher diagonals for each parameter in the network,
         # and Fisher diagonals calculated for later tasks are summed with the fisher diagonal in the list at the
