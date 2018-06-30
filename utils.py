@@ -335,7 +335,7 @@ def output_tensorboard_graph(args, device, models, task_count):
     for model in models:
         model.to(torch.device("cpu"))
         with SummaryWriter(comment='MODEL task count: {}, type: {}'.format(task_count, model.__class__.__name__)) as w:
-            w.add_graph(model, (dummy_input,))
+            w.add_graph(model, dummy_input)
         model.to(device)
 
 def expand(models, args):
