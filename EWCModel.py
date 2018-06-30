@@ -96,7 +96,7 @@ class EWCModel(ExpandableModel):
         for parameter in self.parameters():
             empty_sum = torch.zeros(tuple(parameter.size()))
 
-            if parameter.is_cuda():
+            if self.is_cuda:
                 empty_sum = empty_sum.cuda()
 
             empty_sums.append(empty_sum)
