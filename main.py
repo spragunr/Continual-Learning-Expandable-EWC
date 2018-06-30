@@ -24,7 +24,7 @@ def main():
     # e.g. when training on task 3 this value will be 3
     task_count = 1
 
-    utils.output_tensorboard_graph(args, models, task_count)
+    utils.output_tensorboard_graph(args, device, models, task_count) # TODO change this to model.device in utils/ model constructor
 
     while(True):
         # expand all models before training the next task

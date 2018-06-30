@@ -328,9 +328,9 @@ def pad_tuple(smaller, larger):
     return tuple(pads_required)
 
 
-def output_tensorboard_graph(args, models, task_count):
+def output_tensorboard_graph(args, device, models, task_count):
 
-    dummy_input = Variable(torch.rand(args.batch_size, args.input_size))
+    dummy_input = Variable(torch.rand(args.batch_size, args.input_size)).to(device)
 
     for model in models:
         with SummaryWriter(comment='MODEL task count: {}, type: {}'.format(task_count, model.__class__.__name__)) as w:
