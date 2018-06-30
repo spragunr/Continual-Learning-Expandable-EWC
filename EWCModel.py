@@ -67,7 +67,7 @@ class EWCModel(ExpandableModel):
         # parameter index
         for fisher_diagonal_index in range(len(self.sum_Fx)):
 
-            self.sum_Fx[fisher_diagonal_index].add_(self.list_of_fisher_diags[fisher_diagonal_index])
+            self.sum_Fx[fisher_diagonal_index].cuda().add_(self.list_of_fisher_diags[fisher_diagonal_index])
 
         # add the fisher diagonal for each parameter multiplied (element-wise) by that parameter's current weight values
         # to the existing sum_Fx_Wx entry at the corresponding parameter index
