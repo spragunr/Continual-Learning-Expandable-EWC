@@ -347,7 +347,12 @@ class EWCModel(ExpandableModel):
 
         # populate self.list_of_fisher_diags with tensors of zeros of the appropriate sizes
         for parameter in self.parameters():
-            self.list_of_fisher_diags.append(torch.zeros(tuple(parameter.size())))
+            empty_diag = torch.zeros(tuple(parameter.size()))
+
+            if parameter.is_cuda:
+                empty_diag = empty_diag.cuda()
+
+            self.list_of_fisher_diags.append(empty_diag)
 
         softmax_activations = []
 
