@@ -94,20 +94,25 @@ class EWCModel(ExpandableModel):
         empty_sums = []
 
         for parameter in self.parameters():
-            empty_sums.append(torch.zeros(tuple(parameter.size())))
+            empty_sum = torch.zeros(tuple(parameter.size()))
+
+            if self.is_cuda():
+                empty_sum = empty_sum.cuda()
+
+            empty_sums.append(empty_sum)
 
         # the sum of each task's Fisher Information (list of Fisher diagonals for each parameter in the network,
         # and Fisher diagonals calculated for later tasks are summed with the fisher diagonal in the list at the
         # appropriate parameter index)
-        self.sum_Fx = deepcopy(empty_sums).cuda()
+        self.sum_Fx = deepcopy(empty_sums)
 
         # the sum of each task's Fisher Information multiplied by its respective post-training weights in the network
         # (list of entries- one per parameter- of same size as model parameters)
-        self.sum_Fx_Wx = deepcopy(empty_sums).cuda()
+        self.sum_Fx_Wx = deepcopy(empty_sums)
 
         # the sum of each task's Fisher Information multiplied by the square of its respective post-training weights
         # in the network (list of entries- one per parameter- of same size as model parameters)
-        self.sum_Fx_Wx_sq = deepcopy(empty_sums).cuda()
+        self.sum_Fx_Wx_sq = deepcopy(empty_sums)
 
     # expand the sums used to compute ewc loss to fit an expanded model
     def expand_ewc_sums(self):
