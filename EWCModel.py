@@ -74,7 +74,7 @@ class EWCModel(ExpandableModel):
         for fisher_diagonal_index in range(len(self.sum_Fx_Wx)):
 
             self.sum_Fx_Wx[fisher_diagonal_index] = torch.addcmul(
-                self.sum_Fx_Wx[fisher_diagonal_index],
+                self.sum_Fx_Wx[fisher_diagonal_index].cuda(),
                 self.list_of_fisher_diags[fisher_diagonal_index],
                 current_weights[fisher_diagonal_index])
 
