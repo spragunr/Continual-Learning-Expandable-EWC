@@ -350,7 +350,7 @@ class EWCModel(ExpandableModel):
             empty_diag = torch.zeros(tuple(parameter.size()))
 
             if parameter.is_cuda:
-                print('YO')
+
                 empty_diag = empty_diag.cuda()
 
             self.list_of_fisher_diags.append(empty_diag)
@@ -408,7 +408,7 @@ class EWCModel(ExpandableModel):
         # Fisher diagonal values
         for parameter in range(len(self.list_of_fisher_diags)):
             self.list_of_fisher_diags[parameter] /= validation_loader.batch_size
-
+            print(self.list_of_fisher_diags[parameter].is_cuda)
 
     def save_theta_stars(self, task_count):
 
