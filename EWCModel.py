@@ -100,7 +100,7 @@ class EWCModel(ExpandableModel):
 
             empty_sums.append(empty_sum)
 
-        empty_sums = torch.stack(empty_sums).cuda()
+        empty_sums = torch.Tensor(empty_sums).cuda()
 
         # the sum of each task's Fisher Information (list of Fisher diagonals for each parameter in the network,
         # and Fisher diagonals calculated for later tasks are summed with the fisher diagonal in the list at the
