@@ -99,15 +99,15 @@ class EWCModel(ExpandableModel):
         # the sum of each task's Fisher Information (list of Fisher diagonals for each parameter in the network,
         # and Fisher diagonals calculated for later tasks are summed with the fisher diagonal in the list at the
         # appropriate parameter index)
-        self.sum_Fx = deepcopy(empty_sums)
+        self.sum_Fx = deepcopy(empty_sums).cuda()
 
         # the sum of each task's Fisher Information multiplied by its respective post-training weights in the network
         # (list of entries- one per parameter- of same size as model parameters)
-        self.sum_Fx_Wx = deepcopy(empty_sums)
+        self.sum_Fx_Wx = deepcopy(empty_sums).cuda()
 
         # the sum of each task's Fisher Information multiplied by the square of its respective post-training weights
         # in the network (list of entries- one per parameter- of same size as model parameters)
-        self.sum_Fx_Wx_sq = deepcopy(empty_sums)
+        self.sum_Fx_Wx_sq = deepcopy(empty_sums).cuda()
 
     # expand the sums used to compute ewc loss to fit an expanded model
     def expand_ewc_sums(self):
