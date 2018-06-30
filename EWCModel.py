@@ -350,6 +350,7 @@ class EWCModel(ExpandableModel):
             empty_diag = torch.zeros(tuple(parameter.size()))
 
             if parameter.is_cuda:
+                print('YO')
                 empty_diag = empty_diag.cuda()
 
             self.list_of_fisher_diags.append(empty_diag)
@@ -401,7 +402,7 @@ class EWCModel(ExpandableModel):
             # square the gradients computed above and add each of them to the index in list_of_fisher_diags that
             # corresponds to the parameter for which the gradient was calculated
             for parameter in range(len(self.list_of_fisher_diags)):
-                self.list_of_fisher_diags[parameter].add_(torch.pow(loglikelihood_grads[parameter], 2.0).cuda())
+                self.list_of_fisher_diags[parameter].add_(torch.pow(loglikelihood_grads[parameter], 2.0))
 
         # divide totals by number of samples, getting average squared gradient values across sample_count as the
         # Fisher diagonal values
