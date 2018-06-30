@@ -328,21 +328,19 @@ def pad_tuple(smaller, larger):
     return tuple(pads_required)
 
 
-def output_tensorboard_graph(args, device, models, task_count):
+def output_tensorboard_graph(args, models, task_count):
 
     dummy_input = Variable(torch.rand(args.batch_size, args.input_size))
 
     for model in models:
-        model = model.to(torch.device("cpu"))
         with SummaryWriter(comment='MODEL task count: {}, type: {}'.format(task_count, model.__class__.__name__)) as w:
             w.add_graph(model, (dummy_input,))
-        model = model.to(device) # may not be needed...
 
-def expand(models, args):
+def expand(models, args, device):
 
     expanded_models = []
 
     for model_num, model in enumerate(models):
-        expanded_models.append(model.__class__.from_existing_model(model, model.hidden_size * args.scale_factor))
+        expanded_models.append(model.__class__.from_existing_model(model, model.hidden_size * args.scale_factor).to(device))
 
     return expanded_models
