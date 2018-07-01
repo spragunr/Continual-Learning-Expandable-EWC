@@ -282,9 +282,7 @@ class ExpandableModel(nn.Module):
                 task_number + 1, test_loss, correct, len(test_loader.dataset),
                 accuracy))
 
-        low_accuracies = [acc for acc in test_accuracies if acc < threshold]
-
-        if low_accuracies:
+        if test_accuracies[len(test_accuracies) - 1] < threshold:
             return -1 # accuracy minimum threshold not met
         else:
             return 0 # accuracy minimum threshold met
