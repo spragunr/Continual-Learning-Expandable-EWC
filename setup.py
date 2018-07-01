@@ -114,6 +114,7 @@ def build_models(args, device):
         args.hidden_size,
         args.input_size,
         args.output_size,
+        device
     ).to(device)
 
     # Instantiate a model that will be trained using EWC.
@@ -125,6 +126,7 @@ def build_models(args, device):
         args.hidden_size,
         args.input_size,
         args.output_size,
+        device,
         lam=args.lam  # the lambda (fisher multiplier) value to be used in the EWC loss formula
     ).to(device)
 

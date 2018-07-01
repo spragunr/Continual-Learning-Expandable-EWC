@@ -7,14 +7,14 @@ from copy import deepcopy
 
 class NoRegModel(ExpandableModel):
 
-    def __init__(self, hidden_size, input_size, output_size):
+    def __init__(self, hidden_size, input_size, output_size, device):
 
-        super().__init__(hidden_size, input_size, output_size)
+        super().__init__(hidden_size, input_size, output_size, device)
 
     @classmethod
     def from_existing_model(cls, m, new_hidden_size):
 
-        model = cls(new_hidden_size, m.input_size, m.output_size)
+        model = cls(new_hidden_size, m.input_size, m.output_size, m.device)
 
         model.size_dictionary = deepcopy(m.size_dictionary)
 

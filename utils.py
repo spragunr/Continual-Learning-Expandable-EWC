@@ -267,7 +267,7 @@ def copy_weights_shrinking(big_model, small_model):
 # given a dictionary with task numbers as keys and model sizes (size of hidden layer(s) in the model when the model was
 # trained on a given task) as values, generate and return a dictionary correlating task numbers with model.Model
 # objects of the appropriate sizes, containing subsets of the weights currently in model
-def generate_model_dictionary(m, device):
+def generate_model_dictionary(m):
 
     model_sizes = []
 
@@ -285,7 +285,7 @@ def generate_model_dictionary(m, device):
                 hidden_size,
                 m.input_size,
                 m.output_size,
-            ).to(device)
+            ).to(m.device)
         )
 
     # copy subsets of weights from the largest model to all other models
@@ -336,11 +336,11 @@ def output_tensorboard_graph(args, models, task_count):
         with SummaryWriter(comment='MODEL task count: {}, type: {}'.format(task_count, model.__class__.__name__)) as w:
             w.add_graph(model, (dummy_input,))
 
-def expand(models, args, device):
+def expand(models, args):
 
     expanded_models = []
 
     for model_num, model in enumerate(models):
-        expanded_models.append(model.__class__.from_existing_model(model, model.hidden_size * args.scale_factor).to(device))
+        expanded_models.append(model.__class__.from_existing_model(model, model.hidden_size * args.scale_factor).to(model.device))
 
     return expanded_models

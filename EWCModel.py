@@ -9,9 +9,9 @@ from copy import deepcopy
 
 class EWCModel(ExpandableModel):
 
-    def __init__(self, hidden_size, input_size, output_size, lam):
+    def __init__(self, hidden_size, input_size, output_size, device, lam):
 
-        super().__init__(hidden_size, input_size, output_size)
+        super().__init__(hidden_size, input_size, output_size, device)
 
         self.lam = lam  # the value of lambda (fisher multiplier) to be used in EWC loss computation
 
@@ -28,7 +28,7 @@ class EWCModel(ExpandableModel):
     @classmethod
     def from_existing_model(cls, m, new_hidden_size):
 
-        model = cls(new_hidden_size, m.input_size, m.output_size, m.lam)
+        model = cls(new_hidden_size, m.input_size, m.output_size, m.device, m.lam)
 
         model.task_fisher_diags = deepcopy(m.task_fisher_diags)
 
@@ -100,7 +100,7 @@ class EWCModel(ExpandableModel):
                 zeros = torch.zeros(tuple(parameter.size()))
 
 
-                zeros = zeros.cuda()
+                zeros = zeros.to(self.device)
 
                 empty_sums[empty_sum].append(zeros)
 
@@ -350,11 +350,7 @@ class EWCModel(ExpandableModel):
 
         # populate self.list_of_fisher_diags with tensors of zeros of the appropriate sizes
         for parameter in self.parameters():
-            empty_diag = torch.zeros(tuple(parameter.size()))
-
-            if parameter.is_cuda:
-
-                empty_diag = empty_diag.cuda()
+            empty_diag = torch.zeros(tuple(parameter.size())).to(self.device)
 
             self.list_of_fisher_diags.append(empty_diag)
 

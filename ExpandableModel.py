@@ -5,7 +5,7 @@ import scipy.stats as stats
 
 class ExpandableModel(nn.Module):
 
-    def __init__(self, hidden_size, input_size, output_size):
+    def __init__(self, hidden_size, input_size, output_size, device):
 
         super().__init__()
 
@@ -21,6 +21,8 @@ class ExpandableModel(nn.Module):
         self.initialize_module_list()
 
         self.apply(self.init_weights)
+
+        self.device = device
 
 
     def forward(self, x):

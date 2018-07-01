@@ -32,7 +32,7 @@ def main():
 
             print("EXPANDING...")
 
-            models = utils.expand(models, args, device) # todo change device to model instance variable
+            models = utils.expand(models, args)
 
             #utils.output_tensorboard_graph(args, models, task_count + 1)
 
@@ -64,7 +64,7 @@ def main():
             # generate a dictionary mapping tasks to models of the sizes that the network was when those tasks were
             # trained, containing subsets of the weights currently in the model (to mask new, post-expansion weights
             # when testing on tasks for which the weights did not exist during training)
-            test_models = utils.generate_model_dictionary(model, device)
+            test_models = utils.generate_model_dictionary(model)
 
             # test the model on ALL tasks trained thus far (including current task)
             utils.test(test_models, device, test_loaders)
