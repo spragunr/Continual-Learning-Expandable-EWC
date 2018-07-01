@@ -149,7 +149,7 @@ class EWCModel(ExpandableModel):
         # mutliply error by fisher multiplier (lambda) divided by 2
         return loss_prev_tasks * (self.lam / 2.0)
 
-    def train_model(self, args, train_loader, task_number):
+    def train_model(self, args, train_loader, task_number, **kwargs):
 
         # Set the module in "training mode"
         # This is necessary because some network layers behave differently when training vs testing.
@@ -286,6 +286,23 @@ class EWCModel(ExpandableModel):
                                                                                     100. * batch_idx / len(train_loader),
                                                                                     loss.item()
                                                                                     ))
+
+        # update the model size dictionary
+        self.update_size_dict(task_number)
+
+        self.save_theta_stars(task_number)
+
+        # using validation set in Fisher Information Matrix computation as specified by:
+        # https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
+        self.estimate_fisher(kwargs.get("validation_loader"))
+
+        # update the ewc loss sums in the model to incorporate weights and fisher info from the task on which
+        # we just trained the network
+        self.update_ewc_sums()
+
+        # store the current fisher diagonals for use with plotting and comparative loss calculations
+        # using the method in model.alternative_ewc_loss()
+        self.save_fisher_diags(task_number)
 
     # Defines loss based on all extant Fisher diagonals and previous task weights
     def alternative_ewc_loss(self, task_count):

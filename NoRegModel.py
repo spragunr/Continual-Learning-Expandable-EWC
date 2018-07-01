@@ -22,7 +22,7 @@ class NoRegModel(ExpandableModel):
 
         return model
 
-    def train_model(self, args, train_loader, task_number):
+    def train_model(self, args, train_loader, task_number, **kwargs):
 
         # Set the module in "training mode"
         # This is necessary because some network layers behave differently when training vs testing.
@@ -143,3 +143,5 @@ class NoRegModel(ExpandableModel):
                                                                                     100. * batch_idx / len(train_loader),
                                                                                     loss.item()
                                                                                     ))
+        # update the model size dictionary
+        self.update_size_dict(task_number)

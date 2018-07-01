@@ -54,11 +54,10 @@ def main():
 
         for model in models:
 
-            # for each desired epoch, train the model on the latest task
-            model.train_model(args, train_loader, task_count)
+            kwargs = {'validation_loader': validation_loader} if type(model) == EWCModel else {}
 
-            # update the model size dictionary
-            model.update_size_dict(task_count)
+            # for each desired epoch, train the model on the latest task
+            model.train_model(args, train_loader, task_count, kwargs)
 
             # generate a dictionary mapping tasks to models of the sizes that the network was when those tasks were
             # trained, containing subsets of the weights currently in the model (to mask new, post-expansion weights
@@ -67,23 +66,6 @@ def main():
 
             # test the model on ALL tasks trained thus far (including current task)
             utils.test(test_models, test_loaders)
-
-            # If the model currently being used in the loop is using EWC, we need to compute the fisher information
-            if type(model) == EWCModel:
-
-                model.save_theta_stars(task_count)
-
-                # using validation set in Fisher Information Matrix computation as specified by:
-                # https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
-                model.estimate_fisher(validation_loader)
-
-                # update the ewc loss sums in the model to incorporate weights and fisher info from the task on which
-                # we just trained the network
-                model.update_ewc_sums()
-
-                # store the current fisher diagonals for use with plotting and comparative loss calculations
-                # using the method in model.alternative_ewc_loss()
-                model.save_fisher_diags(task_count)
 
         # increment the number of the current task before re-entering while loop
         task_count += 1
