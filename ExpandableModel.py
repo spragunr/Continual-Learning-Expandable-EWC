@@ -283,7 +283,8 @@ class ExpandableModel(nn.Module):
                 accuracy))
 
         if test_accuracies[len(test_accuracies) - 1] < threshold:
-            return -1 # accuracy minimum threshold not met
+            return -1 # accuracy minimum threshold not met on most recent task
+
         else:
             return 0 # accuracy minimum threshold met
 

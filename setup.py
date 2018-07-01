@@ -70,7 +70,7 @@ def parse_arguments():
     parser.add_argument('--scale-factor', type=int, default=2, metavar='ES',
                         help='the factor by which to scale the size of network layers upon expansion')
 
-    # accuracy threshold (minimum) required on all tasks- if not met, network will reset to pre-training state
+    # accuracy threshold (minimum) required on most recent task- if not met, network will reset to pre-training state
     # and expand - set to 0 to disable automatic network expansion
     parser.add_argument('--accuracy-threshold', type=int, default=90, metavar='AT',
                         help='accuracy threshold (minimum) required on all tasks')
