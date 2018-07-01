@@ -64,7 +64,7 @@ def main():
                 break
 
         if retrain_task:
-            print('\033[93mExpanding')
+            print('\033[92mExpanding\033[0m')
             for model in models:
                 model.reset(task_count - 1)
             models = utils.expand(models, args)
