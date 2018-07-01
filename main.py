@@ -55,8 +55,7 @@ def main():
         for model in models:
 
             # for each desired epoch, train the model on the latest task
-            for epoch in range(1, args.epochs + 1):
-                model.train_model(args, train_loader, epoch, task_count)
+            model.train_model(args, train_loader, task_count)
 
             # update the model size dictionary
             model.update_size_dict(task_count)
