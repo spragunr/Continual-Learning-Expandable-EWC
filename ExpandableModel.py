@@ -105,8 +105,8 @@ class ExpandableModel(nn.Module):
     def reset(self, task_count):
         old_weights = self.task_post_training_weights.get(task_count)
 
-        for parameter_index, parameter in enumerate(self.parameters()):
-            parameter.data.copy_(old_weights[parameter_index])
+        for param_index, parameter in enumerate(self.parameters()):
+            parameter.data[tuple(slice(0, n) for n in old_weights[param_index].shape)] = old_weights[param_index][...]
 
 
     def save_theta_stars(self, task_count):

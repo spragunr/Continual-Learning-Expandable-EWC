@@ -96,12 +96,6 @@ def generate_new_mnist_task(args, kwargs, first_task):
     return train_loader, validation_loader, test_loader
 
 
-
-
-
-
-
-
 # Generate and return a tuple representing the padding size to be used as an argument to torch.nn.functional.pad().
 # Tuple format and more in-depth explanation of the effects of pad() are in documentation of the pad() method here:
 # https://pytorch.org/docs/stable/nn.html#torch.nn.functional.pad
