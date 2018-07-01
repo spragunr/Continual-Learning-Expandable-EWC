@@ -147,3 +147,5 @@ class NoRegModel(ExpandableModel):
                                                                                     ))
         # update the model size dictionary
         self.update_size_dict(task_number)
+
+        self.save_theta_stars(task_number)
