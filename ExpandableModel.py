@@ -40,6 +40,7 @@ class ExpandableModel(nn.Module):
 
         raise NotImplementedError("from_existing_model() is not implemented in ExpandableModel")
 
+    # kwargs contains validation_loader for EWC training (needed for Fisher estimation post-training)
     def train_model(self, args, train_loader, task_number, **kwargs):
 
         raise NotImplementedError("train_model() is not implemented in ExpandableModel")
