@@ -54,10 +54,10 @@ def main():
 
         for model in models:
 
-            kwargs = {'validation_loader': validation_loader} if type(model) == EWCModel else {}
+            train_args = {'validation_loader': validation_loader} if type(model) == EWCModel else {}
 
             # for each desired epoch, train the model on the latest task
-            model.train_model(args, train_loader, task_count, kwargs)
+            model.train_model(args, train_loader, task_count, **train_args)
 
             # generate a dictionary mapping tasks to models of the sizes that the network was when those tasks were
             # trained, containing subsets of the weights currently in the model (to mask new, post-expansion weights
