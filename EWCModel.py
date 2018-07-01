@@ -91,31 +91,25 @@ class EWCModel(ExpandableModel):
     # helper method for initializing 0-filled tensors to hold sums used in calculation of ewc loss
     def initialize_fisher_sums(self):
 
-        self.sum_Fx, self.sum_Fx_Wx, self.sum_Fx_Wx_sq = [], [], []
-
-        empty_sums = [self.sum_Fx, self.sum_Fx_Wx, self.sum_Fx_Wx_sq]
+        empty_sums = []
 
         for parameter in self.parameters():
-            for empty_sum in range(len(empty_sums)):
-                zeros = torch.zeros(tuple(parameter.size()))
+                zeros = torch.zeros(tuple(parameter.size())).to(self.device)
 
-
-                zeros = zeros.to(self.device)
-
-                empty_sums[empty_sum].append(zeros)
+                empty_sums.append(zeros)
 
         # the sum of each task's Fisher Information (list of Fisher diagonals for each parameter in the network,
         # and Fisher diagonals calculated for later tasks are summed with the fisher diagonal in the list at the
         # appropriate parameter index)
-        #self.sum_Fx = deepcopy(empty_sums)
+        self.sum_Fx = deepcopy(empty_sums)
 
         # the sum of each task's Fisher Information multiplied by its respective post-training weights in the network
         # (list of entries- one per parameter- of same size as model parameters)
-        #self.sum_Fx_Wx = deepcopy(empty_sums)
+        self.sum_Fx_Wx = deepcopy(empty_sums)
 
         # the sum of each task's Fisher Information multiplied by the square of its respective post-training weights
         # in the network (list of entries- one per parameter- of same size as model parameters)
-        #self.sum_Fx_Wx_sq = deepcopy(empty_sums)
+        self.sum_Fx_Wx_sq = deepcopy(empty_sums)
 
     # expand the sums used to compute ewc loss to fit an expanded model
     def expand_ewc_sums(self):
