@@ -105,6 +105,8 @@ class ExpandableModel(nn.Module):
     def reset(self, task_count):
         old_weights = self.task_post_training_weights.get(task_count)
 
+        print(old_weights)
+
         for parameter_index, parameter in enumerate(self.parameters()):
             parameter.data.copy_(old_weights[parameter_index])
 

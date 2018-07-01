@@ -36,6 +36,7 @@ def main():
                 print(parameter.size())
 
         if not retrain_task:
+
             # get the DataLoaders for the training, validation, and testing data
             train_loader, validation_loader, test_loader = utils.generate_new_mnist_task(args, kwargs,
                 first_task=(task_count == 1)
