@@ -27,31 +27,28 @@ def main():
 
     #utils.output_tensorboard_graph(args, device, models, task_count) # TODO change this to model.device in utils/ model constructor
 
+    retrain_task = False
+
     while(True):
-        # expand all models before training the next task
-        if task_count == 3:
-
-            print("EXPANDING...")
-
-            models = utils.expand(models, args)
-
-            #utils.output_tensorboard_graph(args, models, task_count + 1)
 
         for model in models:
             for parameter in model.parameters():
                 print(parameter.size())
 
-        # get the DataLoaders for the training, validation, and testing data
-        train_loader, validation_loader, test_loader = utils.generate_new_mnist_task(args, kwargs,
-            first_task=(task_count == 1)
-        )
+        if not retrain_task:
+            # get the DataLoaders for the training, validation, and testing data
+            train_loader, validation_loader, test_loader = utils.generate_new_mnist_task(args, kwargs,
+                first_task=(task_count == 1)
+            )
 
-        # add the new test_loader for this task to the list of testing dataset DataLoaders for later re-use
-        # to evaluate how well the models retain accuracy on old tasks after learning new ones
-        #
-        # NOTE: this list also includes the current test_loader, which we are appending here, because we also
-        # need to test each network on the current task after training
-        test_loaders.append(test_loader)
+            # add the new test_loader for this task to the list of testing dataset DataLoaders for later re-use
+            # to evaluate how well the models retain accuracy on old tasks after learning new ones
+            #
+            # NOTE: this list also includes the current test_loader, which we are appending here, because we also
+            # need to test each network on the current task after training
+            test_loaders.append(test_loader)
+
+        retrain_task = False
 
         for model in models:
             train_args = {'validation_loader': validation_loader} if type(model) == EWCModel else {}
@@ -63,10 +60,16 @@ def main():
 
             # test the model on ALL tasks trained thus far (including current task)
             if model.test(test_loaders, threshold) == -1:
+                retrain_task = True
+                break
 
-
-        # increment the number of the current task before re-entering while loop
-        task_count += 1
+        if retrain_task:
+            print("=================EXPANDING======================")
+            models = utils.expand(models, args)
+            #utils.output_tensorboard_graph(args, models, task_count + 1)
+        else:
+            # increment the number of the current task before re-entering while loop
+            task_count += 1
 
 
 if __name__ == '__main__':
