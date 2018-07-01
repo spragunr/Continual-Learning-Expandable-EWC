@@ -285,6 +285,7 @@ def generate_model_dictionary(m):
                 hidden_size,
                 m.input_size,
                 m.output_size,
+                m.device
             ).to(m.device)
         )
 
