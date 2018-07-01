@@ -70,6 +70,7 @@ def main():
                 model.reset(task_count - 1)
             models = utils.expand(models, args)
             #utils.output_tensorboard_graph(args, models, task_count + 1)
+
         else:
             # increment the number of the current task before re-entering while loop
             task_count += 1
