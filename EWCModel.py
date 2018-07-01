@@ -155,7 +155,7 @@ class EWCModel(ExpandableModel):
         # mutliply error by fisher multiplier (lambda) divided by 2
         return loss_prev_tasks * (self.lam / 2.0)
 
-    def train_model(self, args, device, train_loader, epoch, task_number):
+    def train_model(self, args, train_loader, epoch, task_number):
 
         # Set the module in "training mode"
         # This is necessary because some network layers behave differently when training vs testing.
@@ -222,7 +222,7 @@ class EWCModel(ExpandableModel):
             #
             # .to(device):
             #   set the device (CPU or GPU) to be used with data and target to device variable (defined in main())
-            data, target = Variable(data).to(device), Variable(target).to(device)
+            data, target = Variable(data).to(self.device), Variable(target).to(self.device)
 
             # Gradients are automatically accumulated- therefore, they need to be zeroed out before the next backward
             # pass through the network so that they are replaced by newly computed gradients at later training iterations,
@@ -341,7 +341,7 @@ class EWCModel(ExpandableModel):
         return loss_prev_tasks * (self.lam / 2.0)
 
     # used for whole batch
-    def estimate_fisher(self, device, validation_loader):
+    def estimate_fisher(self, validation_loader):
 
         # List to hold the computed fisher diagonals for the task on which the network was just trained.
         # Fisher Information Matrix diagonals are stored as a list of tensors of the same dimensions and in the same
@@ -376,7 +376,7 @@ class EWCModel(ExpandableModel):
         #
         # .to(device):
         # set the device (CPU or GPU) to be used with data and target to device variable (defined in main())
-        data = Variable(data).to(device)
+        data = Variable(data).to(self.device)
 
         softmax_activations.append(
             F.softmax(self(data), dim=-1)

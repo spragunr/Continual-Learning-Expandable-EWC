@@ -56,7 +56,7 @@ def main():
 
             # for each desired epoch, train the model on the latest task
             for epoch in range(1, args.epochs + 1):
-                model.train_model(args, device, train_loader, epoch, task_count)
+                model.train_model(args, train_loader, epoch, task_count)
 
             # update the model size dictionary
             model.update_size_dict(task_count)
@@ -67,8 +67,7 @@ def main():
             test_models = utils.generate_model_dictionary(model)
 
             # test the model on ALL tasks trained thus far (including current task)
-            utils.test(test_models, device, test_loaders)
-
+            utils.test(test_models, test_loaders)
 
             # If the model currently being used in the loop is using EWC, we need to compute the fisher information
             if type(model) == EWCModel:
@@ -77,7 +76,7 @@ def main():
 
                 # using validation set in Fisher Information Matrix computation as specified by:
                 # https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
-                model.estimate_fisher(device, validation_loader)
+                model.estimate_fisher(validation_loader)
 
                 # update the ewc loss sums in the model to incorporate weights and fisher info from the task on which
                 # we just trained the network

@@ -40,7 +40,7 @@ class ExpandableModel(nn.Module):
 
         raise NotImplementedError("from_existing_model() is not implemented in ExpandableModel")
 
-    def train_model(self, args, device, train_loader, epoch, task_number):
+    def train_model(self, args, train_loader, epoch, task_number):
 
         raise NotImplementedError("train_model() is not implemented in ExpandableModel")
 

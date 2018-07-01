@@ -22,7 +22,7 @@ class NoRegModel(ExpandableModel):
 
         return model
 
-    def train_model(self, args, device, train_loader, epoch, task_number):
+    def train_model(self, args, train_loader, epoch, task_number):
 
         # Set the module in "training mode"
         # This is necessary because some network layers behave differently when training vs testing.
@@ -89,7 +89,7 @@ class NoRegModel(ExpandableModel):
             #
             # .to(device):
             #   set the device (CPU or GPU) to be used with data and target to device variable (defined in main())
-            data, target = Variable(data).to(device), Variable(target).to(device)
+            data, target = Variable(data).to(self.device), Variable(target).to(self.device)
 
             # Gradients are automatically accumulated- therefore, they need to be zeroed out before the next backward
             # pass through the network so that they are replaced by newly computed gradients at later training iterations,

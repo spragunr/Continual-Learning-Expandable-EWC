@@ -96,7 +96,7 @@ def generate_new_mnist_task(args, kwargs, first_task):
     return train_loader, validation_loader, test_loader
 
 
-def test(models, device, test_loaders):
+def test(models, test_loaders):
     # Test the model on ALL tasks, including that on which the model was most recently trained
     for task_number, test_loader in enumerate(test_loaders):
 
@@ -148,7 +148,7 @@ def test(models, device, test_loaders):
                 #
                 # .to(device):
                 # set the device (CPU or GPU) to be used with data and target to device variable (defined in main())
-                data, target = Variable(data).to(device), Variable(target).to(device)
+                data, target = Variable(data).to(model.device), Variable(target).to(model.device)
 
                 # Forward pass: compute predicted output by passing data to the model. Module objects
                 # override the __call__ operator so you can call them like functions. When
