@@ -2,6 +2,7 @@ import torch
 import utils
 import setup
 from EWCModel import EWCModel
+from NoRegModel import NoRegModel
 
 def main():
 
@@ -53,19 +54,16 @@ def main():
         test_loaders.append(test_loader)
 
         for model in models:
-
             train_args = {'validation_loader': validation_loader} if type(model) == EWCModel else {}
 
             # for each desired epoch, train the model on the latest task
             model.train_model(args, train_loader, task_count, **train_args)
 
-            # generate a dictionary mapping tasks to models of the sizes that the network was when those tasks were
-            # trained, containing subsets of the weights currently in the model (to mask new, post-expansion weights
-            # when testing on tasks for which the weights did not exist during training)
-            test_models = utils.generate_model_dictionary(model)
+            threshold = 0 if type(model) == NoRegModel else args.accuracy_threshold
 
             # test the model on ALL tasks trained thus far (including current task)
-            utils.test(test_models, test_loaders)
+            if model.test(test_loaders, threshold) == -1:
+
 
         # increment the number of the current task before re-entering while loop
         task_count += 1

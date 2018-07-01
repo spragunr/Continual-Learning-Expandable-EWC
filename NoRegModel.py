@@ -18,6 +18,8 @@ class NoRegModel(ExpandableModel):
 
         model.size_dictionary = deepcopy(m.size_dictionary)
 
+        model.task_post_training_weights = deepcopy(m.task_post_training_weights)
+
         model.copy_weights_expanding(m)
 
         return model

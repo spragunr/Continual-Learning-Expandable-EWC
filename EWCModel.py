@@ -19,10 +19,6 @@ class EWCModel(ExpandableModel):
         # {task number : list of Fisher diagonals calculated after model trained on task}
         self.task_fisher_diags = {}
 
-        # dictionary, format:
-        # {task number : list of learnable parameter weight values after model trained on task}
-        self.task_post_training_weights = {}
-
         self.initialize_fisher_sums()
 
     @classmethod
@@ -420,24 +416,9 @@ class EWCModel(ExpandableModel):
         for parameter in range(len(self.list_of_fisher_diags)):
             self.list_of_fisher_diags[parameter] /= validation_loader.batch_size
 
-    def save_theta_stars(self, task_count):
-
-        # save the theta* ("theta star") values after training - for plotting and comparative loss calculations
-        # using the method in model.alternative_ewc_loss()
-        #
-        # NOTE: when I reference theta*, I am referring to the values represented by that variable in
-        # equation (3) at:
-        #   https://arxiv.org/pdf/1612.00796.pdf#section.2
-        current_weights = []
-
-        for parameter in self.parameters():
-            current_weights.append(deepcopy(parameter.data.clone()))
-
-        self.task_post_training_weights.update({task_count: deepcopy(current_weights)})
-
-
     def save_fisher_diags(self, task_count):
 
         self.task_fisher_diags.update({task_count: deepcopy(self.list_of_fisher_diags)})
+
 
 
