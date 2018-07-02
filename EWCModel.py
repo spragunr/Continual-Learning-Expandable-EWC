@@ -429,5 +429,5 @@ class EWCModel(ExpandableModel):
 
         for parameter_index, parameter in enumerate(self.parameters()):
 
-            parameter.grad /= torch.clamp(self.sum_Fx[parameter_index] * self.lam, min=0.1)
+            parameter.grad /= torch.clamp(self.sum_Fx[parameter_index] * 100, min=1)
 
