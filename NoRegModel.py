@@ -3,7 +3,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.autograd import Variable
 from copy import deepcopy
-
+import optimizer_utils
 
 class NoRegModel(ExpandableModel):
 
@@ -51,7 +51,11 @@ class NoRegModel(ExpandableModel):
         #        bias b/w hidden layer and output]
         #   )
         #optimizer = optim.SGD(self.parameters(), lr=args.lr, momentum=args.momentum) # can use filter and requires_grad=False to freeze part of the network...
-        optimizer = optim.Adadelta(self.parameters())
+        #optimizer = optim.Adadelta(self.parameters())
+
+        dict = optimizer_utils.generate_parameter_dictionaries(self)
+
+        optimizer = optim.SGD(dict)
 
         for epoch in range(1, args.epochs + 1):
             # Enumerate will keep an automatic loop counter and store it in batch_idx.

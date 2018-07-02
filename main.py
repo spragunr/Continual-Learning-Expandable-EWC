@@ -1,6 +1,7 @@
 import torch
 import utils
 import setup
+import torch.nn as nn
 from EWCModel import EWCModel
 from NoRegModel import NoRegModel
 
@@ -34,7 +35,7 @@ def main():
         for model in models:
             for parameter in model.parameters():
                 print(parameter.size())
-
+                print(list(parameter.size()))
         if not retrain_task:
 
             # get the DataLoaders for the training, validation, and testing data
