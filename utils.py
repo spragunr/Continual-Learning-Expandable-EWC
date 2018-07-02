@@ -1,4 +1,5 @@
 import torch
+import os
 import torch.nn as nn
 import torch.utils.data as D
 from torch.autograd import Variable
@@ -132,9 +133,19 @@ def output_tensorboard_graph(args, models, task_count):
 
 def expand(models, args):
 
+    # output expansion notification to terminal
+    _, columns = os.popen('stty size', 'r').read().split() # width of terminal
+    print("\033[93m\033[1m") # begin bold yellow text formatting
+    print("=" for col in columns)
+    print("\nEXPANDING MODEL AND RETRAINING LAST TASK\n")
+    print("=" for col in columns)
+    print("\033[0m") # end bold yellow text formatting
+
     expanded_models = []
 
     for model_num, model in enumerate(models):
         expanded_models.append(model.__class__.from_existing_model(model, model.hidden_size * args.scale_factor).to(model.device))
 
     return expanded_models
+
+

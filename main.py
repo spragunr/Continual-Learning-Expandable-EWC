@@ -65,9 +65,10 @@ def main():
                 break
 
         if retrain_task:
-            print('\033[1m\033[91mExpanding\033[0m')
+
             for model in models:
                 model.reset(task_count - 1)
+
             models = utils.expand(models, args)
             #utils.output_tensorboard_graph(args, models, task_count + 1)
 
