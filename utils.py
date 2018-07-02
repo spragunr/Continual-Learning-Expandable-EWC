@@ -136,11 +136,12 @@ def expand(models, args):
     # output expansion notification to terminal
     _, columns = os.popen('stty size', 'r').read().split() # width of terminal
     columns = int(columns)
-    print("\033[93m\033[1m") # begin bold warning text formatting
-    for col in range(columns): print("=", end='')
-    print("\nEXPANDING MODEL AND RETRAINING LAST TASK\n")
-    for col in range(columns): print("=", end='')
-    print("\033[0m") # end bold warning text formatting
+    text = "EXPANDING MODEL AND RETRAINING LAST TASK"
+    banner = ""
+    for col in range(columns // 2): banner += u"\u2588"
+    banner += text
+    for col in range(columns - (columns // 2) - len(text)): banner += u"\u2588"
+    print("\033[93m\033[1m{}\033[0m".format(banner)) # print banner with bold warning text formatting
 
     expanded_models = []
 
