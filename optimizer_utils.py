@@ -1,6 +1,7 @@
 import torch.nn as nn
 
-
+"""
+DON'T DO THIS...
 def generate_parameter_dictionaries(model):
 
     dictionaries = []
@@ -13,7 +14,7 @@ def generate_parameter_dictionaries(model):
 
             # biases
             if len(list(parameter.size())) == 1:
-                for weight in parameter:
+                for weight in range(list(parameter.size())[0]):
                     dictionaries.append({'params': nn.Parameter(parameter[weight]), 'lr': lr})
 
             # weights
@@ -23,3 +24,4 @@ def generate_parameter_dictionaries(model):
                         dictionaries.append({'params': nn.Parameter(parameter[row][col]), 'lr': lr})
 
     return dictionaries
+"""
