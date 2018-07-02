@@ -172,7 +172,7 @@ class EWCModel(ExpandableModel):
         #        weights between last hidden layer and output,
         #        bias b/w hidden layer and output]
         #   )
-        #optimizer = optim.SGD(self.parameters(), lr=args.lr, momentum=args.momentum) # can use filter and requires_grad=False to freeze part of the network...
+        optimizer = optim.SGD(self.parameters(), lr=args.lr, momentum=args.momentum) # can use filter and requires_grad=False to freeze part of the network...
         #optimizer = optim.Adadelta(self.parameters())
 
         for epoch in range(1, args.epochs + 1):
@@ -246,7 +246,7 @@ class EWCModel(ExpandableModel):
                 #
                 # See equation (3) at:
                 #   https://arxiv.org/pdf/1612.00796.pdf#section.2
-                if task_number > 1:
+                if task_number > 1: # todo change to hasattr() call
                     # This statement computes loss on previous tasks using the summed fisher terms as in ewc_loss_prev_tasks()
                     loss += self.ewc_loss_prev_tasks()
 
@@ -260,6 +260,9 @@ class EWCModel(ExpandableModel):
                 # Backward pass: compute gradient of the loss with respect to model
                 # parameters
                 loss.backward()
+
+                if task_number > 1: # todo change to hasattr() call
+                    self.tune_variable_learning_rates()
 
                 # Simplified abstraction provided by PyTorch which uses a single statement to update all model parameters
                 # according to gradients (with respect to the last loss function on which .backward() was called and
