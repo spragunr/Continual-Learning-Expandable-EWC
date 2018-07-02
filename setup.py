@@ -72,7 +72,7 @@ def parse_arguments():
 
     # accuracy threshold (minimum) required on most recent task- if not met, network will reset to pre-training state
     # and expand - set to 0 to disable automatic network expansion
-    parser.add_argument('--accuracy-threshold', type=int, default=90, metavar='AT',
+    parser.add_argument('--accuracy-threshold', type=int, default=0, metavar='AT',
                         help='accuracy threshold (minimum) required on all tasks')
 
     return parser.parse_args()
