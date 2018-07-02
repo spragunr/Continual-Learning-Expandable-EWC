@@ -134,12 +134,12 @@ def output_tensorboard_graph(args, models, task_count):
 def expand(models, args):
 
     # output expansion notification to terminal
-    columns, _ = os.popen('stty size', 'r').read().split() # width of terminal
+    _, columns = os.popen('stty size', 'r').read().split() # width of terminal
     columns = int(columns)
     print("\033[93m\033[1m") # begin bold warning text formatting
-    for col in range(columns): print("=")
+    for col in range(columns): print("=", end='')
     print("\nEXPANDING MODEL AND RETRAINING LAST TASK\n")
-    for col in range(columns): print("=")
+    for col in range(columns): print("=", end='')
     print("\033[0m") # end bold warning text formatting
 
     expanded_models = []
