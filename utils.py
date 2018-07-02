@@ -138,9 +138,9 @@ def expand(models, args):
     columns = int(columns)
     text = "EXPANDING MODEL AND RETRAINING LAST TASK"
     banner = ""
-    for col in range(columns // 2): banner += u"\u2588"
+    for col in range((columns // 2) - (len(text) // 2)): banner += u"\u2588"
     banner += text
-    for col in range(columns - (columns // 2) - len(text)): banner += u"\u2588"
+    for col in range(columns - len(banner)): banner += u"\u2588"
     print("\033[93m\033[1m{}\033[0m".format(banner)) # print banner with bold warning text formatting
 
     expanded_models = []
