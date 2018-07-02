@@ -1,7 +1,12 @@
 import torch.optim as optim
 import torch
 
+"""
+VLR: Variable Learning Rate optimizer 
+"""
 class VLR(optim.SGD):
+
+
 
     def step(self, closure=None):
         """Performs a single optimization step.
