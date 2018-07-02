@@ -18,8 +18,8 @@ def generate_parameter_dictionaries(model):
 
             # weights
             else:
-                for row in list(parameter.size())[0]:
-                    for col in list(parameter.size())[1]:
+                for row in range(list(parameter.size())[0]):
+                    for col in range(list(parameter.size())[1]):
                         dictionaries.append({'params': nn.Parameter(parameter[row][col]), 'lr': lr})
 
     return dictionaries
