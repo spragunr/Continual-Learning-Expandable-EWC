@@ -26,7 +26,7 @@ def parse_arguments():
     parser.add_argument('--l2-reg-penalty', type=float, default=0.0, metavar='L2',
                         help='l2 regularization penalty (weight decay) (default: 0.0)')
 
-    parser.add_argument('--lam', type=float, default=400, metavar='LAM',
+    parser.add_argument('--lam', type=float, default=15, metavar='LAM',
                         help='ewc lambda value (fisher multiplier) (default: 15)')
 
     parser.add_argument('--momentum', type=float, default=0.0, metavar='M',
