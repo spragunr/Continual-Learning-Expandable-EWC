@@ -5,6 +5,7 @@ import torch.nn as nn
 from EWCModel import EWCModel
 from NoRegModel import NoRegModel
 
+
 def main():
 
     args = setup.parse_arguments()
