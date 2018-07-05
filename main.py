@@ -36,7 +36,8 @@ def main():
         for model in models:
             for parameter in model.parameters():
                 print(parameter.size())
-                print(list(parameter.size()))
+
+
         if not retrain_task:
 
             # get the DataLoaders for the training, validation, and testing data
