@@ -197,6 +197,7 @@ class EWCModel(ExpandableModel):
             # https://discuss.pytorch.org/t/why-does-the-minimal-pytorch-tutorial-not-have-mnist-images-be-onehot-for-logistic-regression/12562/6
             for batch_idx, (data, target) in enumerate(train_loader):
 
+
                 # The data needs to be wrapped in another tensor to work with our network,
                 # otherwise it is not of the appropriate dimensions... I believe these two statements effectively add
                 # a dimension.
