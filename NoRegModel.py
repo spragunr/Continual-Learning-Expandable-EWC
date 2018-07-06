@@ -146,6 +146,8 @@ class NoRegModel(ExpandableModel):
                                                                                     100. * batch_idx / len(train_loader),
                                                                                     loss.item()
                                                                                     ))
+
+
         # update the model size dictionary
         self.update_size_dict(task_number)
 
