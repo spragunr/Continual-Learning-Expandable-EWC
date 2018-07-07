@@ -75,6 +75,14 @@ def parse_arguments():
     parser.add_argument('--accuracy-threshold', type=int, default=90, metavar='AT',
                         help='accuracy threshold (minimum) required on all tasks')
 
+    # dataset on which to train/test model
+    parser.add_argument('--dataset', type=str, default='mnist', metavar='DS',
+                        help='dataset on which to train/test model')
+
+    # continual learning methodology
+    parser.add_argument('--methodology', type=str, default='ewc', metavar='M',
+                        help='continual learning methodology to use')
+
     return parser.parse_args()
 
 
