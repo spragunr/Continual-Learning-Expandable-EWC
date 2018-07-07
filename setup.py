@@ -83,6 +83,10 @@ def parse_arguments():
     parser.add_argument('--methodology', type=str, default='ewc', metavar='M',
                         help='continual learning methodology to use')
 
+    # number of tasks
+    parser.add_argument('--tasks', type=int, default='20', metavar='T',
+                        help='number of tasks')
+
     return parser.parse_args()
 
 

@@ -249,11 +249,7 @@ def generate_new_cifar_task(args, kwargs, first_task):
     return train_loader, validation_loader, test_loader
 
 
-
-
-
-"""
-# generate the DataLoaders corresponding to a incremental CIFAR 100 tasks
+# generate the DataLoaders corresponding to incremental CIFAR 100 tasks
 def generate_cifar_tasks(args, kwargs):
 
     train_loaders = []
@@ -314,9 +310,17 @@ def generate_cifar_tasks(args, kwargs):
     for (data, target) in train_loader:
         data_org_by_class[target.item()].append((data, target))
 
-    for sample in data_org_by_class[0]:
-        print(sample[1])
+    task_class_indices = []
+
+    class_count = 0
+
+    for task in range(args.tasks):
+        task_class_indices.append(range(class_count, class_count + 100 // args.tasks))
+        class_count += 100 // args.tasks
+
+
+
+    print(task_class_indices)
 
 
     return train_loaders, validation_loaders, test_loaders
-"""

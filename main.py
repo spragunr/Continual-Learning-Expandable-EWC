@@ -33,10 +33,9 @@ def main():
 
     # todo fix kwargs (**kwargs)
     # todo remove
-    train_loader, validation_loader, test_loader = utils.generate_new_cifar_task(args, kwargs, True)
+    train_loaders, validation_loaders, test_loaders = utils.generate_cifar_tasks(args, kwargs)
 
-    data, target = next(iter(train_loader))
-
+    data, target = next(iter(train_loaders[0]))
 
 
     retrain_task = False
