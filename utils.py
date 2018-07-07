@@ -149,8 +149,111 @@ def expand(models, args):
 
     return expanded_models
 
+# generate the DataLoaders corresponding to a permuted CIFAR 10 task
+def generate_new_cifar_task(args, kwargs, first_task):
 
-# generate the DataLoaders corresponding to a permuted mnist task
+    # permutation to be applied to all images in the dataset (if this is not the first dataset being generated)
+    pixel_permutation = torch.randperm(args.input_size)
+
+    # transforms.Compose() composes several transforms together.
+    #
+    # IF this is NOT the FIRST task, we should permute the original MNIST dataset to form a new task.
+    #
+    #  The transforms composed here are as follows:
+    #
+    # transforms.ToTensor():
+    #     Converts a PIL Image or numpy.ndarray (H x W x C) in the range [0, 255] to a
+    #     torch.FloatTensor of shape (C x H x W) in the range [0.0, 1.0].
+    #
+    # transforms.Normalize(mean, std):
+    #     Normalize a tensor image with mean and standard deviation. Given mean: (M1,...,Mn) and
+    #     std: (S1,..,Sn) for n channels, this transform will normalize each channel of the
+    #     input torch.*Tensor i.e. input[channel] = (input[channel] - mean[channel]) / std[channel]
+    #
+    #     NOTE: the values used here for mean and std are those computed on the MNIST dataset
+    #           SOURCE: https://discuss.pytorch.org/t/normalization-in-the-mnist-example/457
+    #
+    # transforms.Lambda() applies the enclosed lambda function to each image (x) in the DataLoader
+    # todo comment on sequential mnist and pixel permuation
+    # permutation from: https://discuss.pytorch.org/t/sequential-mnist/2108 (first response)
+    transform_train = transforms.Compose([
+            transforms.RandomCrop(32, padding=4),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            #transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+            ]) if first_task else transforms.Compose(
+            [
+            transforms.RandomCrop(32, padding=4),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Lambda(lambda x: x.view(3, 1024)[:, pixel_permutation]),
+            transforms.Lambda(lambda x: x.view(3, 32, 32)),
+            #transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+            ])
+
+    transform_test = transforms.Compose([
+            transforms.ToTensor(),
+            #transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+            ]) if first_task else transforms.Compose(
+            [
+            transforms.ToTensor(),
+            transforms.Lambda(lambda x: x.view(-1, 1)[pixel_permutation]),
+            transforms.Lambda(lambda x: x.view(32, 32)),
+            #transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+            ])
+    # Split the PyTorch MNIST training dataset into training and validation datasets, and transform the data.
+    #
+    # D.dataset.random_split(dataset, lengths):
+    #   Randomly split a dataset into non-overlapping new datasets of given lengths
+    #
+    # datasets.MNIST():
+    #   ARGUMENTS (in order):
+    #   root (string) – Root directory of dataset where processed/training.pt and processed/test.pt exist.
+    #   train (bool, optional) – If True, creates dataset from training.pt, otherwise from test.pt.
+    #   transform (callable, optional) – A function/transform that takes in an PIL image and returns a transformed
+    #                                       version. E.g, transforms.RandomCrop
+    #   download (bool, optional) – If true, downloads the dataset from the internet and puts it in root directory.
+    #                                       If dataset is already downloaded, it is not downloaded again.
+    train_data, validation_data = \
+        D.dataset.random_split(datasets.CIFAR10('../data', train=True, transform=transform_train, download=True),
+            [args.train_dataset_size, args.validation_dataset_size])
+
+    # Testing dataset.
+    # train=False, because we want to draw the data here from <root>/test.pt (as opposed to <root>/training.pt)
+    test_data = datasets.CIFAR10('../data', train=False, transform=transform_test, download=True)
+
+    # A PyTorch DataLoader combines a dataset and a sampler, and returns single- or multi-process iterators over
+    # the dataset.
+
+    # DataLoader for the training data.
+    # ARGUMENTS (in order):
+    # dataset (Dataset) – dataset from which to load the data (train_data prepared in above statement, in this case).
+    # batch_size (int, optional) – how many samples per batch to load (default: 1).
+    # shuffle (bool, optional) – set to True to have the data reshuffled at every epoch (default: False).
+    # kwargs - see above definition
+    train_loader = D.DataLoader(train_data, batch_size=10, shuffle=True, **kwargs)
+
+    # Dataloader for the validation dataset-
+    # ARGUMENTS (in order):
+    # 1) validation_data as the dataset
+    # 2) batch_size is the entire validation set in one batch
+    # 3) shuffle=True ensures we are drawing random samples by shuffling the data each time we contstruct a new iterator
+    #       over the data, and is implemented in the source code as a RandomSampler()
+    # 4) kwargs defined above
+    validation_loader = D.DataLoader(validation_data, batch_size=args.validation_dataset_size, shuffle=True, **kwargs)
+
+    # Instantiate a DataLoader for the testing data in the same manner as above for training data, with two exceptions:
+    #   Here, we use test_data rather than train_data, and we use test_batch_size
+    test_loader = D.DataLoader(test_data, batch_size=args.test_batch_size, shuffle=True, **kwargs)
+
+    return train_loader, validation_loader, test_loader
+
+
+
+
+
+"""
+# generate the DataLoaders corresponding to a incremental CIFAR 100 tasks
 def generate_cifar_tasks(args, kwargs):
 
     train_loaders = []
@@ -216,3 +319,4 @@ def generate_cifar_tasks(args, kwargs):
 
 
     return train_loaders, validation_loaders, test_loaders
+"""

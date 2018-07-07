@@ -48,7 +48,7 @@ def parse_arguments():
                         help='how many batches to wait before logging training status (default 10)')
 
     # [train dataset size] = [full MNIST train set (60,000)] - [validation set size]
-    parser.add_argument('--train-dataset-size', type=int, default=59800, metavar='TDS',
+    parser.add_argument('--train-dataset-size', type=int, default=49800, metavar='TDS',
                         help='number of images in the training dataset')
 
     parser.add_argument('--validation-dataset-size', type=int, default=200, metavar='VDS',
@@ -58,8 +58,8 @@ def parse_arguments():
     parser.add_argument('--hidden-size', type=int, default=30, metavar='HS',
                         help='number of neurons in each hidden layer of the network')
 
-    # 28 x 28 pixels = 784 pixels per MNIST image
-    parser.add_argument('--input-size', type=int, default=784, metavar='IS',
+    # 28 x 28 pixels = 784 pixels per MNIST image, 32 x 32 = 1024 for CIFAR 10
+    parser.add_argument('--input-size', type=int, default=1024, metavar='IS',
                         help='size of each input data sampe to the network (default 784 (28 * 28))')
 
     # 10 classes - digits 0-9

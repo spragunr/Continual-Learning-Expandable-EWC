@@ -470,3 +470,38 @@ def calculate_ewc_loss_prev_tasks(model):
                 #         print(sum_number)
                 #         print(ewc_sum.size())
                 #         print(ewc_sum)
+
+
+
+
+print(data[0][0])
+    print(data[0][1])
+    print(data[0][2])
+
+    classes = ('plane', 'car', 'bird', 'cat',
+               'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+
+    def imshow(img):
+        npimg = img.numpy()
+        plt.imshow(np.transpose(npimg, (1, 2, 0)))
+        plt.show()
+
+    # show images
+    imshow(torchvision.utils.make_grid(data))
+    # print labels
+    print(' '.join('%5s' % classes[target[j]] for j in range(10)))
+
+    train_loader, validation_loader, test_loader = utils.generate_new_cifar_task(args, kwargs, False)
+
+    data, target = next(iter(train_loader))
+
+    print(data[0][0])
+    print(data[0][1])
+    print(data[0][2])
+
+    # show images
+    imshow(torchvision.utils.make_grid(data))
+    # print labels
+    print(' '.join('%5s' % classes[target[j]] for j in range(10)))
+
+    exit()

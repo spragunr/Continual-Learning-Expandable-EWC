@@ -4,7 +4,9 @@ import setup
 import torch.nn as nn
 from EWCModel import EWCModel
 from NoRegModel import NoRegModel
-
+import matplotlib.pyplot as plt
+import numpy as np
+import torchvision
 
 def main():
 
@@ -31,12 +33,10 @@ def main():
 
     # todo fix kwargs (**kwargs)
     # todo remove
-    train_loaders, validation_loaders, test_loaders = utils.generate_cifar_tasks(args, kwargs)
+    train_loader, validation_loader, test_loader = utils.generate_new_cifar_task(args, kwargs, True)
 
-    for (data, target) in train_loaders[0]:
-        print(target)
+    data, target = next(iter(train_loader))
 
-    exit()
 
 
     retrain_task = False
