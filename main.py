@@ -29,6 +29,16 @@ def main():
 
     #utils.output_tensorboard_graph(args, device, models, task_count) # TODO change this to model.device in utils/ model constructor
 
+    # todo fix kwargs (**kwargs)
+    # todo remove
+    train_loaders, validation_loaders, test_loaders = utils.generate_cifar_tasks(args, kwargs)
+
+    for (data, target) in train_loaders[0]:
+        print(target)
+
+    exit()
+
+
     retrain_task = False
 
     while(True):
