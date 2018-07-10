@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torchvision
 from utils import ResNet18
+import h5py
 
 def main():
 
@@ -42,10 +43,14 @@ def main():
     retrain_task = False
 
     ### EVALUATION METRICS ###
+    f = h5py.File("test_results.hdf5", "w")
 
-    test_results = [] # accuracy on each task after training
-    expansion_before_tasks = np.zeros(args.tasks + 1) # list of task numbers before which the network needed to expand
-    avg_acc_on_all_tasks = np.zeros(args.tasks + 1) # avg accuracy on all tasks as new tasks are added
+    test_results = f.create_dataset("test_results", (0,), dtype='f') # accuracy on each task after training
+    expansion_before_tasks = f.create_dataset("expansion_before_tasks", (args.tasks + 1,), dtype='i') # list of task numbers before which the network needed to expand
+    avg_acc_on_all_tasks = f.create_dataset("avg_acc_on_all_tasks", (args.tasks + 1,), dtype='f') # avg accuracy on all tasks as new tasks are added
+
+    expansion_before_tasks[...] = np.zeros(len(expansion_before_tasks))
+    avg_acc_on_all_tasks[...] = np.zeros(len(avg_acc_on_all_tasks))
 
     while(args.tasks + 1):
 
@@ -107,6 +112,7 @@ def main():
 
             # increment the number of the current task before re-entering while loop
             task_count += 1
+
 
 
 if __name__ == '__main__':
