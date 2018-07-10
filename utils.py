@@ -10,7 +10,7 @@ from NoRegModel import NoRegModel
 from tensorboardX import SummaryWriter
 import numpy as np
 import random
-
+from network_utils import ResNet18
 
 # generate the DataLoaders corresponding to a permuted mnist task
 def generate_new_mnist_task(args, kwargs, first_task):
