@@ -45,7 +45,7 @@ def main():
     ### EVALUATION METRICS ###
     f = h5py.File("test_results.hdf5", "w")
 
-    test_results = f.create_dataset("test_results", (0,), dtype='f') # accuracy on each task after training
+    test_results = []
     expansion_before_tasks = f.create_dataset("expansion_before_tasks", (args.tasks + 1,), dtype='i') # list of task numbers before which the network needed to expand
     avg_acc_on_all_tasks = f.create_dataset("avg_acc_on_all_tasks", (args.tasks + 1,), dtype='f') # avg accuracy on all tasks as new tasks are added
 
@@ -55,10 +55,6 @@ def main():
     while(args.tasks + 1):
 
         torch.cuda.empty_cache() # free any available gpu memory
-
-        print(test_results)
-        print(expansion_before_tasks)
-        print(avg_acc_on_all_tasks)
 
         if not retrain_task:
 
@@ -113,7 +109,8 @@ def main():
             # increment the number of the current task before re-entering while loop
             task_count += 1
 
-
+    final_task_accs = f.create_dataset("final_task_accs", (len(test_results)), dtype='f')  # accuracy on each task after training
+    final_task_accs[...] = test_results[...]
 
 if __name__ == '__main__':
     main()
