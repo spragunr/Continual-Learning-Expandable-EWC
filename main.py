@@ -52,7 +52,7 @@ def main():
     expansion_before_tasks[...] = np.zeros(len(expansion_before_tasks))
     avg_acc_on_all_tasks[...] = np.zeros(len(avg_acc_on_all_tasks))
 
-    while(args.tasks + 1):
+    while(task_count < args.tasks + 1):
 
         torch.cuda.empty_cache() # free any available gpu memory
 
