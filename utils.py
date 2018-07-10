@@ -9,6 +9,7 @@ from EWCModel import EWCModel
 from NoRegModel import NoRegModel
 from tensorboardX import SummaryWriter
 import numpy as np
+import random
 
 
 # generate the DataLoaders corresponding to a permuted mnist task
@@ -330,7 +331,13 @@ def generate_cifar_tasks(args, kwargs):
     print(len(tasks[0]))
     print(len(tasks[0][0]))
 
-    print(type(tasks[0]))
+    for item in tasks[0]:
+        print(item[1])
 
+    for task in tasks:
+        random.shuffle(task)
+
+    for item in tasks[0]:
+        print(item[1])
 
     return train_loaders, validation_loaders, test_loaders
