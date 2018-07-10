@@ -361,12 +361,12 @@ def generate_cifar_tasks(args, kwargs):
         for batch in range(len(train_loader) // args.batch_size):
             data_target_tuples = [train_loader[i] for i in range(batch_start, batch_start + args.batch_size)]
 
-            data = []
-            target = []
+            data = torch.zeros(0)  # zero-dimensional tensor (empty)
+            target = torch.zeros(0)
 
             for tuple in data_target_tuples:
-                data.append(tuple[0])
-                target.append(tuple(1))
+                data = torch.cat((data, tuple[0]))
+                target = torch.cat((target, tuple[1]))
 
             batched_train_loader.append((data, target))
             batch_start += args.batch_size
@@ -375,12 +375,12 @@ def generate_cifar_tasks(args, kwargs):
         # make the whole validation set one batch for fisher matrix computations (EWC)
         data_target_tuples = [validation_loader[i] for i in range(len(validation_loader))]
 
-        data = []
-        target = []
+        data = torch.zeros(0) # zero-dimensional tensor (empty)
+        target = torch.zeros(0)
 
         for tuple in data_target_tuples:
-            data.append(tuple[0])
-            target.append(tuple(1))
+            data = torch.cat((data, tuple[0]))
+            target = torch.cat((target, tuple[1]))
 
         batched_validation_loader.append((data, target))
 
@@ -396,12 +396,12 @@ def generate_cifar_tasks(args, kwargs):
         for batch in range(len(task) // args.test_batch_size):
             data_target_tuples = [task[i] for i in range(batch_start, batch_start + args.test_batch_size)]
 
-            data = []
-            target = []
+            data = torch.zeros(0)  # zero-dimensional tensor (empty)
+            target = torch.zeros(0)
 
             for tuple in data_target_tuples:
-                data.append(tuple[0])
-                target.append(tuple[1])
+                data = torch.cat((data, tuple[0]))
+                target = torch.cat((target, tuple[1]))
 
             batched_test_loader.append((data, target))
             batch_start += args.test_batch_size
