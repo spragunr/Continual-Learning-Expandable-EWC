@@ -283,7 +283,7 @@ class EWCModel(ExpandableModel):
                                                                                     task_number,
                                                                                     epoch,
                                                                                     batch_idx * len(data),
-                                                                                    len(train_loader.dataset),
+                                                                                    args.train_dataset_size,
                                                                                     100. * batch_idx / len(train_loader),
                                                                                     loss.item()
                                                                                     ))
