@@ -79,7 +79,7 @@ def parse_arguments():
                         help='continual learning methodology to use')
 
     # number of tasks
-    parser.add_argument('--tasks', type=int, default='100', metavar='T',
+    parser.add_argument('--tasks', type=int, default='3', metavar='T',
                         help='number of tasks')
 
     return parser.parse_args()
