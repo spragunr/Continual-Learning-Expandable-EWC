@@ -351,12 +351,31 @@ def generate_cifar_tasks(args, kwargs):
         train_loader = task[:400]
         validation_loader = task[400:]
 
-        train_loaders.append(train_loader)
-        validation_loaders.append(validation_loader)
+        batched_train_loader = []
+        batched_validation_loader = []
+
+        batch_start = 0
+
+        for batch in range(len(train_loader) // args.batch_size):
+            batched_train_loader.append([train_loader[i] for i in range(batch_start, batch_start + args.batch_size)])
+            batch_start += args.batch_size
+
+        # make the whole validation set one batch for fisher matrix computations (EWC)
+        batched_validation_loader.append([validation_loader[i] for i in range(len(validation_loader))])
+
+        train_loaders.append(batched_train_loader)
+        validation_loaders.append(batched_validation_loader)
 
     for task in tasks_test:
-        test_loaders.append(task)
 
-    # todo batches
+        batched_test_loader = []
+
+        batch_start = 0
+
+        for batch in range(len(task) // args.test_batch_size):
+            batched_test_loader.append([task[i] for i in range(batch_start, batch_start + args.test_batch_size)])
+            batch_start += args.test_batch_size
+
+        test_loaders.append(batched_test_loader)
 
     return train_loaders, validation_loaders, test_loaders
