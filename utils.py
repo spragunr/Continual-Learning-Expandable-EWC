@@ -257,17 +257,19 @@ def generate_cifar_tasks(args, kwargs):
     validation_loaders = []
     test_loaders = []
 
-    transform_train = transforms.Compose([
-        transforms.RandomCrop(32, padding=4),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
-    ])  # meanstd transformation
+    # transform_train = transforms.Compose([
+    #     transforms.RandomCrop(32, padding=4),
+    #     transforms.RandomHorizontalFlip(),
+    #     transforms.ToTensor(),
+    #     transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
+    # ])  # meanstd transformation
+    #
+    # transform_test = transforms.Compose([
+    #     transforms.ToTensor(),
+    #     transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
+    # ])
 
-    transform_test = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
-    ])
+    transformations = transforms.Lambda(lambda x: x.float().view(x.size(0), -1) / 255.0),
 
     # Split the PyTorch MNIST training dataset into training and validation datasets, and transform the data.
     #
@@ -282,11 +284,11 @@ def generate_cifar_tasks(args, kwargs):
     #                                       version. E.g, transforms.RandomCrop
     #   download (bool, optional) – If true, downloads the dataset from the internet and puts it in root directory.
     #                                       If dataset is already downloaded, it is not downloaded again.
-    train_data = datasets.CIFAR100('../data', transform=transform_train, train=True, download=True)
+    train_data = datasets.CIFAR100('../data', transform=transformations, train=True, download=True)
 
     # Testing dataset.
     # train=False, because we want to draw the data here from <root>/test.pt (as opposed to <root>/training.pt)
-    test_data = datasets.CIFAR100('../data', transform=transform_test, train=False, download=True)
+    test_data = datasets.CIFAR100('../data', transform=transformations, train=False, download=True)
 
     # A PyTorch DataLoader combines a dataset and a sampler, and returns single- or multi-process iterators over
     # the dataset.
