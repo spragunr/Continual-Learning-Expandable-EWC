@@ -304,7 +304,7 @@ class ExpandableModel(nn.Module):
             return -1 # accuracy minimum threshold not met on most recent task
 
         else:
-            return 0 # accuracy minimum threshold met
+            return test_accuracies # accuracy minimum threshold met
 
     # given a dictionary with task numbers as keys and model sizes (size of hidden layer(s) in the model when the model was
     # trained on a given task) as values, generate and return a dictionary correlating task numbers with model.Model

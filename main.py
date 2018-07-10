@@ -79,8 +79,9 @@ def main():
 
             threshold = 0 if type(model) == NoRegModel else args.accuracy_threshold
 
+            test_results = model.test(prev_test_loaders, threshold, args)
             # test the model on ALL tasks trained thus far (including current task)
-            if model.test(prev_test_loaders, threshold, args) == -1:
+            if test_results == -1:
                 retrain_task = True
                 break
 
