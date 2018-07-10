@@ -297,7 +297,7 @@ class ExpandableModel(nn.Module):
 
             # For task_number's complete test set (all batches), display the average loss and accuracy
             print('\nTest set {}: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-                task_number + 1, test_loss, correct, len(test_loader.dataset),
+                task_number + 1, test_loss, correct, (len(test_loader) * args.test_batch_size),
                 accuracy))
 
         if test_accuracies[len(test_accuracies) - 1] < threshold:
