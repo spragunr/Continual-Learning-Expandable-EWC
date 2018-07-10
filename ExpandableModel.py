@@ -140,7 +140,7 @@ class ExpandableModel(nn.Module):
 
         self.task_post_training_weights.update({task_count: deepcopy(current_weights)})
 
-    def test(self, test_loaders, threshold):
+    def test(self, test_loaders, threshold, args):
 
         test_accuracies = []
 
@@ -193,7 +193,7 @@ class ExpandableModel(nn.Module):
                     #
                     # This code was used here in another experiment:
                     #   https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/utils.py#L75
-                    data = data.view(test_loader.batch_size, -1)
+                    data = data.view(args.test_batch_size, -1)
 
                     # wrap data and target in variables- again, from the following experiment:
                     #   https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/utils.py#L76
