@@ -20,11 +20,7 @@ def main():
     # print 8 digits of precision when displaying floating point output from tensors
     torch.set_printoptions(precision=8)
 
-    #models = setup.build_models(args, device)
-
-    # A list of the different DataLoader objects that hold various permutations of the mnist testing dataset-
-    # used for testing models on all previously encountered tasks
-    test_loaders = []
+    models = setup.build_models(args, device)
 
     # The number of the task on which we are CURRENTLY training in the loop below-
     # e.g. when training on task 3 this value will be 3
@@ -33,20 +29,15 @@ def main():
     #utils.output_tensorboard_graph(args, device, models, task_count) # TODO change this to model.device in utils/ model constructor
 
 
-
-    for parameter in model.parameters():
-        print(parameter.size())
-
-    exit(1)
-
     # todo fix kwargs (**kwargs)
-    # todo remove
-    train_loaders, validation_loaders, test_loaders = utils.generate_cifar_tasks(args, kwargs)
 
-    data, target = next(iter(train_loaders[0]))
+    if args.dataset == "cifar100":
+        train_loaders, validation_loaders, test_loaders = utils.generate_cifar_tasks(args, kwargs)
 
-    exit(1)
 
+    # A list of the different DataLoader objects that hold various permutations of the mnist testing dataset-
+    # used for testing models on all previously encountered tasks
+    prev_test_loaders = []
 
     retrain_task = False
 
@@ -59,17 +50,23 @@ def main():
 
         if not retrain_task:
 
-            # get the DataLoaders for the training, validation, and testing data
-            train_loader, validation_loader, test_loader = utils.generate_new_mnist_task(args, kwargs,
-                first_task=(task_count == 1)
-            )
+            if args.dataset == "cifar100":
+                train_loader = train_loaders[task_count - 1]
+                validation_loader = train_loaders[task_count - 1]
+                test_loader = train_loaders[task_count - 1]
+
+            else:
+                # get the DataLoaders for the training, validation, and testing data
+                train_loader, validation_loader, test_loader = utils.generate_new_mnist_task(args, kwargs,
+                    first_task=(task_count == 1)
+                )
 
             # add the new test_loader for this task to the list of testing dataset DataLoaders for later re-use
             # to evaluate how well the models retain accuracy on old tasks after learning new ones
             #
             # NOTE: this list also includes the current test_loader, which we are appending here, because we also
             # need to test each network on the current task after training
-            test_loaders.append(test_loader)
+            prev_test_loaders.append(test_loader)
 
         retrain_task = False
 
@@ -82,7 +79,7 @@ def main():
             threshold = 0 if type(model) == NoRegModel else args.accuracy_threshold
 
             # test the model on ALL tasks trained thus far (including current task)
-            if model.test(test_loaders, threshold) == -1:
+            if model.test(prev_test_loaders, threshold) == -1:
                 retrain_task = True
                 break
 
