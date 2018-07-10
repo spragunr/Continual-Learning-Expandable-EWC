@@ -283,7 +283,6 @@ class ExpandableModel(nn.Module):
                     # .item() gets the scalar value held in the sum tensor
                     correct += pred.eq(target.view_as(pred)).sum().item()
 
-            print(len(test_loader) * args.test_batch_size)
             # Divide the accumulated test loss across all testing batches for the current task_number by the total number
             # of testing samples in the task_number's testset (in this case, 10,000) to get the average loss for the
             # entire test set for task_number.
