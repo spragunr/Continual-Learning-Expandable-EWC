@@ -301,15 +301,20 @@ def generate_cifar_tasks(args, kwargs):
 
     # Instantiate a DataLoader for the testing data in the same manner as above for training data, with two exceptions:
     #   Here, we use test_data rather than train_data, and we use test_batch_size
-    test_loader = D.DataLoader(test_data, batch_size=args.test_batch_size, shuffle=False, **kwargs)
+    test_loader = D.DataLoader(test_data, batch_size=1, shuffle=False, **kwargs)
 
-    data_org_by_class = []
+    train_data_org_by_class = []
+    test_data_org_by_class = []
 
     for i in range(100):
-        data_org_by_class.append([])
+        train_data_org_by_class.append([])
+        test_data_org_by_class.append([])
 
     for (data, target) in train_loader:
-        data_org_by_class[target.item()].append((data, target))
+        train_data_org_by_class[target.item()].append((data, target))
+
+    for (data, target) in test_loader:
+        test_data_org_by_class[target.item()].append((data, target))
 
     task_class_indices = []
 
@@ -319,32 +324,39 @@ def generate_cifar_tasks(args, kwargs):
         task_class_indices.append(range(class_count, class_count + 100 // args.tasks))
         class_count += 100 // args.tasks
 
-    tasks = []
+    tasks_train = []
+    tasks_test = []
 
     for task in task_class_indices:
-        tasks.append([])
+        tasks_train.append([])
+        tasks_test.append([])
+
+        # task is a range object (e.g. range(0,5) for 1st task if CIFAR 100 split into 20 tasks)
         for class_data_index in task:
-            for data_sample in data_org_by_class[class_data_index]:
-                tasks[len(tasks) - 1].append(data_sample)
 
-    print(len(tasks))
-    print(len(tasks[0]))
-    print(len(tasks[0][0]))
+            for train_sample in train_data_org_by_class[class_data_index]:
+                tasks_train[len(tasks_train) - 1].append(train_sample)
 
-    for item in tasks[0]:
-        print(item[1])
+            for test_sample in test_data_org_by_class[class_data_index]:
+                tasks_test[len(tasks_test) - 1].append(test_sample)
 
-    for task in tasks:
+
+    for task in tasks_train:
         random.shuffle(task)
 
-    for item in tasks[0]:
-        print(item[1])
+    for task in tasks_test:
+        random.shuffle(task)
 
-    for task in tasks:
+    for task in tasks_train:
         train_loader = task[:400]
         validation_loader = task[400:]
 
         train_loaders.append(train_loader)
         validation_loaders.append(validation_loader)
+
+    for task in tasks_test:
+        test_loaders.append(task)
+
+    # todo batches
 
     return train_loaders, validation_loaders, test_loaders
