@@ -18,7 +18,7 @@ def parse_arguments():
     parser.add_argument('--test-batch-size', type=int, default=1000, metavar='TBS',
                         help='input batch size for testing (default: 1000)')
 
-    parser.add_argument('--epochs', type=int, default=1, metavar='E',
+    parser.add_argument('--epochs', type=int, default=10, metavar='E',
                         help='number of epochs to train (default: 1)')
 
     parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
@@ -67,7 +67,7 @@ def parse_arguments():
 
     # accuracy threshold (minimum) required on most recent task- if not met, network will reset to pre-training state
     # and expand - set to 0 to disable automatic network expansion
-    parser.add_argument('--accuracy-threshold', type=int, default=70, metavar='AT',
+    parser.add_argument('--accuracy-threshold', type=int, default=90, metavar='AT',
                         help='accuracy threshold (minimum) required on all tasks')
 
     # dataset on which to train/test model
@@ -79,7 +79,7 @@ def parse_arguments():
                         help='continual learning methodology to use')
 
     # number of tasks
-    parser.add_argument('--tasks', type=int, default=1, metavar='T',
+    parser.add_argument('--tasks', type=int, default=3, metavar='T',
                         help='number of tasks')
 
     return parser.parse_args()
