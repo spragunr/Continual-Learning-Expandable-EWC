@@ -371,8 +371,6 @@ def generate_cifar_tasks(args, kwargs):
             batched_train_loader.append((data, target))
             batch_start += args.batch_size
 
-        print(len(batched_train_loader))
-
         # make the whole validation set one batch for fisher matrix computations (EWC)
         data_target_tuples = [validation_loader[i] for i in range(len(validation_loader))]
 
@@ -384,9 +382,6 @@ def generate_cifar_tasks(args, kwargs):
             target = torch.cat((target, tuple[1]))
 
         batched_validation_loader.append((data, target))
-
-
-
 
         train_loaders.append(batched_train_loader)
         validation_loaders.append(batched_validation_loader)
