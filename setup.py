@@ -120,18 +120,19 @@ def set_gpu_options(args):
 
 def build_models(args, device):
 
-    # Instantiate a model that will be trained using only vanilla SGD (no regularization).
-    #
-    # .to(device):
-    #   Move all parameters and buffers in the module Net to device (CPU or GPU- set above).
-    #   Both integral and floating point values are moved.
-    no_reg_model = NoRegModel(
-        args.hidden_size,
-        args.input_size,
-        args.output_size,
-        device,
-        args.dataset
-    ).to(device)
+    # todo uncomment
+    # # Instantiate a model that will be trained using only vanilla SGD (no regularization).
+    # #
+    # # .to(device):
+    # #   Move all parameters and buffers in the module Net to device (CPU or GPU- set above).
+    # #   Both integral and floating point values are moved.
+    # no_reg_model = NoRegModel(
+    #     args.hidden_size,
+    #     args.input_size,
+    #     args.output_size,
+    #     device,
+    #     args.dataset
+    # ).to(device)
 
     # Instantiate a model that will be trained using EWC.
     #
@@ -147,4 +148,4 @@ def build_models(args, device):
         lam=args.lam  # the lambda (fisher multiplier) value to be used in the EWC loss formula
     ).to(device)
 
-    return [no_reg_model, ewc_model]
+    return [ewc_model] # todo change back to [no_reg_model, ewc_model]

@@ -45,9 +45,11 @@ def main():
 
     test_results = [] # accuracy on each task after training
     expansion_before_tasks = np.zeros(args.tasks + 1) # list of task numbers before which the network needed to expand
-    avg_acc_on_all_tasks = np.zeros(args.tasks + 1)
+    avg_acc_on_all_tasks = np.zeros(args.tasks + 1) # avg accuracy on all tasks as new tasks are added
 
     while(args.tasks + 1):
+
+        torch.cuda.empty_cache() # free any available gpu memory
 
         if not retrain_task:
 
@@ -93,9 +95,12 @@ def main():
                 model.reset(task_count - 1)
 
             models = utils.expand(models, args)
+            expansion_before_tasks[task_count] += 1
             #utils.output_tensorboard_graph(args, models, task_count + 1)
 
         else:
+            avg_acc_on_all_tasks[task_count] = sum(test_results) / len(test_results)
+
             # increment the number of the current task before re-entering while loop
             task_count += 1
 
