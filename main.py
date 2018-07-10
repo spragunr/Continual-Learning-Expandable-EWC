@@ -41,12 +41,13 @@ def main():
 
     retrain_task = False
 
-    while(True):
+    ### EVALUATION METRICS ###
 
-        for model in models:
-            for parameter in model.parameters():
-                print(parameter.size())
+    test_results = [] # accuracy on each task after training
+    expansion_before_tasks = np.zeros(args.tasks + 1) # list of task numbers before which the network needed to expand
+    avg_acc_on_all_tasks = np.zeros(args.tasks + 1)
 
+    while(args.tasks + 1):
 
         if not retrain_task:
 
@@ -79,8 +80,9 @@ def main():
 
             threshold = 0 if type(model) == NoRegModel else args.accuracy_threshold
 
-            test_results = model.test(prev_test_loaders, threshold, args)
             # test the model on ALL tasks trained thus far (including current task)
+            test_results = model.test(prev_test_loaders, threshold, args)
+
             if test_results == -1:
                 retrain_task = True
                 break
