@@ -3,6 +3,7 @@ import torch.nn as nn
 import scipy.stats as stats
 from copy import deepcopy
 from torch.autograd import Variable
+from network_utils import ResNet18
 
 
 class ExpandableModel(nn.Module):
@@ -30,16 +31,24 @@ class ExpandableModel(nn.Module):
 
         self.device = device
 
-        self.is_cifar = (dataset == "cifar100")
+        self.dataset = dataset
+
+        self.is_cifar = (self.dataset == "cifar100")
 
 
     def forward(self, x):
 
-        # pass the data through all layers of the network
-        for module in self.modulelist:
-            x = module(x)
+        if self.is_cifar:
 
-        self.y = x
+            self.y = self.resnet(x)
+
+        else:
+
+            # pass the data through all layers of the network
+            for module in self.modulelist:
+                x = module(x)
+
+            self.y = x
 
         return self.y
 
@@ -55,7 +64,8 @@ class ExpandableModel(nn.Module):
 
     def initialize_module_list(self):
         if self.is_cifar:
-            self.resnet =
+
+            self.resnet = ResNet18(100, nf=self.hidden_size)
 
         else:
             self.modulelist = nn.ModuleList()
@@ -314,7 +324,8 @@ class ExpandableModel(nn.Module):
                     hidden_size,
                     self.input_size,
                     self.output_size,
-                    self.device
+                    self.device,
+                    self.dataset
                 ).to(self.device)
             )
 
