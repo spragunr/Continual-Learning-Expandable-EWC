@@ -394,7 +394,16 @@ def generate_cifar_tasks(args, kwargs):
         batch_start = 0
 
         for batch in range(len(task) // args.test_batch_size):
-            batched_test_loader.append([task[i] for i in range(batch_start, batch_start + args.test_batch_size)])
+            data_target_tuples = [task[i] for i in range(batch_start, batch_start + args.test_batch_size)]
+
+            data = []
+            target = []
+
+            for tuple in data_target_tuples:
+                data.append(tuple[0])
+                target.append(tuple[1])
+
+            batched_test_loader.append((data, target))
             batch_start += args.test_batch_size
 
         test_loaders.append(batched_test_loader)
