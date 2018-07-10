@@ -49,9 +49,9 @@ def parse_arguments():
     parser.add_argument('--validation-dataset-size', type=int, default=200, metavar='VDS',
                         help='number of images in the validation dataset')
 
-    # size of hidden layer(s)
+    # size of hidden layer in MLP in neurons OR initial number of filters in conv network
     parser.add_argument('--hidden-size', type=int, default=30, metavar='HS',
-                        help='number of neurons in each hidden layer of the network')
+                        help='# neurons in each hidden layer of MLP OR # filters in conv resnet')
 
     # 28 x 28 pixels = 784 pixels per MNIST image, 32 x 32 = 1024 for CIFAR 10
     parser.add_argument('--input-size', type=int, default=1024, metavar='IS',

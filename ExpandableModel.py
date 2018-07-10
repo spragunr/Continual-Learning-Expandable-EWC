@@ -54,12 +54,15 @@ class ExpandableModel(nn.Module):
         raise NotImplementedError("train_model() is not implemented in ExpandableModel")
 
     def initialize_module_list(self):
+        if self.is_cifar:
+            self.resnet =
 
-        self.modulelist = nn.ModuleList()
+        else:
+            self.modulelist = nn.ModuleList()
 
-        self.modulelist.append(nn.Linear(self.input_size, self.hidden_size))
-        self.modulelist.append(nn.ReLU())
-        self.modulelist.append(nn.Linear(self.hidden_size, self.output_size))
+            self.modulelist.append(nn.Linear(self.input_size, self.hidden_size))
+            self.modulelist.append(nn.ReLU())
+            self.modulelist.append(nn.Linear(self.hidden_size, self.output_size))
 
     def update_size_dict(self, task_count):
 

@@ -7,6 +7,7 @@ from NoRegModel import NoRegModel
 import matplotlib.pyplot as plt
 import numpy as np
 import torchvision
+from utils import ResNet18
 
 def main():
 
@@ -19,7 +20,7 @@ def main():
     # print 8 digits of precision when displaying floating point output from tensors
     torch.set_printoptions(precision=8)
 
-    models = setup.build_models(args, device)
+    #models = setup.build_models(args, device)
 
     # A list of the different DataLoader objects that hold various permutations of the mnist testing dataset-
     # used for testing models on all previously encountered tasks
@@ -30,6 +31,13 @@ def main():
     task_count = 1
 
     #utils.output_tensorboard_graph(args, device, models, task_count) # TODO change this to model.device in utils/ model constructor
+
+
+
+    for parameter in model.parameters():
+        print(parameter.size())
+
+    exit(1)
 
     # todo fix kwargs (**kwargs)
     # todo remove
