@@ -112,5 +112,8 @@ def main():
     final_task_accs = f.create_dataset("final_task_accs", (len(test_results)), dtype='f')  # accuracy on each task after training
     final_task_accs[...] = test_results[...]
 
+    f.flush()
+    f.close()
+
 if __name__ == '__main__':
     main()
