@@ -110,7 +110,7 @@ def main():
             task_count += 1
 
     final_task_accs = f.create_dataset("final_task_accs", (len(test_results),), dtype='f')  # accuracy on each task after training
-    final_task_accs[...] = test_results[...]
+    final_task_accs[...] = np.array(test_results)[...]
 
     f.flush()
     f.close()
