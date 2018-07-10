@@ -328,6 +328,9 @@ def generate_cifar_tasks(args, kwargs):
 
     print(len(tasks))
     print(len(tasks[0]))
+    print(len(tasks[0][0]))
+
+    print(type(tasks[0]))
 
 
     return train_loaders, validation_loaders, test_loaders

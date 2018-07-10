@@ -2,6 +2,7 @@ import argparse
 import torch
 import numpy as np
 import scipy as sp
+import random
 from EWCModel import EWCModel
 from NoRegModel import NoRegModel
 
@@ -35,14 +36,8 @@ def parse_arguments():
     parser.add_argument('--no-cuda', action='store_true', default=False,
                         help='disables CUDA training')
 
-    parser.add_argument('--seed-torch', type=int, default=1, metavar='ST',
-                        help='random seed for PyTorch (default: 1)')
-
-    parser.add_argument('--seed-numpy', type=int, default=1, metavar='SN',
-                        help='random seed for NumPy (default: 1)')
-
-    parser.add_argument('--seed-scipy', type=int, default=1, metavar='SS',
-                        help='random seed for SciPy (default: 1)')
+    parser.add_argument('--seed', type=int, default=1, metavar='S',
+                        help='seed for RNGs')
 
     parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                         help='how many batches to wait before logging training status (default 10)')
@@ -93,16 +88,19 @@ def parse_arguments():
 def seed_rngs(args):
 
     # set a manual seed for PyTorch CPU random number generation
-    torch.manual_seed(args.seed_torch)
+    torch.manual_seed(args.seed)
 
     # set a manual seed for PyTorch GPU random number generation
-    torch.cuda.manual_seed_all(args.seed_torch)
+    torch.cuda.manual_seed_all(args.seed)
 
     # set a manual seed for NumPy random number generation
-    np.random.seed(args.seed_numpy)
+    np.random.seed(args.seed)
 
     # set a manual seed for SciPy random number generation
-    sp.random.seed(args.seed_scipy)
+    sp.random.seed(args.seed)
+
+    # set a manual seed for python random number generation
+    random.seed(args.seed)
 
 def set_gpu_options(args):
 
