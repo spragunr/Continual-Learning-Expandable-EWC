@@ -340,4 +340,11 @@ def generate_cifar_tasks(args, kwargs):
     for item in tasks[0]:
         print(item[1])
 
+    for task in tasks:
+        train_loader = task[:400]
+        validation_loader = task[400:]
+
+        train_loaders.append(train_loader)
+        validation_loaders.append(validation_loader)
+
     return train_loaders, validation_loaders, test_loaders
