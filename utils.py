@@ -361,8 +361,8 @@ def generate_cifar_tasks(args, kwargs):
         for batch in range(len(train_loader) // args.batch_size):
             data_target_tuples = [train_loader[i] for i in range(batch_start, batch_start + args.batch_size)]
 
-            data = torch.zeros(0)  # zero-dimensional tensor (empty)
-            target = torch.zeros(0)
+            data = torch.empty(0, dtype=torch.float)  # zero-dimensional tensor (empty)
+            target = torch.empty(0, dtype=torch.long)
 
             for tuple in data_target_tuples:
                 data = torch.cat((data, tuple[0]))
@@ -375,8 +375,8 @@ def generate_cifar_tasks(args, kwargs):
         # make the whole validation set one batch for fisher matrix computations (EWC)
         data_target_tuples = [validation_loader[i] for i in range(len(validation_loader))]
 
-        data = torch.zeros(0) # zero-dimensional tensor (empty)
-        target = torch.zeros(0)
+        data = torch.empty(0, dtype=torch.float) # zero-dimensional tensor (empty)
+        target = torch.empty(0, dtype=torch.long)
 
         for tuple in data_target_tuples:
             data = torch.cat((data, tuple[0]))
@@ -396,8 +396,8 @@ def generate_cifar_tasks(args, kwargs):
         for batch in range(len(task) // args.test_batch_size):
             data_target_tuples = [task[i] for i in range(batch_start, batch_start + args.test_batch_size)]
 
-            data = torch.zeros(0)  # zero-dimensional tensor (empty)
-            target = torch.zeros(0)
+            data = torch.empty(0, dtype=torch.float)  # zero-dimensional tensor (empty)
+            target = torch.empty(0, dtype=torch.long)
 
             for tuple in data_target_tuples:
                 data = torch.cat((data, tuple[0]))
