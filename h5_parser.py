@@ -7,7 +7,12 @@ f = h5py.File('test_results.hdf5', 'r')
 datasets = []
 
 for key in f.keys():
-    datasets.append(deepcopy(f[key]))
+    dataset = []
+
+    for data in f[key]:
+        dataset.append(data)
+
+    datasets.append(dataset)
 
 f.close()
 
