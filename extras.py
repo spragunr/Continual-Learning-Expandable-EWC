@@ -474,7 +474,7 @@ def calculate_ewc_loss_prev_tasks(model):
 
 
 
-print(data[0][0])
+    print(data[0][0])
     print(data[0][1])
     print(data[0][2])
 

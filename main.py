@@ -37,6 +37,8 @@ def main():
 
     data, target = next(iter(train_loaders[0]))
 
+    exit(1)
+
 
     retrain_task = False
 

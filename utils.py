@@ -318,9 +318,16 @@ def generate_cifar_tasks(args, kwargs):
         task_class_indices.append(range(class_count, class_count + 100 // args.tasks))
         class_count += 100 // args.tasks
 
+    tasks = []
 
+    for task in task_class_indices:
+        tasks.append([])
+        for class_data_index in task:
+            for data_sample in data_org_by_class[class_data_index]:
+                tasks[len(tasks) - 1].append(data_sample)
 
-    print(task_class_indices)
+    print(len(tasks))
+    print(len(tasks[0]))
 
 
     return train_loaders, validation_loaders, test_loaders
