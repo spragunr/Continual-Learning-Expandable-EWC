@@ -68,6 +68,7 @@ def main():
             # need to test each network on the current task after training
             prev_test_loaders.append(test_loader)
 
+
         retrain_task = False
 
         for model in models:

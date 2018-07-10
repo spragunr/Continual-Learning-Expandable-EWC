@@ -25,15 +25,17 @@ class ExpandableModel(nn.Module):
         self.hidden_size = hidden_size
         self.output_size = output_size
 
+        self.dataset = dataset
+
+        self.is_cifar = (self.dataset == "cifar100")
+
         self.initialize_module_list()
 
         self.apply(self.init_weights)
 
         self.device = device
 
-        self.dataset = dataset
 
-        self.is_cifar = (self.dataset == "cifar100")
 
 
     def forward(self, x):
