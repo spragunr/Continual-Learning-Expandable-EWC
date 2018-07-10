@@ -109,7 +109,7 @@ def main():
             # increment the number of the current task before re-entering while loop
             task_count += 1
 
-    final_task_accs = f.create_dataset("final_task_accs", (len(test_results)), dtype='f')  # accuracy on each task after training
+    final_task_accs = f.create_dataset("final_task_accs", (len(test_results),), dtype='f')  # accuracy on each task after training
     final_task_accs[...] = test_results[...]
 
     f.flush()
