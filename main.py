@@ -51,6 +51,10 @@ def main():
 
         torch.cuda.empty_cache() # free any available gpu memory
 
+        print(test_results)
+        print(expansion_before_tasks)
+        print(avg_acc_on_all_tasks)
+
         if not retrain_task:
 
             if args.dataset == "cifar100":

@@ -12,22 +12,22 @@ def parse_arguments():
     # Command Line args
     parser = argparse.ArgumentParser(description='Variable Capacity Network for Continual Learning')
 
-    parser.add_argument('--batch-size', type=int, default=10, metavar='BS',
+    parser.add_argument('--batch-size', type=int, default=100, metavar='BS',
                         help='input batch size for training (default: 64)')
 
-    parser.add_argument('--test-batch-size', type=int, default=10, metavar='TBS',
+    parser.add_argument('--test-batch-size', type=int, default=1000, metavar='TBS',
                         help='input batch size for testing (default: 1000)')
 
-    parser.add_argument('--epochs', type=int, default=5, metavar='E',
+    parser.add_argument('--epochs', type=int, default=1, metavar='E',
                         help='number of epochs to train (default: 1)')
 
-    parser.add_argument('--lr', type=float, default=1.0, metavar='LR',
+    parser.add_argument('--lr', type=float, default=0.1, metavar='LR',
                         help='learning rate (default: 0.1)')
 
     parser.add_argument('--l2-reg-penalty', type=float, default=0.0, metavar='L2',
                         help='l2 regularization penalty (weight decay) (default: 0.0)')
 
-    parser.add_argument('--lam', type=float, default=15, metavar='LAM',
+    parser.add_argument('--lam', type=float, default=400, metavar='LAM',
                         help='ewc lambda value (fisher multiplier) (default: 15)')
 
     parser.add_argument('--momentum', type=float, default=0.0, metavar='M',
@@ -43,22 +43,22 @@ def parse_arguments():
                         help='how many batches to wait before logging training status (default 10)')
 
     # [train dataset size] = [full MNIST train set (60,000)] - [validation set size]
-    parser.add_argument('--train-dataset-size', type=int, default=2000, metavar='TDS',
+    parser.add_argument('--train-dataset-size', type=int, default=59800, metavar='TDS',
                         help='number of images in the training dataset')
 
-    parser.add_argument('--validation-dataset-size', type=int, default=500, metavar='VDS',
+    parser.add_argument('--validation-dataset-size', type=int, default=200, metavar='VDS',
                         help='number of images in the validation dataset')
 
     # size of hidden layer in MLP in neurons OR initial number of filters in conv network
-    parser.add_argument('--hidden-size', type=int, default=20, metavar='HS',
+    parser.add_argument('--hidden-size', type=int, default=50, metavar='HS',
                         help='# neurons in each hidden layer of MLP OR # filters in conv resnet')
 
     # 28 x 28 pixels = 784 pixels per MNIST image, 32 x 32 = 1024 for CIFAR 10
-    parser.add_argument('--input-size', type=int, default=1024, metavar='IS',
+    parser.add_argument('--input-size', type=int, default=784, metavar='IS',
                         help='size of each input data sampe to the network (default 784 (28 * 28))')
 
     # 10 classes - digits 0-9 for MNIST, 100 for CIFAR 100
-    parser.add_argument('--output-size', type=int, default=100, metavar='OS',
+    parser.add_argument('--output-size', type=int, default=10, metavar='OS',
                         help='size of the output of the network (default 10)')
 
     # e.g. 2 to double the size of the network when expansion occurs
@@ -67,11 +67,11 @@ def parse_arguments():
 
     # accuracy threshold (minimum) required on most recent task- if not met, network will reset to pre-training state
     # and expand - set to 0 to disable automatic network expansion
-    parser.add_argument('--accuracy-threshold', type=int, default=0, metavar='AT',
+    parser.add_argument('--accuracy-threshold', type=int, default=90, metavar='AT',
                         help='accuracy threshold (minimum) required on all tasks')
 
     # dataset on which to train/test model
-    parser.add_argument('--dataset', type=str, default='cifar100', metavar='DS',
+    parser.add_argument('--dataset', type=str, default='mnist', metavar='DS',
                         help='dataset on which to train/test model (cifar100 or mnist)')
 
     # continual learning methodology
@@ -79,7 +79,7 @@ def parse_arguments():
                         help='continual learning methodology to use')
 
     # number of tasks
-    parser.add_argument('--tasks', type=int, default='20', metavar='T',
+    parser.add_argument('--tasks', type=int, default='100', metavar='T',
                         help='number of tasks')
 
     return parser.parse_args()
