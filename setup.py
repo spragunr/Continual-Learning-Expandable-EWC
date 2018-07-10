@@ -18,10 +18,10 @@ def parse_arguments():
     parser.add_argument('--test-batch-size', type=int, default=10, metavar='TBS',
                         help='input batch size for testing (default: 1000)')
 
-    parser.add_argument('--epochs', type=int, default=3, metavar='E',
+    parser.add_argument('--epochs', type=int, default=1, metavar='E',
                         help='number of epochs to train (default: 1)')
 
-    parser.add_argument('--lr', type=float, default=0.1, metavar='LR',
+    parser.add_argument('--lr', type=float, default=1e-3, metavar='LR',
                         help='learning rate (default: 0.1)')
 
     parser.add_argument('--l2-reg-penalty', type=float, default=0.0, metavar='L2',
