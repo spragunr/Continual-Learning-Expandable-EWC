@@ -72,7 +72,7 @@ def parse_arguments():
 
     # dataset on which to train/test model
     parser.add_argument('--dataset', type=str, default='mnist', metavar='DS',
-                        help='dataset on which to train/test model')
+                        help='dataset on which to train/test model (cifar100 or mnist)')
 
     # continual learning methodology
     parser.add_argument('--methodology', type=str, default='ewc', metavar='M',

@@ -7,14 +7,14 @@ import optimizer_utils
 
 class NoRegModel(ExpandableModel):
 
-    def __init__(self, hidden_size, input_size, output_size, device):
+    def __init__(self, hidden_size, input_size, output_size, device, dataset):
 
-        super().__init__(hidden_size, input_size, output_size, device)
+        super().__init__(hidden_size, input_size, output_size, device, dataset)
 
     @classmethod
     def from_existing_model(cls, m, new_hidden_size):
 
-        model = cls(new_hidden_size, m.input_size, m.output_size, m.device)
+        model = cls(new_hidden_size, m.input_size, m.output_size, m.device, m.dataset)
 
         model.size_dictionary = deepcopy(m.size_dictionary)
 

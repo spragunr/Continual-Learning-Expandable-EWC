@@ -10,9 +10,9 @@ import optimizer_utils
 
 class EWCModel(ExpandableModel):
 
-    def __init__(self, hidden_size, input_size, output_size, device, lam):
+    def __init__(self, hidden_size, input_size, output_size, device, dataset, lam):
 
-        super().__init__(hidden_size, input_size, output_size, device)
+        super().__init__(hidden_size, input_size, output_size, device, dataset)
 
         self.lam = lam  # the value of lambda (fisher multiplier) to be used in EWC loss computation
 
@@ -25,7 +25,7 @@ class EWCModel(ExpandableModel):
     @classmethod
     def from_existing_model(cls, m, new_hidden_size):
 
-        model = cls(new_hidden_size, m.input_size, m.output_size, m.device, m.lam)
+        model = cls(new_hidden_size, m.input_size, m.output_size, m.device, m.dataset, m.lam)
 
         model.task_fisher_diags = deepcopy(m.task_fisher_diags)
 
