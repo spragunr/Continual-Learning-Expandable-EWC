@@ -3,9 +3,14 @@ from mpl_toolkits.mplot3d import axes3d
 import matplotlib.pyplot as plt
 from matplotlib import cm
 
-def plot_line_avg_acc(avg_accuracies, expansion_markers, threshold):
+def plot_line_avg_acc(avg_accuracies, expansion_markers, threshold, label1, avg_accuracies2=None, label2=None):
 
-    plt.plot(avg_accuracies, color='c')
+    plt.figure()
+
+    plt.plot(avg_accuracies, color='c', label=label1)
+    if avg_accuracies2 is not None:
+        plt.plot(avg_accuracies, color='orange', label=label2)
+
     plt.ylabel('Average Accuracy on All Tasks')
     plt.xlabel('Total Task Count')
     plt.xlim(1, len(avg_accuracies))
@@ -16,18 +21,25 @@ def plot_line_avg_acc(avg_accuracies, expansion_markers, threshold):
 
     plt.axhline(y=threshold, color='b', linestyle='dashed')
 
+    plt.legend()
+
     plt.savefig('avg_accs.eps', dpi=300, format='eps')
 
-def plot_bar_each_task_acc(single_task_accuracies):
+def plot_bar_each_task_acc(single_task_accuracies1, label1, single_task_accuracies2=None, label2=None):
+    plt.figure()
 
-    x_values = np.arange(1, len(single_task_accuracies) + 1)
+    x_values = np.arange(1, len(single_task_accuracies1) + 1)
 
-    plt.bar(x_values, width=1, height=single_task_accuracies, align='center', color='c', edgecolor='k')
+    w = 0.5
+
+    plt.bar(x_values-0.25, width=w, height=single_task_accuracies1, align='center', color='c', edgecolor='k', label=label1)
+    if single_task_accuracies2 is not None:
+        plt.bar(x_values+0.25, width=w, height=single_task_accuracies2, align='center', color='orange', edgecolor='k', label=label2)
 
     plt.ylabel('Accuracy')
     plt.xlabel('Task')
-    plt.xlim(0, len(single_task_accuracies) + 1)
-    plt.ylim(50, 100)
+    plt.xlim(0, len(single_task_accuracies1) + 1)
+    plt.ylim(0, 100)
 
 
     plt.savefig('final_per_task_acc.eps', dpi=300, format='eps')
