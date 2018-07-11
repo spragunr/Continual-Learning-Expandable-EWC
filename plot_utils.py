@@ -9,19 +9,20 @@ def plot_line_avg_acc(avg_accuracies, expansion_markers, threshold, label1, avg_
 
     plt.plot(avg_accuracies, color='c', label=label1)
     if avg_accuracies2 is not None:
-        plt.plot(avg_accuracies, color='orange', label=label2)
+        plt.plot(avg_accuracies2, color='orange', label=label2)
 
     plt.ylabel('Average Accuracy on All Tasks')
     plt.xlabel('Total Task Count')
     plt.xlim(1, len(avg_accuracies))
-    plt.ylim(50, 100)
+    plt.ylim(0, 100)
 
     for marker in expansion_markers:
         plt.axvline(x=marker, color='r')
 
     plt.axhline(y=threshold, color='b', linestyle='dashed')
 
-    plt.legend()
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
+               ncol=3, fancybox=True, shadow=True)
 
     plt.savefig('avg_accs.eps', dpi=300, format='eps')
 
@@ -41,7 +42,8 @@ def plot_bar_each_task_acc(single_task_accuracies1, label1, single_task_accuraci
     plt.xlim(0, len(single_task_accuracies1) + 1)
     plt.ylim(0, 100)
 
-
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
+              ncol=3, fancybox=True, shadow=True)
     plt.savefig('final_per_task_acc.eps', dpi=300, format='eps')
 
 def plot_line_compare_avg_accs(avg_accuracies, labels):
