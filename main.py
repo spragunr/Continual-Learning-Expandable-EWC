@@ -43,7 +43,7 @@ def main():
     retrain_task = False
 
     ### EVALUATION METRICS ###
-    f = h5py.File("test_results.hdf5", "w")
+    f = h5py.File("55tasks_lam150_50hidden_1layer_no_expansion.hdf5", "w")
 
     test_results = []
     expansion_before_tasks = f.create_dataset("expansion_before_tasks", (args.tasks + 1,), dtype='i') # list of task numbers before which the network needed to expand
