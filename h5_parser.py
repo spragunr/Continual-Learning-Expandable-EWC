@@ -2,7 +2,7 @@ import h5py
 import numpy as np
 from copy import deepcopy
 
-f = h5py.File('test_results.hdf5', 'r')
+f = h5py.File('55tasks_lam150_50hidden_1layer_mnist_ewc_expansion.hdf5', 'r')
 
 datasets = []
 
