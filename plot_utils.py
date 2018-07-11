@@ -16,7 +16,7 @@ def plot_line_avg_acc(avg_accuracies, expansion_markers, threshold):
 
     plt.axhline(y=threshold, color='b', linestyle='dashed')
 
-    plt.show()
+    plt.savefig('avg_accs.eps', dpi=300, format='eps')
 
 def plot_bar_each_task_acc(single_task_accuracies):
 
@@ -29,7 +29,8 @@ def plot_bar_each_task_acc(single_task_accuracies):
     plt.xlim(0, len(single_task_accuracies) + 1)
     plt.ylim(50, 100)
 
-    plt.show()
+
+    plt.savefig('final_per_task_acc.eps', dpi=300, format='eps')
 
 def plot_line_compare_avg_accs(avg_accuracies, labels):
 
