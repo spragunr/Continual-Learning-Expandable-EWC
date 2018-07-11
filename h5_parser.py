@@ -1,20 +1,36 @@
 import h5py
 import numpy as np
 from copy import deepcopy
+import plot_utils
 
 f = h5py.File('55tasks_lam150_50hidden_1layer_mnist_ewc_expansion.hdf5', 'r')
 
-datasets = []
+avg_accs = []
+expansions = []
 
-for key in f.keys():
-    dataset = []
 
-    for data in f[key]:
-        dataset.append(data)
+for data in f["avg_acc_on_all_tasks"]:
 
-    datasets.append(dataset)
+    avg_accs.append(data)
+
+for data in f["expansion_before_tasks"]:
+
+    expansions.append(data)
 
 f.close()
 
-for dataset in datasets:
-    print(dataset)
+expansion_indices = []
+
+for i in range(len(expansions)):
+    if expansions[i] == 1:
+        expansion_indices.append(i)
+
+avg_accs = avg_accs[:56]
+
+plot_utils.plot_line_avg_acc(avg_accs, expansion_indices, 90)
+
+# forgot to save these, so had to reconstruct from terminal output
+single_task_accs = [95,95,93,89,94,94,92,89,94,92,90,91,94,94,92,91,88,93,94,92,90,87,87,94,92,93,92,90,90,85,85,91,94,
+                    93,92,85,90,91,84,86,81,76,92,95,91,90,92,92,89,89,80,83,83,78,97]
+
+plot_utils.plot_bar_each_task_acc(single_task_accs)

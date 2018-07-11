@@ -8,8 +8,8 @@ def plot_line_avg_acc(avg_accuracies, expansion_markers, threshold):
     plt.plot(avg_accuracies, color='c')
     plt.ylabel('Average Accuracy on All Tasks')
     plt.xlabel('Total Task Count')
-    plt.xlim(1, 100)
-    plt.ylim(0, 100)
+    plt.xlim(1, len(avg_accuracies))
+    plt.ylim(50, 100)
 
     for marker in expansion_markers:
         plt.axvline(x=marker, color='r')
@@ -26,8 +26,8 @@ def plot_bar_each_task_acc(single_task_accuracies):
 
     plt.ylabel('Accuracy')
     plt.xlabel('Task')
-    plt.xlim(0, 101)
-    plt.ylim(0, 100)
+    plt.xlim(0, len(single_task_accuracies) + 1)
+    plt.ylim(50, 100)
 
     plt.show()
 
@@ -78,6 +78,8 @@ def plot_wireframe_weight_surface(weights, minz, maxz):
 
     plt.show()
 
+
+# to demonstrate figure appearances
 if __name__ == "__main__":
 
     avg_accs = np.random.randint(80, 96, 100)
