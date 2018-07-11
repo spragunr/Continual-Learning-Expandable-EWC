@@ -58,11 +58,11 @@ def generate_new_mnist_task(args, kwargs, first_task):
     #
     # datasets.MNIST():
     #   ARGUMENTS (in order):
-    #   root (string) – Root directory of dataset where processed/training.pt and processed/test.pt exist.
-    #   train (bool, optional) – If True, creates dataset from training.pt, otherwise from test.pt.
-    #   transform (callable, optional) – A function/transform that takes in an PIL image and returns a transformed
+    #   root (string) - Root directory of dataset where processed/training.pt and processed/test.pt exist.
+    #   train (bool, optional) - If True, creates dataset from training.pt, otherwise from test.pt.
+    #   transform (callable, optional) - A function/transform that takes in an PIL image and returns a transformed
     #                                       version. E.g, transforms.RandomCrop
-    #   download (bool, optional) – If true, downloads the dataset from the internet and puts it in root directory.
+    #   download (bool, optional) - If true, downloads the dataset from the internet and puts it in root directory.
     #                                       If dataset is already downloaded, it is not downloaded again.
     train_data, validation_data = \
         D.dataset.random_split(datasets.MNIST('../data', train=True, transform=transformations, download=True),
@@ -77,9 +77,9 @@ def generate_new_mnist_task(args, kwargs, first_task):
 
     # DataLoader for the training data.
     # ARGUMENTS (in order):
-    # dataset (Dataset) – dataset from which to load the data (train_data prepared in above statement, in this case).
-    # batch_size (int, optional) – how many samples per batch to load (default: 1).
-    # shuffle (bool, optional) – set to True to have the data reshuffled at every epoch (default: False).
+    # dataset (Dataset) - dataset from which to load the data (train_data prepared in above statement, in this case).
+    # batch_size (int, optional) - how many samples per batch to load (default: 1).
+    # shuffle (bool, optional) - set to True to have the data reshuffled at every epoch (default: False).
     # kwargs - see above definition
     train_loader = D.DataLoader(train_data, batch_size=args.batch_size, shuffle=True, **kwargs)
 
@@ -209,11 +209,11 @@ def generate_new_cifar_task(args, kwargs, first_task):
     #
     # datasets.MNIST():
     #   ARGUMENTS (in order):
-    #   root (string) – Root directory of dataset where processed/training.pt and processed/test.pt exist.
-    #   train (bool, optional) – If True, creates dataset from training.pt, otherwise from test.pt.
-    #   transform (callable, optional) – A function/transform that takes in an PIL image and returns a transformed
+    #   root (string) - Root directory of dataset where processed/training.pt and processed/test.pt exist.
+    #   train (bool, optional) - If True, creates dataset from training.pt, otherwise from test.pt.
+    #   transform (callable, optional) - A function/transform that takes in an PIL image and returns a transformed
     #                                       version. E.g, transforms.RandomCrop
-    #   download (bool, optional) – If true, downloads the dataset from the internet and puts it in root directory.
+    #   download (bool, optional) - If true, downloads the dataset from the internet and puts it in root directory.
     #                                       If dataset is already downloaded, it is not downloaded again.
     train_data, validation_data = \
         D.dataset.random_split(datasets.CIFAR10('../data', train=True, transform=transform_train, download=True),
@@ -228,9 +228,9 @@ def generate_new_cifar_task(args, kwargs, first_task):
 
     # DataLoader for the training data.
     # ARGUMENTS (in order):
-    # dataset (Dataset) – dataset from which to load the data (train_data prepared in above statement, in this case).
-    # batch_size (int, optional) – how many samples per batch to load (default: 1).
-    # shuffle (bool, optional) – set to True to have the data reshuffled at every epoch (default: False).
+    # dataset (Dataset) - dataset from which to load the data (train_data prepared in above statement, in this case).
+    # batch_size (int, optional) - how many samples per batch to load (default: 1).
+    # shuffle (bool, optional) - set to True to have the data reshuffled at every epoch (default: False).
     # kwargs - see above definition
     train_loader = D.DataLoader(train_data, batch_size=10, shuffle=True, **kwargs)
 
@@ -278,11 +278,11 @@ def generate_cifar_tasks(args, kwargs):
     #
     # datasets.MNIST():
     #   ARGUMENTS (in order):
-    #   root (string) – Root directory of dataset where processed/training.pt and processed/test.pt exist.
-    #   train (bool, optional) – If True, creates dataset from training.pt, otherwise from test.pt.
-    #   transform (callable, optional) – A function/transform that takes in an PIL image and returns a transformed
+    #   root (string) - Root directory of dataset where processed/training.pt and processed/test.pt exist.
+    #   train (bool, optional) - If True, creates dataset from training.pt, otherwise from test.pt.
+    #   transform (callable, optional) - A function/transform that takes in an PIL image and returns a transformed
     #                                       version. E.g, transforms.RandomCrop
-    #   download (bool, optional) – If true, downloads the dataset from the internet and puts it in root directory.
+    #   download (bool, optional) - If true, downloads the dataset from the internet and puts it in root directory.
     #                                       If dataset is already downloaded, it is not downloaded again.
     train_data = datasets.CIFAR100('../data', transform=transform_train, train=True, download=True)
 
@@ -295,9 +295,9 @@ def generate_cifar_tasks(args, kwargs):
 
     # DataLoader for the training data.
     # ARGUMENTS (in order):
-    # dataset (Dataset) – dataset from which to load the data (train_data prepared in above statement, in this case).
-    # batch_size (int, optional) – how many samples per batch to load (default: 1).
-    # shuffle (bool, optional) – set to True to have the data reshuffled at every epoch (default: False).
+    # dataset (Dataset) - dataset from which to load the data (train_data prepared in above statement, in this case).
+    # batch_size (int, optional) - how many samples per batch to load (default: 1).
+    # shuffle (bool, optional) - set to True to have the data reshuffled at every epoch (default: False).
     # kwargs - see above definition
     train_loader = D.DataLoader(train_data, batch_size=1, shuffle=False, **kwargs)
 

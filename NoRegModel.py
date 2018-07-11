@@ -36,9 +36,9 @@ class NoRegModel(ExpandableModel):
         # momentum (depends on the value of args.momentum- default is 0.0, so no momentum by default).
         #
         # ARGUMENTS (in order):
-        #     params (iterable) – iterable of parameters to optimize or dicts defining parameter groups
-        #     lr (float) – learning rate
-        #     momentum (float, optional) – momentum factor (default: 0)
+        #     params (iterable) - iterable of parameters to optimize or dicts defining parameter groups
+        #     lr (float) - learning rate
+        #     momentum (float, optional) - momentum factor (default: 0)
         #
         # NOTE on params:
         #   model.parameters() returns an iterator over a list of the model parameters in the same order in
