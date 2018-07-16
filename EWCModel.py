@@ -208,7 +208,9 @@ class EWCModel(ExpandableModel):
                 # This code was used here in another experiment:
                 # https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/train.py#L35
                 data_size = len(data)
-                data = data.view(data_size, -1)
+
+                if not self.is_cifar:
+                    data = data.view(data_size, -1)
 
                 # wrap data and target in variables- again, from the following experiment:
                 #   https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/train.py#L50
@@ -383,7 +385,8 @@ class EWCModel(ExpandableModel):
         #
         # This code was used here in another experiment:
         # https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/model.py#L61
-        data = data.view(args.validation_dataset_size, -1)
+        if not self.is_cifar:
+            data = data.view(args.validation_dataset_size, -1)
 
         # wrap data and target in variables- again, from the following experiment:
         #   https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/model.py#L62
