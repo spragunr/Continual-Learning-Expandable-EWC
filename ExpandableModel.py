@@ -290,6 +290,9 @@ class ExpandableModel(nn.Module):
 
             # The overall accuracy of the model's predictions on the task indicated by task_number as a percent
             # value is the count of its accurate predictions divided by the number of predictions it made, all multiplied by 100
+            print(len(test_loader))
+            print(correct)
+
             accuracy = 100. * correct / (len(test_loader) * args.test_batch_size)
 
             test_accuracies.append(accuracy)
