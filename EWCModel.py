@@ -296,7 +296,7 @@ class EWCModel(ExpandableModel):
 
         # using validation set in Fisher Information Matrix computation as specified by:
         # https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
-        self.estimate_fisher(kwargs.get("validation_loader"))
+        self.estimate_fisher(kwargs.get("validation_loader"), args)
 
         # update the ewc loss sums in the model to incorporate weights and fisher info from the task on which
         # we just trained the network
@@ -355,7 +355,7 @@ class EWCModel(ExpandableModel):
         return loss_prev_tasks * (self.lam / 2.0)
 
     # used for whole batch
-    def estimate_fisher(self, validation_loader):
+    def estimate_fisher(self, validation_loader, args):
 
         # List to hold the computed fisher diagonals for the task on which the network was just trained.
         # Fisher Information Matrix diagonals are stored as a list of tensors of the same dimensions and in the same
@@ -383,7 +383,7 @@ class EWCModel(ExpandableModel):
         #
         # This code was used here in another experiment:
         # https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/model.py#L61
-        data = data.view(validation_loader.batch_size, -1)
+        data = data.view(args.validation_dataset_size, -1)
 
         # wrap data and target in variables- again, from the following experiment:
         #   https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/model.py#L62

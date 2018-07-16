@@ -12,13 +12,13 @@ def parse_arguments():
     # Command Line args
     parser = argparse.ArgumentParser(description='Variable Capacity Network for Continual Learning')
 
-    parser.add_argument('--batch-size', type=int, default=100, metavar='BS',
+    parser.add_argument('--batch-size', type=int, default=10, metavar='BS',
                         help='input batch size for training (default: 64)')
 
-    parser.add_argument('--test-batch-size', type=int, default=1000, metavar='TBS',
+    parser.add_argument('--test-batch-size', type=int, default=10, metavar='TBS',
                         help='input batch size for testing (default: 1000)')
 
-    parser.add_argument('--epochs', type=int, default=10, metavar='E',
+    parser.add_argument('--epochs', type=int, default=3, metavar='E',
                         help='number of epochs to train (default: 1)')
 
     parser.add_argument('--lr', type=float, default=0.1, metavar='LR',
@@ -43,10 +43,10 @@ def parse_arguments():
                         help='how many batches to wait before logging training status (default 10)')
 
     # [train dataset size] = [full MNIST train set (60,000)] - [validation set size]
-    parser.add_argument('--train-dataset-size', type=int, default=59800, metavar='TDS',
+    parser.add_argument('--train-dataset-size', type=int, default=2000, metavar='TDS',
                         help='number of images in the training dataset')
 
-    parser.add_argument('--validation-dataset-size', type=int, default=200, metavar='VDS',
+    parser.add_argument('--validation-dataset-size', type=int, default=500, metavar='VDS',
                         help='number of images in the validation dataset')
 
     # size of hidden layer in MLP in neurons OR initial number of filters in conv network
@@ -79,7 +79,7 @@ def parse_arguments():
                         help='continual learning methodology to use')
 
     # number of tasks
-    parser.add_argument('--tasks', type=int, default=55, metavar='T',
+    parser.add_argument('--tasks', type=int, default=20, metavar='T',
                         help='number of tasks')
 
     return parser.parse_args()
