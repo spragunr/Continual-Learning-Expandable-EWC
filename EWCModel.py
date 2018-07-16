@@ -420,7 +420,7 @@ class EWCModel(ExpandableModel):
         # divide totals by number of samples, getting average squared gradient values across sample_count as the
         # Fisher diagonal values
         for parameter in range(len(self.list_of_fisher_diags)):
-            self.list_of_fisher_diags[parameter] /= validation_loader.batch_size
+            self.list_of_fisher_diags[parameter] /= args.validation_dataset_size
 
     def save_fisher_diags(self, task_count):
 
