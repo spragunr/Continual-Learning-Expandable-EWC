@@ -50,15 +50,15 @@ def parse_arguments():
                         help='number of images in the validation dataset')
 
     # size of hidden layer in MLP in neurons OR initial number of filters in conv network
-    parser.add_argument('--hidden-size', type=int, default=50, metavar='HS',
+    parser.add_argument('--hidden-size', type=int, default=20, metavar='HS',
                         help='# neurons in each hidden layer of MLP OR # filters in conv resnet')
 
     # 28 x 28 pixels = 784 pixels per MNIST image, 32 x 32 = 1024 for CIFAR 10
-    parser.add_argument('--input-size', type=int, default=784, metavar='IS',
+    parser.add_argument('--input-size', type=int, default=1024, metavar='IS',
                         help='size of each input data sampe to the network (default 784 (28 * 28))')
 
     # 10 classes - digits 0-9 for MNIST, 100 for CIFAR 100
-    parser.add_argument('--output-size', type=int, default=10, metavar='OS',
+    parser.add_argument('--output-size', type=int, default=100, metavar='OS',
                         help='size of the output of the network (default 10)')
 
     # e.g. 2 to double the size of the network when expansion occurs
@@ -71,7 +71,7 @@ def parse_arguments():
                         help='accuracy threshold (minimum) required on all tasks')
 
     # dataset on which to train/test model
-    parser.add_argument('--dataset', type=str, default='mnist', metavar='DS',
+    parser.add_argument('--dataset', type=str, default='cifar100', metavar='DS',
                         help='dataset on which to train/test model (cifar100 or mnist)')
 
     # continual learning methodology
