@@ -374,8 +374,6 @@ class EWCModel(ExpandableModel):
         # _ is a batch of labels for the images in the data batch (not needed)
         data, _ = next(iter(validation_loader))
 
-        print(data.size())
-
         # The data needs to be wrapped in another tensor to work with our network,
         # otherwise it is not of the appropriate dimensions... I believe this statement effectively adds
         # a dimension.
