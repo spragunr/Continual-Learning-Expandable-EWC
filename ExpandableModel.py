@@ -255,6 +255,9 @@ class ExpandableModel(nn.Module):
                     # fewer dimension than input.
                     pred = output.max(1, keepdim=True)[1]
 
+
+                    print("PREDICTIONS: {} TARGETS:{}".format(pred, target))
+
                     # Check if predictions are correct, and if so add one to the total number of correct predictions across the
                     # entire testing set for each correct prediction.
                     #
@@ -290,8 +293,6 @@ class ExpandableModel(nn.Module):
 
             # The overall accuracy of the model's predictions on the task indicated by task_number as a percent
             # value is the count of its accurate predictions divided by the number of predictions it made, all multiplied by 100
-            print(len(test_loader))
-            print(correct)
 
             accuracy = 100. * correct / (len(test_loader) * args.test_batch_size)
 
