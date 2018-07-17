@@ -257,21 +257,9 @@ def generate_cifar_tasks(args, kwargs):
     validation_loaders = []
     test_loaders = []
 
-    # transform_train = transforms.Compose([
-    #     transforms.RandomCrop(32, padding=4),
-    #     transforms.RandomHorizontalFlip(),
-    #     transforms.ToTensor(),
-    #     transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
-    # ])  # meanstd transformation
-    #
-    # transform_test = transforms.Compose([
-    #     transforms.ToTensor(),
-    #     transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
-    # ])
-
-    transformations = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Lambda(lambda x: x.view(x.size(0), -1) / 255.0)])
+    transformations = transforms.Compose(
+        [transforms.ToTensor(),
+         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
     # Split the PyTorch MNIST training dataset into training and validation datasets, and transform the data.
     #
