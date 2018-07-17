@@ -1,10 +1,9 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import scipy.stats as stats
 from copy import deepcopy
 from torch.autograd import Variable
-from network_utils import ResNet18
-
 
 class ExpandableModel(nn.Module):
 
@@ -42,7 +41,12 @@ class ExpandableModel(nn.Module):
 
         if self.is_cifar:
 
-            self.y = self.resnet(x)
+            x = self.pool(F.relu(self.conv1(x)))
+            x = self.pool(F.relu(self.conv2(x)))
+            x = x.view(-1, 16 * 5 * 5)
+            x = F.relu(self.fc1(x))
+            x = F.relu(self.fc2(x))
+            x = self.fc3(x)
 
         else:
 
@@ -50,7 +54,7 @@ class ExpandableModel(nn.Module):
             for module in self.modulelist:
                 x = module(x)
 
-            self.y = x
+        self.y = x
 
         return self.y
 
@@ -65,16 +69,32 @@ class ExpandableModel(nn.Module):
         raise NotImplementedError("train_model() is not implemented in ExpandableModel")
 
     def initialize_module_list(self):
+
         if self.is_cifar:
 
-            self.resnet = ResNet18(100, nf=self.hidden_size)
+            self.build_conv()
 
         else:
-            self.modulelist = nn.ModuleList()
 
-            self.modulelist.append(nn.Linear(self.input_size, self.hidden_size))
-            self.modulelist.append(nn.ReLU())
-            self.modulelist.append(nn.Linear(self.hidden_size, self.output_size))
+            self.build_mlp()
+
+    def build_mlp(self):
+
+        self.modulelist = nn.ModuleList()
+
+        self.modulelist.append(nn.Linear(self.input_size, self.hidden_size))
+        self.modulelist.append(nn.ReLU())
+        self.modulelist.append(nn.Linear(self.hidden_size, self.output_size))
+
+
+    def build_conv(self):
+
+        self.conv1 = nn.Conv2d(3, 6, 5)
+        self.pool = nn.MaxPool2d(2, 2)
+        self.conv2 = nn.Conv2d(6, 16, 5)
+        self.fc1 = nn.Linear(16 * 5 * 5, 120)
+        self.fc2 = nn.Linear(120, 84)
+        self.fc3 = nn.Linear(84, 10)
 
     def update_size_dict(self, task_count):
 
