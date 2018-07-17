@@ -34,8 +34,8 @@ def main():
     # todo fix num_workers in utils
 
 
-    if args.dataset == "cifar100":
-        #train_loaders, validation_loaders, test_loaders = utils.generate_cifar_tasks(args, kwargs)
+    # if args.dataset == "cifar100":
+    #     train_loaders, validation_loaders, test_loaders = utils.generate_cifar_tasks(args, kwargs)
 
 
 
@@ -76,9 +76,11 @@ def main():
         if not retrain_task:
 
             if args.dataset == "cifar100":
-                train_loader = train_loaders[task_count - 1]
-                validation_loader = validation_loaders[task_count - 1]
-                test_loader = test_loaders[task_count - 1]
+                # train_loader = train_loaders[task_count - 1]
+                # validation_loader = validation_loaders[task_count - 1]
+                # test_loader = test_loaders[task_count - 1]
+
+                train_loader, validation_loader, test_loader = utils.generate_1_cifar10_task(args)
 
             else:
                 # get the DataLoaders for the training, validation, and testing data
