@@ -80,11 +80,11 @@ def main():
                 # validation_loader = validation_loaders[task_count - 1]
                 # test_loader = test_loaders[task_count - 1]
 
-                train_loader, validation_loader, test_loader = utils.generate_1_cifar10_task(args)
+                train_loader, test_loader = utils.generate_1_cifar10_task(args)
 
             else:
                 # get the DataLoaders for the training, validation, and testing data
-                train_loader, test_loader = utils.generate_new_mnist_task(args, kwargs,
+                train_loader, validation_loader, test_loader = utils.generate_new_mnist_task(args, kwargs,
                     first_task=(task_count == 1)
                 )
 
