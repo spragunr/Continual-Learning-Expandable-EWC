@@ -30,7 +30,9 @@ class ExpandableModel(nn.Module):
 
         self.initialize_module_list()
 
-        self.apply(self.init_weights)
+        # todo use XAVIER 10 method
+        if not self.is_cifar:
+            self.apply(self.init_weights)
 
         self.device = device
 
