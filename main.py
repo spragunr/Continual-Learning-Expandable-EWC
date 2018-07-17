@@ -31,9 +31,26 @@ def main():
 
 
     # todo fix kwargs (**kwargs)
+    # todo fix num_workers in utils
+
 
     if args.dataset == "cifar100":
-        train_loaders, validation_loaders, test_loaders = utils.generate_cifar_tasks(args, kwargs)
+        #train_loaders, validation_loaders, test_loaders = utils.generate_cifar_tasks(args, kwargs)
+
+
+
+    cifar_classes = utils.define_cifar100_labels()
+
+
+    # for task in range(args.tasks):
+    #     # get some random training images
+    #     images, labels = next(iter(test_loaders[task]))
+    #
+    #     # show images
+    #     utils.imshow(torchvision.utils.make_grid(images))
+    #
+    #     # print labels
+    #     print(' '.join('%5s' % cifar_classes[labels[j]] for j in range(len(labels))))
 
 
     # A list of the different DataLoader objects that hold various permutations of the mnist testing dataset-
