@@ -84,7 +84,7 @@ def main():
 
             else:
                 # get the DataLoaders for the training, validation, and testing data
-                train_loader, validation_loader, test_loader = utils.generate_new_mnist_task(args, kwargs,
+                train_loader, test_loader = utils.generate_new_mnist_task(args, kwargs,
                     first_task=(task_count == 1)
                 )
 
