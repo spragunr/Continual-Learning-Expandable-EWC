@@ -26,13 +26,10 @@ class ExpandableModel(nn.Module):
 
         self.dataset = dataset
 
-        self.is_cifar = (self.dataset == "cifar100")
-
         self.initialize_module_list()
 
         # todo use XAVIER 10 method
-        if not self.is_cifar:
-            self.apply(self.init_weights)
+        self.apply(self.init_weights)
 
         self.device = device
 
@@ -80,24 +77,6 @@ class ExpandableModel(nn.Module):
 
             self.build_mlp()
 
-    def build_mlp(self):
-
-        self.modulelist = nn.ModuleList()
-
-        self.modulelist.append(nn.Linear(self.input_size, self.hidden_size))
-        self.modulelist.append(nn.ReLU())
-        self.modulelist.append(nn.Linear(self.hidden_size, self.output_size))
-
-
-    def build_conv(self):
-
-        self.conv1 = nn.Conv2d(3, 6, 5)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(6, 16, 5)
-        self.fc1 = nn.Linear(16 * 5 * 5, 120)
-        self.fc2 = nn.Linear(120, 84)
-        self.fc3 = nn.Linear(84, 10)
-
     def update_size_dict(self, task_count):
 
         self.size_dictionary.update({task_count: self.hidden_size})
@@ -114,32 +93,7 @@ class ExpandableModel(nn.Module):
         for param_index, parameter in enumerate(self.parameters()):
             parameter.data[tuple(slice(0, n) for n in old_weights[param_index].shape)] = old_weights[param_index][...]
 
-    # initialize weights in the network in the same manner as in:
-    # https://github.com/ariseff/overcoming-catastrophic/blob/afea2d3c9f926d4168cc51d56f1e9a92989d7af0/model.py#L7
-    @staticmethod
-    def init_weights(m):
 
-        # This function is intended to mimic the behavior of TensorFlow's tf.truncated_normal(), returning
-        # a tensor of the specified shape containing values sampled from a truncated normal distribution with the
-        # specified mean and standard deviation. Sampled values which fall outside of the range of +/- 2 standard deviations
-        # from the mean are dropped and re-picked.
-        def trunc_normal_weights(shape, mean=0.0, stdev=0.1):
-
-            num_samples = 1
-
-            for dim in list(shape):
-                num_samples *= dim
-
-            a, b = ((mean - 2 * stdev) - mean) / stdev, ((mean + 2 * stdev) - mean) / stdev
-
-            samples = stats.truncnorm.rvs(a, b, scale=stdev, loc=mean, size=num_samples)
-
-            return torch.Tensor(samples.reshape(tuple(shape)))
-
-        if type(m) == nn.Linear:
-            m.weight.data.copy_(trunc_normal_weights(m.weight.size()))
-            if m.bias is not None:
-                m.bias.data.fill_(0.1)
 
     def reset(self, task_count):
         old_weights = self.task_post_training_weights.get(task_count)
