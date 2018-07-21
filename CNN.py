@@ -2,6 +2,14 @@
 
 class CNN(ExpandableModel):
 
+    def __init__(self, hidden_size, input_size, output_size, device):
+
+        super().__init__(hidden_size, input_size, output_size, device)
+
+        self.build()
+
+        # todo use XAVIER 10 method for weight initialization
+
     def forward(self, x):
 
         x = self.pool(F.relu(self.conv1(x)))
