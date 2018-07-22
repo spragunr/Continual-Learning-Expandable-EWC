@@ -35,9 +35,32 @@ def parse_arguments():
         args.dataset = 'mnist'
         args.tasks = 100
 
+        print(args)
 
     elif args.experiment == 'cifar':
         print('|-----[CONDUCTING INCREMENTAL CIFAR 100 EXPERIMENT]-----|')
+
+        args.batch_size = 4
+        args.test_batch_size = 4
+        args.epochs = 2
+        args.lr = 0.001
+        args.l2_reg_penalty = 0.0
+        args.lam = 150
+        args.momentum = 0.9
+        args.no_cuda = False
+        args.seed = 1
+        args.log_interval = 10
+        args.train_dataset_size = 59800
+        args.validation_dataset_size = 200
+        args.hidden_size = 50 # todo do something with this...
+        args.input_size = 1024
+        args.output_size = 100
+        args.scale_factor = 2
+        args.accuracy_threshold = 0 # todo figure out what this should be...
+        args.dataset = 'cifar'
+        args.tasks = 20
+
+        print(args)
 
     else:
         print('|-----[CUSTOM EXPERIMENT- DEFAULT HYPERPARAMETERS USED WHERE NOT SPECIFIED]-----|')
