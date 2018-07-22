@@ -113,7 +113,7 @@ class ExpandableModel(nn.Module):
         # make a model of each size specified in model_sizes, add them to models list
         for hidden_size in model_sizes:
             models.append(
-                ExpandableModel(
+                self.__class__(
                     hidden_size,
                     self.input_size,
                     self.output_size,
