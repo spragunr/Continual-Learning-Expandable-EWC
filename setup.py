@@ -5,9 +5,18 @@ import scipy as sp
 import random
 
 def parse_arguments():
+    parser = argparse.ArgumentParser(description='Variable Capacity Network for Continual Learning')
+
+    parser.add_argument('--experiment', type=str, default='none', metavar='EXPERIMENT',
+                        help='run a predefined experiment (cifar or mnist)')
+
+    experiment_choice = parser.parse_known_args(['--experiment'])
+
+    if experiment_choice.experiment == 'none':
+        print('none')
+    elif experiment_choice.
 
     # Command Line args
-    parser = argparse.ArgumentParser(description='Variable Capacity Network for Continual Learning')
 
     parser.add_argument('--batch-size', type=int, default=10, metavar='BS',
                         help='input batch size for training (default: 64)')
