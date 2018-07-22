@@ -60,7 +60,9 @@ def parse_arguments():
         args.dataset = 'cifar'
         args.tasks = 20
 
-        print(args)
+        args_dict = vars(args)
+        for k in args_dict.keys():
+            print("{}:\t{}".format(k, args_dict.get(k)))
 
     else:
         print('|-----[CUSTOM EXPERIMENT- DEFAULT HYPERPARAMETERS USED WHERE NOT SPECIFIED]-----|')
