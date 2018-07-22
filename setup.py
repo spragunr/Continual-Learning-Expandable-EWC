@@ -10,16 +10,16 @@ def parse_arguments():
     parser.add_argument('--experiment', type=str, default='none', metavar='EXPERIMENT',
                         help='run a predefined experiment (cifar or mnist)')
 
-    experiment = parser.parse_known_args(['--experiment']).experiment
+    args = parser.parse_args()
 
-    if experiment == 'mnist':
-        print('mnist')
+    if args.experiment == 'mnist':
+        print('|||||[CONDUCTING PERMUTED MNIST EXPERIMENT]|||||')
 
-    elif experiment == 'cifar':
-        print('cifar')
+    elif args.experiment == 'cifar':
+        print('|||||[CONDUCTING INCREMENTAL CIFAR 100 EXPERIMENT]|||||')
 
     else:
-        print('none')
+        print('|||||[CUSTOM EXPERIMENT- DEFAULT HYPERPARAMETERS USED WHERE NOT SPECIFIED]|||||')
 
     exit()
 
