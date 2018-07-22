@@ -35,7 +35,7 @@ def parse_arguments():
         args.accuracy_threshold = 90
         args.dataset = 'mnist'
         args.tasks = 100
-        args.nets = ['ewc']
+        args.nets = ['EWCMLP', 'VanillaMLP']
 
         args_dict = vars(args)
 
@@ -65,6 +65,7 @@ def parse_arguments():
         args.accuracy_threshold = 0 # todo figure out what this should be...
         args.dataset = 'cifar'
         args.tasks = 20
+        args.nets = ['EWCCNN', 'VanillaCNN']
 
         args_dict = vars(args)
 
@@ -140,9 +141,12 @@ def parse_arguments():
         parser.add_argument('--tasks', type=int, default=50, metavar='T',
                             help='number of tasks')
 
+        parser.add_argument('--nets', type=[str], default=['EWCMLP', 'VanillaMLP'], metavar='NETS',
+                            help='neural net classes to train')
+
         args = parser.parse_args()
 
-        args.experiment = 'none'
+        args.experiment = 'custom'
 
         args_dict = vars(args)
 
