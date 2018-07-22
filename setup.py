@@ -15,6 +15,27 @@ def parse_arguments():
     if args.experiment == 'mnist':
         print('|-----[CONDUCTING PERMUTED MNIST EXPERIMENT]-----|')
 
+        args.batch_size = 100
+        args.test_batch_size = 1000
+        args.epochs = 10
+        args.lr = 0.01
+        args.l2_reg_penalty = 0.0
+        args.lam = 150
+        args.momentum = 0.0
+        args.no_cuda = False
+        args.seed = 1
+        args.log_interval = 10
+        args.train_dataset_size = 59800
+        args.validation_dataset_size = 200
+        args.hidden_size = 50
+        args.input_size = 784
+        args.output_size = 10
+        args.scale_factor = 2
+        args.accuracy_threshold = 90
+        args.dataset = 'mnist'
+        args.tasks = 100
+
+
     elif args.experiment == 'cifar':
         print('|-----[CONDUCTING INCREMENTAL CIFAR 100 EXPERIMENT]-----|')
 
