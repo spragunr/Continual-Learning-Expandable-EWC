@@ -35,6 +35,7 @@ def parse_arguments():
         args.accuracy_threshold = 90
         args.dataset = 'mnist'
         args.tasks = 100
+        args.nets = ['ewc']
 
         args_dict = vars(args)
 
@@ -42,6 +43,7 @@ def parse_arguments():
             print("{:_<30}{:_>10}".format(k, args_dict.get(k)))
 
     elif args.experiment == 'cifar':
+
         print('|-----[CONDUCTING INCREMENTAL CIFAR 100 EXPERIMENT]-----|')
 
         args.batch_size = 4
@@ -71,8 +73,6 @@ def parse_arguments():
 
     else:
         print('|-----[CUSTOM EXPERIMENT- DEFAULT HYPERPARAMETERS USED WHERE NOT SPECIFIED]-----|')
-
-        # Command Line args
 
         parser.add_argument('--batch-size', type=int, default=10, metavar='BS',
                             help='input batch size for training (default: 64)')
@@ -142,12 +142,12 @@ def parse_arguments():
 
         args = parser.parse_args()
 
+        args.experiment = 'none'
+
         args_dict = vars(args)
 
         for k in args_dict.keys():
             print("{:_<30}{:_>10}".format(k, args_dict.get(k)))
-
-    exit()
 
     return args
 
