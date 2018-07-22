@@ -3,9 +3,6 @@ import torch
 import numpy as np
 import scipy as sp
 import random
-from EWCModel import EWCModel
-from NoRegModel import NoRegModel
-
 
 def parse_arguments():
 
@@ -74,10 +71,6 @@ def parse_arguments():
     parser.add_argument('--dataset', type=str, default='cifar100', metavar='DS',
                         help='dataset on which to train/test model (cifar100 or mnist)')
 
-    # continual learning methodology
-    parser.add_argument('--methodology', type=str, default='ewc', metavar='M',
-                        help='continual learning methodology to use')
-
     # number of tasks
     parser.add_argument('--tasks', type=int, default=50, metavar='T',
                         help='number of tasks')
@@ -134,18 +127,18 @@ def build_models(args, device):
         args.dataset
     ).to(device)
 
-    # # Instantiate a model that will be trained using EWC.
-    # #
-    # # .to(device):
-    # #   Move all parameters and buffers in the module Net to device (CPU or GPU- set above).
-    # #   Both integral and floating point values are moved.
-    # ewc_model = EWCModel(
-    #     args.hidden_size,
-    #     args.input_size,
-    #     args.output_size,
-    #     device,
-    #     args.dataset,
-    #     lam=args.lam  # the lambda (fisher multiplier) value to be used in the EWC loss formula
-    # ).to(device)
+    # Instantiate a model that will be trained using EWC.
+    #
+    # .to(device):
+    #   Move all parameters and buffers in the module Net to device (CPU or GPU- set above).
+    #   Both integral and floating point values are moved.
+    ewc_model = EWCModel(
+        args.hidden_size,
+        args.input_size,
+        args.output_size,
+        device,
+        args.dataset,
+        lam=args.lam  # the lambda (fisher multiplier) value to be used in the EWC loss formula
+    ).to(device)
 
     return [no_reg_model] # todo change back to [no_reg_model, ewc_model]

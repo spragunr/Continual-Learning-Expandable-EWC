@@ -1,19 +1,18 @@
-from ExpandableModel import ExpandableModel
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.autograd import Variable
 from copy import deepcopy
+from CNN import CNN
 
-class NoRegModel(ExpandableModel):
+class VanillaCNN(CNN):
+    def __init__(self, hidden_size, input_size, output_size, device):
 
-    def __init__(self, hidden_size, input_size, output_size, device, dataset):
-
-        super().__init__(hidden_size, input_size, output_size, device, dataset)
+        super().__init__(hidden_size, input_size, output_size, device)
 
     @classmethod
     def from_existing_model(cls, m, new_hidden_size):
 
-        model = cls(new_hidden_size, m.input_size, m.output_size, m.device, m.dataset)
+        model = cls(new_hidden_size, m.input_size, m.output_size, m.device)
 
         model.size_dictionary = deepcopy(m.size_dictionary)
 
@@ -85,8 +84,9 @@ class NoRegModel(ExpandableModel):
                 # This code was used here in another experiment:
                 # https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/train.py#L35
                 data_size = len(data)
-                if not self.is_cifar:
-                    data = data.view(data_size, -1)
+
+                # todo remove from CNN?
+                data = data.view(data_size, -1)
 
                 # wrap data and target in variables- again, from the following experiment:
                 #   https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/train.py#L50

@@ -1,13 +1,12 @@
 import torch
 import utils
 import setup
-import torch.nn as nn
-from EWCModel import EWCModel
-from NoRegModel import NoRegModel
-import matplotlib.pyplot as plt
+from EWCCNN import EWCCNN
+from EWCMLP import EWCMLP
+from VanillaMLP import VanillaMLP
+from VanillaCNN import VanillaCNN
 import numpy as np
-import torchvision
-from utils import ResNet18
+
 import h5py
 
 def main():
@@ -99,12 +98,12 @@ def main():
         retrain_task = False
 
         for model in models:
-            train_args = {'validation_loader': validation_loader} if type(model) == EWCModel else {}
+            train_args = {'validation_loader': validation_loader} if isinstance(model, (EWCMLP, EWCCNN)) else {}
 
             # for each desired epoch, train the model on the latest task
             model.train_model(args, train_loader, task_count, **train_args)
 
-            threshold = 0 if type(model) == NoRegModel else args.accuracy_threshold
+            threshold = 0 if isinstance(model, (VanillaMLP, VanillaCNN)) else args.accuracy_threshold
 
             # test the model on ALL tasks trained thus far (including current task)
             test_results = model.test(prev_test_loaders, threshold, args)

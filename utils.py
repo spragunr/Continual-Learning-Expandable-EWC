@@ -1,16 +1,10 @@
 import torch
-import os
-import torch.nn as nn
 import torch.utils.data as D
 from torch.autograd import Variable
 from torchvision import datasets, transforms
-from ExpandableModel import ExpandableModel
-from EWCModel import EWCModel
-from NoRegModel import NoRegModel
 from tensorboardX import SummaryWriter
 import numpy as np
 import random
-from network_utils import ResNet18
 import matplotlib.pyplot as plt
 
 # generate the DataLoaders corresponding to a permuted mnist task

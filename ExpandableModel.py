@@ -1,9 +1,5 @@
-import torch
 import torch.nn as nn
-import torch.nn.functional as F
-import scipy.stats as stats
 from copy import deepcopy
-from torch.autograd import Variable
 
 
 class ExpandableModel(nn.Module):
@@ -72,14 +68,11 @@ class ExpandableModel(nn.Module):
         for param_index, parameter in enumerate(self.parameters()):
             parameter.data[tuple(slice(0, n) for n in old_weights[param_index].shape)] = old_weights[param_index][...]
 
-
-
     def reset(self, task_count):
         old_weights = self.task_post_training_weights.get(task_count)
 
         for param_index, parameter in enumerate(self.parameters()):
             parameter.data[tuple(slice(0, n) for n in old_weights[param_index].shape)] = old_weights[param_index][...]
-
 
     def save_theta_stars(self, task_count):
         # save the theta* ("theta star") values after training - for plotting and comparative loss calculations
@@ -94,7 +87,6 @@ class ExpandableModel(nn.Module):
             current_weights.append(deepcopy(parameter.data.clone()))
 
         self.task_post_training_weights.update({task_count: deepcopy(current_weights)})
-
 
     # given a dictionary with task numbers as keys and model sizes (size of hidden layer(s) in the model when the model was
     # trained on a given task) as values, generate and return a dictionary correlating task numbers with model.Model

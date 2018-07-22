@@ -1,19 +1,19 @@
-from ExpandableModel import ExpandableModel
+from MLP import MLP
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.autograd import Variable
 from copy import deepcopy
 
-class NoRegModel(ExpandableModel):
+class VanillaMLP(MLP):
 
-    def __init__(self, hidden_size, input_size, output_size, device, dataset):
+    def __init__(self, hidden_size, input_size, output_size, device):
 
-        super().__init__(hidden_size, input_size, output_size, device, dataset)
+        super().__init__(hidden_size, input_size, output_size, device)
 
     @classmethod
     def from_existing_model(cls, m, new_hidden_size):
 
-        model = cls(new_hidden_size, m.input_size, m.output_size, m.device, m.dataset)
+        model = cls(new_hidden_size, m.input_size, m.output_size, m.device)
 
         model.size_dictionary = deepcopy(m.size_dictionary)
 
