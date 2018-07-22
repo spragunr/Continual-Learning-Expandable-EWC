@@ -10,11 +10,18 @@ def parse_arguments():
     parser.add_argument('--experiment', type=str, default='none', metavar='EXPERIMENT',
                         help='run a predefined experiment (cifar or mnist)')
 
-    experiment_choice = parser.parse_known_args(['--experiment'])
+    experiment = parser.parse_known_args(['--experiment']).experiment
 
-    if experiment_choice.experiment == 'none':
+    if experiment == 'mnist':
+        print('mnist')
+
+    elif experiment == 'cifar':
+        print('cifar')
+
+    else:
         print('none')
-    elif experiment_choice.
+
+    exit()
 
     # Command Line args
 
