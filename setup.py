@@ -13,13 +13,13 @@ def parse_arguments():
     args = parser.parse_args()
 
     if args.experiment == 'mnist':
-        print('|||||[CONDUCTING PERMUTED MNIST EXPERIMENT]|||||')
+        print('|-----[CONDUCTING PERMUTED MNIST EXPERIMENT]-----|')
 
     elif args.experiment == 'cifar':
-        print('|||||[CONDUCTING INCREMENTAL CIFAR 100 EXPERIMENT]|||||')
+        print('|-----[CONDUCTING INCREMENTAL CIFAR 100 EXPERIMENT]-----|')
 
     else:
-        print('|||||[CUSTOM EXPERIMENT- DEFAULT HYPERPARAMETERS USED WHERE NOT SPECIFIED]|||||')
+        print('|-----[CUSTOM EXPERIMENT- DEFAULT HYPERPARAMETERS USED WHERE NOT SPECIFIED]-----|')
 
     exit()
 
