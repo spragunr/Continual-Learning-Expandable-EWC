@@ -130,19 +130,19 @@ def main():
 
     for f in files:
 
-        print("|-----[", f.filename, "]-----|")
+        print("|-----[", f.filename, "]-----|", '\n')
 
         print("METADATA:\n")
-        print([d for d in f['metadata']])
+        print([d for d in f['metadata']], '\n')
 
         print("FINAL TASK ACCURACIES:\n")
-        print([d for d in f['task_acc']])
+        print([d for d in f['task_acc']], '\n')
 
         print("EXPANSIONS:\n")
-        print([d for d in f['expansions']])
+        print([d for d in f['expansions']], '\n')
 
         print("AVERAGE ACCURACIES:\n")
-        print([d for d in f['avg_acc']])
+        print([d for d in f['avg_acc']], '\n')
 
         f.close()
 
