@@ -28,8 +28,7 @@ class VanillaCNN(CNN):
         # This is necessary because some network layers behave differently when training vs testing.
         # Dropout, for example, is used to zero/mask certain weights during TRAINING to prevent overfitting.
         # However, during TESTING (e.g. model.eval()) we do not want this to happen.
-        # todo uncomment this later ?
-        #self.train()
+        self.train()
 
         # Set the optimization algorithm for the model- in this case, Stochastic Gradient Descent with/without
         # momentum (depends on the value of args.momentum- default is 0.0, so no momentum by default).
@@ -52,9 +51,10 @@ class VanillaCNN(CNN):
         optimizer = optim.SGD(self.parameters(), lr=args.lr, momentum=args.momentum) # can use filter and requires_grad=False to freeze part of the network...
         #optimizer = optim.Adadelta(self.parameters())
 
-        running_loss = 0.0
 
         for epoch in range(1, args.epochs + 1):
+            running_loss = 0.0
+
             # Enumerate will keep an automatic loop counter and store it in batch_idx.
             # The (data, target) pair returned by DataLoader train_loader each iteration consists
             # of an MNIST image data sample and an associated label classifying it as a digit 0-9.
@@ -85,7 +85,7 @@ class VanillaCNN(CNN):
                 #
                 # This code was used here in another experiment:
                 # https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/train.py#L35
-                data_size = len(data)
+                #data_size = len(data)
 
                 # todo remove from CNN?
                 # data = data.view(data_size, -1)
