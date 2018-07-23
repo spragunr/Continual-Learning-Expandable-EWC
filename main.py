@@ -59,7 +59,7 @@ def main():
 
     files, expansions, avg_acc, task_acc = setup.setup_h5_file(args, models)
 
-    while(task_count < args.tasks + 1):
+    while task_count < (args.tasks + 1) :
 
         torch.cuda.empty_cache() # free any available gpu memory
 
@@ -129,11 +129,21 @@ def main():
 
 
     for f in files:
-        print("|-----", f.name, "-----|")
-        print("METADATA:\n", f['metadata'])
-        print("FINAL TASK ACCURACIES:\n", f['task_acc'])
-        print("EXPANSIONS\n", f['expansions'])
-        print("AVERAGE ACCURACIES:\n", f['avg_acc'])
+
+        print("|-----[", f.filename, "]-----|")
+
+        print("METADATA:\n")
+        print([d for d in f['metadata']])
+
+        print("FINAL TASK ACCURACIES:\n")
+        print([d for d in f['task_acc']])
+
+        print("EXPANSIONS:\n")
+        print([d for d in f['expansions']])
+
+        print("AVERAGE ACCURACIES:\n")
+        print([d for d in f['avg_acc']])
+
         f.close()
 
 if __name__ == '__main__':

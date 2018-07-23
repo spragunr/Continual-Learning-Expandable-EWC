@@ -131,12 +131,7 @@ def output_tensorboard_graph(args, models, task_count):
 def expand(models, args):
 
     # output expansion notification to terminal
-    text = "EXPANDING MODEL AND RETRAINING LAST TASK"
-    banner = ""
-    for char in range(len(text) + 2): banner += u"\u2588"
-    banner += "\n" + u"\u2588" + text + u"\u2588" + "\n"
-    for char in range(len(text) + 2): banner += u"\u2588"
-    print("\033[93m\033[1m{}\033[0m".format(banner)) # print banner with bold warning text formatting
+    print("|-----[EXPANDING MODEL AND RETRAINING LAST TASK]-----|")
 
     expanded_models = []
 
