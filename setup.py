@@ -267,12 +267,23 @@ def setup_h5_file(args, models):
     avg_acc_list = []
     task_acc_list = []
 
+    # used to store variable length unicode strings in h5 format with Python 3.x
+    dt = h5py.special_dtype(vlen=str)
+
     for model in models:
 
-        f = h5py.File("{}_".format(type(model)) + args.output_file, "x")
+        model_type = str(type(model))
+        model_type = model_type[model_type.index("'") + 1:model_type.rindex('.')]
+
+
+        f = h5py.File( model_type + "_" + args.output_file, "x")
         files.append(f)
 
-        metadata = f.create_dataset("metadata", (1,), data=vars(args))
+        metadata = f.create_dataset("metadata", (len(vars(args).keys()),), dtype=dt)
+
+        for i, k in enumerate(vars(args).keys()):
+            metadata[i] = "{}: {}".format(k, vars(args).get(k))
+
 
         # NOTE: TO FACILITATE PARSING THERE IS A ZERO TACKED ONTO THE FRONT OF THIS LIST
         # [0, 0, 1, 0, 2, 0] would mean that the network had to expand 0 times before successfully learning the 1st task,
