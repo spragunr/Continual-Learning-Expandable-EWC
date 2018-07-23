@@ -15,14 +15,12 @@ from pathlib import Path
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Variable Capacity Network for Continual Learning')
 
-    parser.add_argument('--experiment', type=str, default='none', metavar='EXPERIMENT',
-                        help='run a predefined experiment (cifar or mnist)')
+    experiment = input("\nWHICH TYPE OF EXPERIMENT WOULD YOU LIKE TO RUN?[cifar/mnist/custom]:  ").strip().lower()
 
-    args = parser.parse_args()
-
-    if args.experiment == 'mnist':
+    if experiment == 'mnist':
 
         print('|-----[CONDUCTING PERMUTED MNIST EXPERIMENT]-----|')
+        args = parser.parse_args()
 
         args.batch_size = 100
         args.test_batch_size = 1000
@@ -54,10 +52,10 @@ def parse_arguments():
             else:
                 print("{:_<30}{:_>30}".format(k, ", ".join(args_dict.get(k))))
 
-    elif args.experiment == 'cifar':
+    elif experiment == 'cifar':
 
         print('|-----[CONDUCTING INCREMENTAL CIFAR 100 EXPERIMENT]-----|')
-
+        args = parser.parse_args()
         args.batch_size = 4
         args.test_batch_size = 4
         args.epochs = 2
