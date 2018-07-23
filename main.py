@@ -57,15 +57,10 @@ def main():
 
     retrain_task = False
 
-    setup.setup_h5_files()
-
-    ### EVALUATION METRICS ###
+    f, expansions, avg_acc, task_acc = setup.setup_h5_file(args, models)
 
     test_results = []
 
-
-    expansion_before_tasks[...] = np.zeros(len(expansion_before_tasks))
-    avg_acc_on_all_tasks[...] = np.zeros(len(avg_acc_on_all_tasks))
 
     while(task_count < args.tasks + 1):
 
@@ -117,16 +112,16 @@ def main():
                 model.reset(task_count - 1)
 
             models = utils.expand(models, args)
-            expansion_before_tasks[task_count] += 1
+            expansions[task_count] += 1
             #utils.output_tensorboard_graph(args, models, task_count + 1)
 
         else:
-            avg_acc_on_all_tasks[task_count] = sum(test_results) / len(test_results)
+            avg_acc[task_count] = sum(test_results) / len(test_results)
 
             # increment the number of the current task before re-entering while loop
             task_count += 1
 
-    final_task_accs[...] = np.array(test_results)[...]
+    task_acc[...] = np.array(test_results)[...]
 
     f.flush()
     f.close()

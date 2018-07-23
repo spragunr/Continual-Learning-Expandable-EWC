@@ -42,6 +42,7 @@ def parse_arguments():
         args.accuracy_threshold = 90
         args.dataset = 'mnist'
         args.tasks = 100
+        args.output_file = 'perm_mnist.h5'
         args.nets = ['EWCMLP', 'VanillaMLP']
 
         args_dict = vars(args)
@@ -75,6 +76,7 @@ def parse_arguments():
         args.accuracy_threshold = 0 # todo figure out what this should be...
         args.dataset = 'cifar'
         args.tasks = 20
+        args.output_file = 'increm_cifar.h5'
         args.nets = ['EWCCNN', 'VanillaCNN']
 
         args_dict = vars(args)
@@ -153,7 +155,10 @@ def parse_arguments():
         parser.add_argument('--tasks', type=int, default=50, metavar='T',
                             help='number of tasks')
 
-        parser.add_argument('--nets', nargs='+', default=['EWCMLP', 'VanillaMLP'], metavar='NETS',
+        parser.add_argument('--output-file', type=str, default='custom.h5', metavar='OUTPUT FILE',
+                            help='h5 file for storage of experimental results')
+
+        parser.add_argument('--nets', nargs='+', type=str, default=['EWCMLP', 'VanillaMLP'], metavar='NETS',
                             help='neural net classes to train')
 
         args = parser.parse_args()
@@ -255,23 +260,39 @@ def build_models(args, device):
     return models
 
 
-def setup_h5_files(args):
+def setup_h5_files(args, models):
 
-    f = h5py.File(args.output_file, "w")
+    files = []
+    expansions_list = []
+    avg_acc_list = []
+    task_acc_list = []
 
-    # NOTE: TO FACILITATE PARSING THERE IS A ZERO TACKED ONTO THE FRONT OF THIS LIST
-    # [0, 0, 1, 0, 2, 0] would mean that the network had to expand 0 times before successfully learning the 1st task,
-    # once before successfully learning the 2nd task, 0 MORE times before learning the 3rd task, twice MORE before
-    # successfully learning the 4th task (total of 3 expansions now) and 0 MORE times before successfully learning
-    # the 5th task
-    expansions = f.create_dataset("expansions", (args.tasks + 1,),
-                                              dtype='i')
+    for model in models:
 
-    # NOTE: TO FACILITATE PARSING THERE IS A ZERO TACKED ONTO THE FRONT OF THIS LIST
-    # avg accuracy on all tasks as new tasks are added
-    avg_acc = f.create_dataset("avg_acc_on_all_tasks", (args.tasks + 1,),
-                                            dtype='f')
+        f = h5py.File("{}_".format(type(model)) + args.output_file, "w")
+        files.append(f)
 
-    # NOTE: TO FACILITATE PARSING THERE IS A ZERO TACKED ONTO THE FRONT OF THIS LIST
-    # final post-training accuracy on each individual task
-    task_accs = f.create_dataset("final_task_accs", (len(test_results),), dtype='f')
+        # NOTE: TO FACILITATE PARSING THERE IS A ZERO TACKED ONTO THE FRONT OF THIS LIST
+        # [0, 0, 1, 0, 2, 0] would mean that the network had to expand 0 times before successfully learning the 1st task,
+        # once before successfully learning the 2nd task, 0 MORE times before learning the 3rd task, twice MORE before
+        # successfully learning the 4th task (total of 3 expansions now) and 0 MORE times before successfully learning
+        # the 5th task
+        expansions = f.create_dataset("expansions", (args.tasks + 1,), dtype='i')
+        expansions[...] = np.zeros(len(expansions))
+        expansions_list.append(expansions)
+
+        # NOTE: TO FACILITATE PARSING THERE IS A ZERO TACKED ONTO THE FRONT OF THIS LIST
+        # avg accuracy on all tasks as new tasks are added
+        avg_acc = f.create_dataset("avg_acc", (args.tasks + 1,), dtype='f')
+        avg_acc[...] = np.zeros(len(avg_acc))
+        avg_acc_list.append(avg_acc)
+
+        # NOTE: TO FACILITATE PARSING THERE IS A ZERO TACKED ONTO THE FRONT OF THIS LIST
+        # final post-training accuracy on each individual task
+        task_acc = f.create_dataset("task_acc", (args.tasks + 1,), dtype='f')
+        task_acc[...] = np.zeros(len(task_acc))
+        task_acc_list.append(task_acc)
+
+
+
+    return files, expansions_list, avg_acc_list, task_acc_list
