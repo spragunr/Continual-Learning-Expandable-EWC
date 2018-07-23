@@ -82,7 +82,7 @@ def parse_arguments():
                         help='dataset on which to train/test model (cifar100 or mnist)')
 
     # number of tasks
-    parser.add_argument('--tasks', type=int, default=3, metavar='T',
+    parser.add_argument('--tasks', type=int, default=50, metavar='T',
                         help='number of tasks')
 
     parser.add_argument('--output-file', type=str, default='custom.h5', metavar='OUTPUT FILE',
@@ -144,9 +144,8 @@ def parse_arguments():
         args.no_cuda = False
         args.seed = 1
         args.log_interval = 10
-        args.train_dataset_size = 59800
-        args.validation_dataset_size = 200
         args.hidden_size = 50 # todo do something with this...
+        args.validation_dataset_size = 100 # in THIS case, this is the validation data from each individual CLASS
         args.input_size = 1024
         args.output_size = 100
         args.scale_factor = 2
@@ -155,6 +154,12 @@ def parse_arguments():
         args.tasks = 20
         args.output_file = 'increm_cifar.h5'
         args.nets = ['EWCCNN']
+
+        # per-class train dataset size * classes per task
+        args.train_dataset_size = (500 - args.validation_dataset_size) * (100 / args.tasks)
+
+        # per-class validation data size * classes per task
+        args.validation_dataset_size *= (100 / args.tasks)
 
         args_dict = vars(args)
 
@@ -167,6 +172,14 @@ def parse_arguments():
     elif args.experiment == 'custom':
 
         print('|-----[CUSTOM EXPERIMENT- DEFAULT HYPERPARAMETERS USED WHERE NOT SPECIFIED]-----|')
+
+        if args.dataset == "cifar":
+            # per-class train dataset size * classes per task
+            args.train_dataset_size = (500 - args.validation_dataset_size) * (100 / args.tasks)
+
+            # per-class validation data size * classes per task
+            args.validation_dataset_size *= (100 / args.tasks)
+
 
         args_dict = vars(args)
 
