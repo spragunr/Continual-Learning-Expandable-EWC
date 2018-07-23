@@ -88,6 +88,9 @@ def parse_arguments():
     parser.add_argument('--output-file', type=str, default='custom.h5', metavar='OUTPUT FILE',
                         help='h5 file for storage of experimental results')
 
+    parser.add_argument('--overwrite', action='store_true', default=False,
+                        help='overwrite old result data files without asking (will prompt otherwise)')
+
     parser.add_argument('--nets', nargs='+', type=str, default=['VanillaCNN'], metavar='NETS',
                         help='neural net classes to train')
 
@@ -286,7 +289,7 @@ def setup_h5_file(args, models):
         mode = "x" # throw an exception if the file already exists
 
         # file already exists - ask if we want to get rid of the old one
-        if path.is_file():
+        if path.is_file() and not args.overwrite:
 
             if input("\nWOULD YOU LIKE TO ERASE OLD DATA FILE {}?[y/n]:  ".format(filename)).strip().lower() == "y":
 
