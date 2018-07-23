@@ -243,6 +243,10 @@ def generate_new_cifar_task(args, kwargs, first_task):
 # generate the DataLoaders corresponding to incremental CIFAR 100 tasks
 def generate_cifar_tasks(args, kwargs):
 
+    # for indicating progress...
+    symbols = ['|', '/', '-', '\\']
+    symbol_index = 0
+
     train_loaders = []
     validation_loaders = []
     test_loaders = []
@@ -293,9 +297,15 @@ def generate_cifar_tasks(args, kwargs):
         test_data_org_by_class.append([])
 
     for (data, target) in train_loader:
+        print("CONSTRUCTING INCREMENTAL CIFAR 100 DATASET {}".format(symbols[symbol_index]))
+        symbol_index += 1
+
         train_data_org_by_class[target.item()].append((data, target))
 
     for (data, target) in test_loader:
+        print("CONSTRUCTING INCREMENTAL CIFAR 100 DATASET {}".format(symbols[symbol_index]))
+        symbol_index += 1
+
         test_data_org_by_class[target.item()].append((data, target))
 
     task_class_indices = []
@@ -315,6 +325,8 @@ def generate_cifar_tasks(args, kwargs):
 
         # task is a range object (e.g. range(0,5) for 1st task if CIFAR 100 split into 20 tasks)
         for class_data_index in task:
+            print("CONSTRUCTING INCREMENTAL CIFAR 100 DATASET {}".format(symbols[symbol_index]))
+            symbol_index += 1
 
             for train_sample in train_data_org_by_class[class_data_index]:
                 tasks_train[len(tasks_train) - 1].append(train_sample)
@@ -330,6 +342,9 @@ def generate_cifar_tasks(args, kwargs):
         random.shuffle(task)
 
     for task in tasks_train:
+        print("CONSTRUCTING INCREMENTAL CIFAR 100 DATASET {}".format(symbols[symbol_index]))
+        symbol_index += 1
+
         train_loader = task[:args.train_dataset_size]
         validation_loader = task[args.train_dataset_size:]
 
@@ -367,6 +382,8 @@ def generate_cifar_tasks(args, kwargs):
         validation_loaders.append(batched_validation_loader)
 
     for task in tasks_test:
+        print("CONSTRUCTING INCREMENTAL CIFAR 100 DATASET {}".format(symbols[symbol_index]))
+        symbol_index += 1
 
         batched_test_loader = []
 
