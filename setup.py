@@ -156,10 +156,10 @@ def parse_arguments():
         args.nets = ['EWCCNN']
 
         # per-class train dataset size * classes per task
-        args.train_dataset_size = (500 - args.validation_dataset_size) * (100 / args.tasks)
+        args.train_dataset_size = (500 - args.validation_dataset_size) * (100 // args.tasks)
 
         # per-class validation data size * classes per task
-        args.validation_dataset_size *= (100 / args.tasks)
+        args.validation_dataset_size *= (100 // args.tasks)
 
         args_dict = vars(args)
 
@@ -175,10 +175,10 @@ def parse_arguments():
 
         if args.dataset == "cifar":
             # per-class train dataset size * classes per task
-            args.train_dataset_size = (500 - args.validation_dataset_size) * (100 / args.tasks)
+            args.train_dataset_size = (500 - args.validation_dataset_size) * (100 // args.tasks)
 
             # per-class validation data size * classes per task
-            args.validation_dataset_size *= (100 / args.tasks)
+            args.validation_dataset_size *= (100 // args.tasks)
 
 
         args_dict = vars(args)
