@@ -3,7 +3,6 @@ import torch.optim as optim
 from torch.autograd import Variable
 from copy import deepcopy
 from CNN import CNN
-import torch.nn as nn
 
 class VanillaCNN(CNN):
     def __init__(self, hidden_size, input_size, output_size, device):
@@ -30,9 +29,6 @@ class VanillaCNN(CNN):
         # Dropout, for example, is used to zero/mask certain weights during TRAINING to prevent overfitting.
         # However, during TESTING (e.g. model.eval()) we do not want this to happen.
         self.train()
-
-        # todo remove this?
-        criterion = nn.CrossEntropyLoss()
 
         # Set the optimization algorithm for the model- in this case, Stochastic Gradient Descent with/without
         # momentum (depends on the value of args.momentum- default is 0.0, so no momentum by default).
@@ -126,7 +122,7 @@ class VanillaCNN(CNN):
                 #
                 # NOTE: torch.nn.CrossEntropyLoss combines torch.nn.LogSoftmax() and torch.nn.NLLLoss() in one single class.
                 # apply the loss function to the predictions/labels for this batch to compute loss
-                loss = criterion(output, target)
+                loss = F.cross_entropy(output, target)
 
                 # Backward pass: compute gradient of the loss with respect to model
                 # parameters
