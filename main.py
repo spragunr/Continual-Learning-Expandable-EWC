@@ -31,12 +31,6 @@ def main():
     # todo fix kwargs (**kwargs)
     # todo fix num_workers in utils
 
-
-    if args.dataset == "cifar":
-        train_loaders, validation_loaders, test_loaders = utils.generate_cifar_tasks(args, kwargs)
-
-
-
     cifar_classes = utils.define_cifar100_labels()
 
 
@@ -58,6 +52,9 @@ def main():
     retrain_task = False
 
     files, expansions, avg_acc, task_acc = setup.setup_h5_file(args, models)
+
+    if args.dataset == "cifar":
+        train_loaders, validation_loaders, test_loaders = utils.generate_cifar_tasks(args, kwargs)
 
     while task_count < (args.tasks + 1) :
 
