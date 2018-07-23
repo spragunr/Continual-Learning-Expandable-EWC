@@ -97,11 +97,13 @@ def main():
 
             # test the model on ALL tasks trained thus far (including current task)
             test_results = model.test(prev_test_loaders, threshold, args)
-            task_acc[model_num][:len(test_results)] = np.array(test_results)[...]
 
             if test_results == -1:
                 retrain_task = True
                 break
+
+            else:
+                task_acc[model_num][:len(test_results)] = np.array(test_results)[...]
 
         if retrain_task:
 
