@@ -8,6 +8,7 @@ from VanillaCNN import VanillaCNN
 from EWCMLP import EWCMLP
 from EWCCNN import EWCCNN
 import h5py
+from pathlib import Path
 
 
 
@@ -275,8 +276,21 @@ def setup_h5_file(args, models):
         model_type = str(type(model))
         model_type = model_type[model_type.index("'") + 1:model_type.rindex('.')]
 
+        filename = model_type + "_" + args.output_file
 
-        f = h5py.File( model_type + "_" + args.output_file, "x")
+        path = Path(filename)
+
+        mode = "x" # throw an exception if the file already exists
+
+        # file already exists - ask if we want to get rid of the old one
+        if path.is_file():
+
+            if input("WOULD YOU LIKE TO ERASE OLD DATA FILE {}?[y/n]".format(filename)).lower() == "y":
+
+                mode = "w" # truncate and write over the file if it exists
+
+        f = h5py.File(filename, mode)
+
         files.append(f)
 
         metadata = f.create_dataset("metadata", (len(vars(args).keys()),), dtype=dt)

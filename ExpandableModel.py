@@ -112,7 +112,8 @@ class ExpandableModel(nn.Module):
                     hidden_size,
                     self.input_size,
                     self.output_size,
-                    self.device
+                    self.device,
+                    **train_args
                 ).to(self.device)
             )
 
