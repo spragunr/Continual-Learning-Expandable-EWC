@@ -1,10 +1,11 @@
-from MLP import MLP
 import torch
 import utils
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.autograd import Variable
 from copy import deepcopy
+from MLP import MLP
+
 
 class EWCMLP(MLP):
     def __init__(self, hidden_size, input_size, output_size, device, lam):

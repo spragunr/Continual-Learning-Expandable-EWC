@@ -1,7 +1,5 @@
 import torch.nn as nn
 from copy import deepcopy
-from EWCMLP import EWCMLP
-from EWCCNN import EWCCNN
 
 class ExpandableModel(nn.Module):
 
@@ -103,17 +101,16 @@ class ExpandableModel(nn.Module):
 
         models = []
 
-        train_args = {'lam': self.lam} if isinstance(self, (EWCMLP, EWCCNN)) else {}
-
         # make a model of each size specified in model_sizes, add them to models list
         for hidden_size in model_sizes:
             models.append(
-                self.__class__(
+                # make a model of the type corresponding to the model's direct superclass (CNN or MLP) for testing-
+                # this way we don't need to pass lambda to the constructor, as it's not needed for testing
+                self.__class__.__bases__[0](
                     hidden_size,
                     self.input_size,
                     self.output_size,
-                    self.device,
-                    **train_args
+                    self.device
                 ).to(self.device)
             )
 
