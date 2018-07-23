@@ -94,9 +94,8 @@ class VanillaCNN(CNN):
                 # .to(device):
                 #   set the device (CPU or GPU) to be used with data and target to device variable (defined in main())
 
-                # todo see if removing this helps with loss spikes
-                #data, target = Variable(data).to(self.device), Variable(target).to(self.device)
-                data, target = data.to(self.device), target.to(self.device)
+                # todo may not need to wrap in variables - just to move to GPU if necessary
+                data, target = Variable(data).to(self.device), Variable(target).to(self.device)
 
 
                 # Gradients are automatically accumulated- therefore, they need to be zeroed out before the next backward
