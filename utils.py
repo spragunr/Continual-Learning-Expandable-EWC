@@ -297,13 +297,13 @@ def generate_cifar_tasks(args, kwargs):
         test_data_org_by_class.append([])
 
     for (data, target) in train_loader:
-        print("CONSTRUCTING INCREMENTAL CIFAR 100 DATASET {}".format(symbols[(symbol_index // 20) % len(symbols)]), end='\r')
+        print("CONSTRUCTING INCREMENTAL CIFAR 100 DATASET {}".format(symbols[(symbol_index // 100) % len(symbols)]), end='\r')
         symbol_index += 1
 
         train_data_org_by_class[target.item()].append((data, target))
 
     for (data, target) in test_loader:
-        print("CONSTRUCTING INCREMENTAL CIFAR 100 DATASET {}".format(symbols[(symbol_index // 20) % len(symbols)]), end='\r')
+        print("CONSTRUCTING INCREMENTAL CIFAR 100 DATASET {}".format(symbols[(symbol_index // 100) % len(symbols)]), end='\r')
         symbol_index += 1
 
         test_data_org_by_class[target.item()].append((data, target))
@@ -325,7 +325,7 @@ def generate_cifar_tasks(args, kwargs):
 
         # task is a range object (e.g. range(0,5) for 1st task if CIFAR 100 split into 20 tasks)
         for class_data_index in task:
-            print("CONSTRUCTING INCREMENTAL CIFAR 100 DATASET {}".format(symbols[(symbol_index // 20) % len(symbols)]), end='\r')
+            print("CONSTRUCTING INCREMENTAL CIFAR 100 DATASET {}".format(symbols[(symbol_index // 100) % len(symbols)]), end='\r')
             symbol_index += 1
 
             for train_sample in train_data_org_by_class[class_data_index]:
@@ -342,7 +342,7 @@ def generate_cifar_tasks(args, kwargs):
         random.shuffle(task)
 
     for task in tasks_train:
-        print("CONSTRUCTING INCREMENTAL CIFAR 100 DATASET {}".format(symbols[(symbol_index // 20) % len(symbols)]), end='\r')
+        print("CONSTRUCTING INCREMENTAL CIFAR 100 DATASET {}".format(symbols[(symbol_index // 100) % len(symbols)]), end='\r')
         symbol_index += 1
 
         train_loader = task[:args.train_dataset_size]
@@ -382,7 +382,7 @@ def generate_cifar_tasks(args, kwargs):
         validation_loaders.append(batched_validation_loader)
 
     for task in tasks_test:
-        print("CONSTRUCTING INCREMENTAL CIFAR 100 DATASET {}".format(symbols[(symbol_index // 20) % len(symbols)]), end='\r')
+        print("CONSTRUCTING INCREMENTAL CIFAR 100 DATASET {}".format(symbols[(symbol_index // 100) % len(symbols)]), end='\r')
         symbol_index += 1
 
         batched_test_loader = []
