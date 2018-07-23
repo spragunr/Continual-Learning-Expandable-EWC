@@ -25,7 +25,7 @@ def parse_arguments():
     parser.add_argument('--test-batch-size', type=int, default=4, metavar='TBS',
                         help='input batch size for testing')
 
-    parser.add_argument('--epochs', type=int, default=2, metavar='E',
+    parser.add_argument('--epochs', type=int, default=5, metavar='E',
                         help='number of epochs to train')
 
     parser.add_argument('--lr', type=float, default=0.001, metavar='LR',
@@ -50,10 +50,10 @@ def parse_arguments():
                         help='how many batches to wait before logging training status (default 10)')
 
     # [train dataset size] = [full MNIST train set (60,000)] - [validation set size]
-    parser.add_argument('--train-dataset-size', type=int, default=50000, metavar='TDS',
+    parser.add_argument('--train-dataset-size', type=int, default=400, metavar='TDS',
                         help='number of images in the training dataset')
 
-    parser.add_argument('--validation-dataset-size', type=int, default=0, metavar='VDS',
+    parser.add_argument('--validation-dataset-size', type=int, default=100, metavar='VDS',
                         help='number of images in the validation dataset')
 
     # size of hidden layer in MLP in neurons OR initial number of filters in conv network
