@@ -289,11 +289,17 @@ def setup_h5_file(args, models):
         mode = "x" # throw an exception if the file already exists
 
         # file already exists - ask if we want to get rid of the old one
-        if path.is_file() and not args.overwrite:
+        if path.is_file():
 
-            if input("\nWOULD YOU LIKE TO ERASE OLD DATA FILE {}?[y/n]:  ".format(filename)).strip().lower() == "y":
+            if not args.overwrite:
 
-                mode = "w" # truncate and write over the file if it exists
+                if input("\nWOULD YOU LIKE TO ERASE OLD DATA FILE {}?[y/n]:  ".format(filename)).strip().lower() == "y":
+
+                    mode = "w" # truncate and write over the file if it exists
+
+            else:
+
+                mode = "w"
 
         f = h5py.File(filename, mode)
 
