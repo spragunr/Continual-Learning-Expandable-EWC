@@ -1,6 +1,7 @@
 import torch.nn as nn
 from copy import deepcopy
-
+from EWCMLP import EWCMLP
+from EWCCNN import EWCCNN
 
 class ExpandableModel(nn.Module):
 
@@ -101,6 +102,8 @@ class ExpandableModel(nn.Module):
                 model_sizes.append(self.size_dictionary.get(key))
 
         models = []
+
+        train_args = {'lam': self.lam} if isinstance(self, (EWCMLP, EWCCNN)) else {}
 
         # make a model of each size specified in model_sizes, add them to models list
         for hidden_size in model_sizes:
