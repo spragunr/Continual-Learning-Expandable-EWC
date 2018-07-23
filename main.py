@@ -65,11 +65,12 @@ def main():
 
         if not retrain_task:
 
-            if args.dataset == "cifar100": # todo change to "cifar"
+            if args.dataset == "cifar":
                 # train_loader = train_loaders[task_count - 1]
                 # validation_loader = validation_loaders[task_count - 1]
                 # test_loader = test_loaders[task_count - 1]
 
+                # todo remove- just for testing CNNs
                 train_loader, test_loader = utils.generate_1_cifar10_task(args)
 
             else:
