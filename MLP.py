@@ -2,6 +2,8 @@ from ExpandableModel import ExpandableModel
 import torch.nn as nn
 import scipy.stats as stats
 import torch
+from torch.autograd import Variable
+
 
 class MLP(ExpandableModel):
 

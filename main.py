@@ -65,7 +65,7 @@ def main():
 
         if not retrain_task:
 
-            if args.dataset == "cifar100":
+            if args.dataset == "cifar100": # todo change to "cifar"
                 # train_loader = train_loaders[task_count - 1]
                 # validation_loader = validation_loaders[task_count - 1]
                 # test_loader = test_loaders[task_count - 1]

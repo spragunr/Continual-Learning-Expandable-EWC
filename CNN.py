@@ -2,6 +2,8 @@ from ExpandableModel import ExpandableModel
 import torch.nn.functional as F
 import torch.nn as nn
 import torch
+from torch.autograd import Variable
+
 
 class CNN(ExpandableModel):
 
