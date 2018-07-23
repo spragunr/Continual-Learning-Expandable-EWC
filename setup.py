@@ -46,7 +46,7 @@ def parse_arguments():
     parser.add_argument('--seed', type=int, default=1, metavar='S',
                         help='seed for RNGs')
 
-    parser.add_argument('--log-interval', type=int, default=2000, metavar='N',
+    parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                         help='how many batches to wait before logging training status (default 10)')
 
     # [train dataset size] = [full MNIST train set (60,000)] - [validation set size]
@@ -82,7 +82,7 @@ def parse_arguments():
                         help='dataset on which to train/test model (cifar100 or mnist)')
 
     # number of tasks
-    parser.add_argument('--tasks', type=int, default=50, metavar='T',
+    parser.add_argument('--tasks', type=int, default=20, metavar='T',
                         help='number of tasks')
 
     parser.add_argument('--output-file', type=str, default='custom.h5', metavar='OUTPUT FILE',
