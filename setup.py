@@ -272,9 +272,7 @@ def setup_h5_file(args, models):
         f = h5py.File("{}_".format(type(model)) + args.output_file, "x")
         files.append(f)
 
-        metadata = f.create_dataset("metadata", (2,))
-        metadata[0] = type(model)
-        metadata[1] = vars(args)
+        metadata = f.create_dataset("metadata", (1,), data=vars(args))
 
         # NOTE: TO FACILITATE PARSING THERE IS A ZERO TACKED ONTO THE FRONT OF THIS LIST
         # [0, 0, 1, 0, 2, 0] would mean that the network had to expand 0 times before successfully learning the 1st task,
