@@ -85,7 +85,6 @@ def main():
             # need to test each network on the current task after training
             prev_test_loaders.append(test_loader)
 
-
         retrain_task = False
 
         for model_num, model in enumerate(models):
@@ -126,7 +125,13 @@ def main():
         for f in files:
             f.flush()
 
+
     for f in files:
+        print("|-----", f.name, "-----|")
+        print("METADATA:\n", f['metadata'])
+        print("FINAL TASK ACCURACIES:\n", f['task_acc'])
+        print("EXPANSIONS\n", f['expansions'])
+        print("AVERAGE ACCURACIES:\n", f['avg_acc'])
         f.close()
 
 if __name__ == '__main__':
