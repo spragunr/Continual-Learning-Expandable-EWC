@@ -26,17 +26,17 @@ class ExpandableModel(nn.Module):
 
     def forward(self, x):
 
-        raise NotImplementedError("forward() is not implemented in ExpandableModel")
+        raise NotImplementedError("forward() is not implemented in ExpandableModel\n")
 
     @classmethod
     def from_existing_model(cls, m, new_hidden_size):
 
-        raise NotImplementedError("from_existing_model() is not implemented in ExpandableModel")
+        raise NotImplementedError("from_existing_model() is not implemented in ExpandableModel\n")
 
     # kwargs contains validation_loader for EWC training (needed for Fisher estimation post-training)
     def train_model(self, args, train_loader, task_number, **kwargs):
 
-        raise NotImplementedError("train_model() is not implemented in ExpandableModel")
+        raise NotImplementedError("train_model() is not implemented in ExpandableModel\n")
 
     def initialize_module_list(self):
 
@@ -50,7 +50,7 @@ class ExpandableModel(nn.Module):
 
     def test(self, test_loaders, threshold, args):
 
-        raise NotImplementedError("test() is not implemented in ExpandableModel")
+        raise NotImplementedError("test() is not implemented in ExpandableModel\n")
 
     def update_size_dict(self, task_count):
 

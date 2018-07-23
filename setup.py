@@ -3,6 +3,11 @@ import torch
 import numpy as np
 import scipy as sp
 import random
+from VanillaMLP import VanillaMLP
+from VanillaCNN import VanillaCNN
+from EWCMLP import EWCMLP
+from EWCCNN import EWCCNN
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Variable Capacity Network for Continual Learning')
@@ -40,7 +45,10 @@ def parse_arguments():
         args_dict = vars(args)
 
         for k in args_dict.keys():
-            print("{:_<30}{:_>10}".format(k, args_dict.get(k)))
+            if k != 'nets':
+                print("{:_<30}{:_>30}".format(k, args_dict.get(k)))
+            else:
+                print("{:_<30}{:_>30}".format(k, ", ".join(args_dict.get(k))))
 
     elif args.experiment == 'cifar':
 
@@ -70,8 +78,10 @@ def parse_arguments():
         args_dict = vars(args)
 
         for k in args_dict.keys():
-            print("{:_<30}{:_>10}".format(k, args_dict.get(k)))
-
+            if k != 'nets':
+                print("{:_<30}{:_>30}".format(k, args_dict.get(k)))
+            else:
+                print("{:_<30}{:_>30}".format(k, ", ".join(args_dict.get(k))))
     else:
         print('|-----[CUSTOM EXPERIMENT- DEFAULT HYPERPARAMETERS USED WHERE NOT SPECIFIED]-----|')
 
@@ -141,7 +151,7 @@ def parse_arguments():
         parser.add_argument('--tasks', type=int, default=50, metavar='T',
                             help='number of tasks')
 
-        parser.add_argument('--nets', type=[str], default=['EWCMLP', 'VanillaMLP'], metavar='NETS',
+        parser.add_argument('--nets', nargs='+', default=['EWCMLP', 'VanillaMLP'], metavar='NETS',
                             help='neural net classes to train')
 
         args = parser.parse_args()
@@ -151,7 +161,10 @@ def parse_arguments():
         args_dict = vars(args)
 
         for k in args_dict.keys():
-            print("{:_<30}{:_>10}".format(k, args_dict.get(k)))
+            if k != 'nets':
+                print("{:_<30}{:_>30}".format(k, args_dict.get(k)))
+            else:
+                print("{:_<30}{:_>30}".format(k, ", ".join(args_dict.get(k))))
 
     return args
 
@@ -190,32 +203,53 @@ def set_gpu_options(args):
 
 def build_models(args, device):
 
+    models = []
 
-    # Instantiate a model that will be trained using only vanilla SGD (no regularization).
-    #
-    # .to(device):
-    #   Move all parameters and buffers in the module Net to device (CPU or GPU- set above).
-    #   Both integral and floating point values are moved.
-    no_reg_model = NoRegModel(
-        args.hidden_size,
-        args.input_size,
-        args.output_size,
-        device,
-        args.dataset
-    ).to(device)
+    for net in args.nets:
 
-    # Instantiate a model that will be trained using EWC.
-    #
-    # .to(device):
-    #   Move all parameters and buffers in the module Net to device (CPU or GPU- set above).
-    #   Both integral and floating point values are moved.
-    ewc_model = EWCModel(
-        args.hidden_size,
-        args.input_size,
-        args.output_size,
-        device,
-        args.dataset,
-        lam=args.lam  # the lambda (fisher multiplier) value to be used in the EWC loss formula
-    ).to(device)
+        if net == "VanillaMLP":
 
-    return [no_reg_model] # todo change back to [no_reg_model, ewc_model]
+            models.append(VanillaMLP(
+                args.hidden_size,
+                args.input_size,
+                args.output_size,
+                device,
+            ).to(device))
+
+        elif net == "VanillaCNN":
+
+            models.append(VanillaCNN(
+                args.hidden_size,
+                args.input_size,
+                args.output_size,
+                device,
+            ).to(device))
+
+        elif net == "EWCMLP":
+
+            models.append(
+                EWCMLP(
+                    args.hidden_size,
+                    args.input_size,
+                    args.output_size,
+                    device,
+                    lam=args.lam  # the lambda (fisher multiplier) value to be used in the EWC loss formula
+                ).to(device))
+
+        elif net == "EWCCNN":
+
+            models.append(
+                EWCCNN(
+                    args.hidden_size,
+                    args.input_size,
+                    args.output_size,
+                    device,
+                    lam=args.lam  # the lambda (fisher multiplier) value to be used in the EWC loss formula
+                ).to(device))
+
+        else:
+            raise TypeError("Invalid Neural Network Type Specified: {}\n".format(net))
+
+    print(models)
+    exit()
+    return models
