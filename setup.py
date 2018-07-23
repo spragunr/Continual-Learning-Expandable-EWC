@@ -91,7 +91,7 @@ def parse_arguments():
     parser.add_argument('--overwrite', action='store_true', default=False,
                         help='overwrite old result data files without asking (will prompt otherwise)')
 
-    parser.add_argument('--nets', nargs='+', type=str, default=['VanillaCNN'], metavar='NETS',
+    parser.add_argument('--nets', nargs='+', type=str, default=['EWCCNN'], metavar='NETS',
                         help='neural net classes to train')
 
     args = parser.parse_args()

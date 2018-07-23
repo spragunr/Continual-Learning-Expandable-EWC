@@ -404,7 +404,7 @@ def generate_cifar_tasks(args, kwargs):
 
         test_loaders.append(batched_test_loader)
 
-    print("DATASET CONSTRUCTION COMPLETE")
+    print("\nDATASET CONSTRUCTION COMPLETE")
     return train_loaders, validation_loaders, test_loaders
 
 
