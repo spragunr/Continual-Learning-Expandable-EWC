@@ -28,7 +28,8 @@ class VanillaCNN(CNN):
         # This is necessary because some network layers behave differently when training vs testing.
         # Dropout, for example, is used to zero/mask certain weights during TRAINING to prevent overfitting.
         # However, during TESTING (e.g. model.eval()) we do not want this to happen.
-        self.train()
+        # todo uncomment this later ?
+        #self.train()
 
         # Set the optimization algorithm for the model- in this case, Stochastic Gradient Descent with/without
         # momentum (depends on the value of args.momentum- default is 0.0, so no momentum by default).
@@ -73,7 +74,7 @@ class VanillaCNN(CNN):
             #
             # SOURCE:
             # https://discuss.pytorch.org/t/why-does-the-minimal-pytorch-tutorial-not-have-mnist-images-be-onehot-for-logistic-regression/12562/6
-            for batch_idx, (data, target) in enumerate(train_loader):
+            for batch_idx, (data, target) in enumerate(train_loader, 0):
 
                 # The data needs to be wrapped in another tensor to work with our network,
                 # otherwise it is not of the appropriate dimensions... I believe these two statements effectively add
