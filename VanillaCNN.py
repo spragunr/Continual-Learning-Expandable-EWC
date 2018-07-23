@@ -96,6 +96,8 @@ class VanillaCNN(CNN):
 
                 # todo see if removing this helps with loss spikes
                 #data, target = Variable(data).to(self.device), Variable(target).to(self.device)
+                data, target = data.to(self.device), target.to(self.device)
+
 
                 # Gradients are automatically accumulated- therefore, they need to be zeroed out before the next backward
                 # pass through the network so that they are replaced by newly computed gradients at later training iterations,
