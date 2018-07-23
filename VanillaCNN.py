@@ -51,6 +51,7 @@ class VanillaCNN(CNN):
         optimizer = optim.SGD(self.parameters(), lr=args.lr, momentum=args.momentum) # can use filter and requires_grad=False to freeze part of the network...
         #optimizer = optim.Adadelta(self.parameters())
 
+        running_loss =0.0
 
         for epoch in range(1, args.epochs + 1):
             # Enumerate will keep an automatic loop counter and store it in batch_idx.
@@ -137,9 +138,11 @@ class VanillaCNN(CNN):
                 #               param -= learning_rate * param.grad
                 optimizer.step()
 
+                running_loss += loss.item()
+
                 # Each time the batch index is a multiple of the specified progress display interval (args.log_interval),
                 # print a message indicating progress AND which network (model) is reporting values.
-                if batch_idx % args.log_interval == 0:
+                if batch_idx % args.log_interval == args.log_interval - 1:
                     print('{} Task: {} Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                                                                                     'NoReg',
                                                                                     task_number,
@@ -147,8 +150,9 @@ class VanillaCNN(CNN):
                                                                                     batch_idx * len(data),
                                                                                     args.train_dataset_size,
                                                                                     100. * batch_idx / len(train_loader),
-                                                                                    loss.item()
+                                                                                    running_loss / args.log_interval
                                                                                     ))
+                    running_loss = 0.0
 
 
         # update the model size dictionary
