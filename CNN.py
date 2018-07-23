@@ -154,9 +154,6 @@ class CNN(ExpandableModel):
                     # fewer dimension than input.
                     pred = output.max(1, keepdim=True)[1]
 
-
-                    print("PREDICTIONS: {} TARGETS:{}".format(pred, target))
-
                     # Check if predictions are correct, and if so add one to the total number of correct predictions across the
                     # entire testing set for each correct prediction.
                     #
