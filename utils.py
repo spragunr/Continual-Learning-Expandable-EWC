@@ -131,7 +131,7 @@ def output_tensorboard_graph(args, models, task_count):
 def expand(models, args):
 
     # output expansion notification to terminal
-    print("|-----[EXPANDING MODEL AND RETRAINING LAST TASK]-----|")
+    print("|-----[EXPANDING MODEL AND RETRAINING LAST TASK]-----|\n")
 
     expanded_models = []
 
