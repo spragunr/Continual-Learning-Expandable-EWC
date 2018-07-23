@@ -253,7 +253,8 @@ def generate_cifar_tasks(args, kwargs):
 
     transformations = transforms.Compose(
         [transforms.ToTensor(),
-         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+         transforms.Lambda(lambda x: x.view(x.size(0), -1) / 255.0)
+         ])
 
     # Split the PyTorch MNIST training dataset into training and validation datasets, and transform the data.
     #

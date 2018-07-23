@@ -19,16 +19,16 @@ def parse_arguments():
     parser.add_argument('--experiment', type=str, default='custom', metavar='EXPERIMENT',
                         help='preconfigured experiment to run: mnist or cifar (defaults to custom)')
 
-    parser.add_argument('--batch-size', type=int, default=4, metavar='BS',
+    parser.add_argument('--batch-size', type=int, default=10, metavar='BS',
                         help='input batch size for training')
 
-    parser.add_argument('--test-batch-size', type=int, default=4, metavar='TBS',
+    parser.add_argument('--test-batch-size', type=int, default=10, metavar='TBS',
                         help='input batch size for testing')
 
-    parser.add_argument('--epochs', type=int, default=5, metavar='E',
+    parser.add_argument('--epochs', type=int, default=1, metavar='E',
                         help='number of epochs to train')
 
-    parser.add_argument('--lr', type=float, default=0.001, metavar='LR',
+    parser.add_argument('--lr', type=float, default=1e-3, metavar='LR',
                         help='learning rate')
 
     parser.add_argument('--l2-reg-penalty', type=float, default=0.0, metavar='L2',
@@ -37,13 +37,13 @@ def parse_arguments():
     parser.add_argument('--lam', type=float, default=5000, metavar='LAM',
                         help='ewc lambda value (fisher multiplier) (default: 15)')
 
-    parser.add_argument('--momentum', type=float, default=0.9, metavar='M',
+    parser.add_argument('--momentum', type=float, default=0.0, metavar='M',
                         help='SGD momentum (default: 0.0)')
 
     parser.add_argument('--no-cuda', action='store_true', default=False,
                         help='disables CUDA training')
 
-    parser.add_argument('--seed', type=int, default=1, metavar='S',
+    parser.add_argument('--seed', type=int, default=0, metavar='S',
                         help='seed for RNGs')
 
     parser.add_argument('--log-interval', type=int, default=10, metavar='N',
@@ -57,7 +57,7 @@ def parse_arguments():
                         help='number of images in the validation dataset')
 
     # size of hidden layer in MLP in neurons OR initial number of filters in conv network
-    parser.add_argument('--hidden-size', type=int, default=0, metavar='HS',
+    parser.add_argument('--hidden-size', type=int, default=20, metavar='HS',
                         help='# neurons in each hidden layer of MLP OR # filters in conv resnet')
 
     # 28 x 28 pixels = 784 pixels per MNIST image, 32 x 32 = 1024 for CIFAR 10
