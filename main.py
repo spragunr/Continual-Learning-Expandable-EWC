@@ -57,10 +57,7 @@ def main():
 
     retrain_task = False
 
-    f, expansions, avg_acc, task_acc = setup.setup_h5_file(args, models)
-
-    test_results = []
-
+    files, expansions, avg_acc, task_acc = setup.setup_h5_file(args, models)
 
     while(task_count < args.tasks + 1):
 
@@ -91,7 +88,7 @@ def main():
 
         retrain_task = False
 
-        for model in models:
+        for model_num, model in enumerate(models):
             train_args = {'validation_loader': validation_loader} if isinstance(model, (EWCMLP, EWCCNN)) else {}
 
             # for each desired epoch, train the model on the latest task
@@ -101,6 +98,7 @@ def main():
 
             # test the model on ALL tasks trained thus far (including current task)
             test_results = model.test(prev_test_loaders, threshold, args)
+            task_acc[model_num][:len(test_results)] = np.array(test_results)[...]
 
             if test_results == -1:
                 retrain_task = True
@@ -112,19 +110,24 @@ def main():
                 model.reset(task_count - 1)
 
             models = utils.expand(models, args)
-            expansions[task_count] += 1
+
+            for model_num in range(len(models)):
+                expansions[model_num][task_count] += 1
+
             #utils.output_tensorboard_graph(args, models, task_count + 1)
 
         else:
-            avg_acc[task_count] = sum(test_results) / len(test_results)
+            for model_num in range(len(models)):
+                avg_acc[model_num][task_count] = sum(task_acc[model_num]) / len(task_acc[model_num])
 
             # increment the number of the current task before re-entering while loop
             task_count += 1
 
-    task_acc[...] = np.array(test_results)[...]
+        for f in files:
+            f.flush()
 
-    f.flush()
-    f.close()
+    for f in files:
+        f.close()
 
 if __name__ == '__main__':
     main()
