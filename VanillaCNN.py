@@ -142,7 +142,7 @@ class VanillaCNN(CNN):
 
                 # Each time the batch index is a multiple of the specified progress display interval (args.log_interval),
                 # print a message indicating progress AND which network (model) is reporting values.
-                if batch_idx % args.log_interval == args.log_interval - 1:
+                if batch_idx % args.log_interval == 0:
                     print('{} Task: {} Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                                                                                     'NoReg',
                                                                                     task_number,
