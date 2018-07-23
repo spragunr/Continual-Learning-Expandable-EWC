@@ -65,7 +65,7 @@ class MLP(ExpandableModel):
 
     def test(self, test_loaders, threshold, args):
 
-        test_accuracies = []
+        test_accuracies = [0]
 
         # generate a dictionary mapping tasks to models of the sizes that the network was when those tasks were
         # trained, containing subsets of the weights currently in the model (to mask new, post-expansion weights

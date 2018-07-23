@@ -119,7 +119,7 @@ def main():
 
         else:
             for model_num in range(len(models)):
-                avg_acc[model_num][task_count] = sum(task_acc[model_num]) / len(task_acc[model_num])
+                avg_acc[model_num][task_count] = sum(task_acc[model_num]) / task_count
 
             # increment the number of the current task before re-entering while loop
             task_count += 1
