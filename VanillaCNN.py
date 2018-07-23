@@ -3,6 +3,7 @@ import torch.optim as optim
 from torch.autograd import Variable
 from copy import deepcopy
 from CNN import CNN
+import torch.nn as nn
 
 class VanillaCNN(CNN):
     def __init__(self, hidden_size, input_size, output_size, device):
@@ -30,6 +31,9 @@ class VanillaCNN(CNN):
         # However, during TESTING (e.g. model.eval()) we do not want this to happen.
         self.train()
 
+        # todo remove this?
+        criterion = nn.CrossEntropyLoss()
+
         # Set the optimization algorithm for the model- in this case, Stochastic Gradient Descent with/without
         # momentum (depends on the value of args.momentum- default is 0.0, so no momentum by default).
         #
@@ -51,7 +55,7 @@ class VanillaCNN(CNN):
         optimizer = optim.SGD(self.parameters(), lr=args.lr, momentum=args.momentum) # can use filter and requires_grad=False to freeze part of the network...
         #optimizer = optim.Adadelta(self.parameters())
 
-        running_loss =0.0
+        running_loss = 0.0
 
         for epoch in range(1, args.epochs + 1):
             # Enumerate will keep an automatic loop counter and store it in batch_idx.
@@ -122,7 +126,7 @@ class VanillaCNN(CNN):
                 #
                 # NOTE: torch.nn.CrossEntropyLoss combines torch.nn.LogSoftmax() and torch.nn.NLLLoss() in one single class.
                 # apply the loss function to the predictions/labels for this batch to compute loss
-                loss = F.cross_entropy(output, target)
+                loss = criterion(output, target)
 
                 # Backward pass: compute gradient of the loss with respect to model
                 # parameters
