@@ -136,7 +136,7 @@ def parse_arguments():
                             help='size of each input data sampe to the network (default 784 (28 * 28))')
 
         # 10 classes - digits 0-9 for MNIST, 100 for CIFAR 100
-        parser.add_argument('--output-size', type=int, default=100, metavar='OS',
+        parser.add_argument('--output-size', type=int, default=10, metavar='OS',
                             help='size of the output of the network (default 10)')
 
         # e.g. 2 to double the size of the network when expansion occurs

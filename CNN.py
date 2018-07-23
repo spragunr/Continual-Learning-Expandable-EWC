@@ -92,7 +92,7 @@ class CNN(ExpandableModel):
                     #   https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/utils.py#L75
 
                     # todo maybe remove this from CNN
-                    data = data.view(args.test_batch_size, -1)
+                    # data = data.view(args.test_batch_size, -1)
 
                     # wrap data and target in variables- again, from the following experiment:
                     #   https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/utils.py#L76

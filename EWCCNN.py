@@ -207,7 +207,7 @@ class EWCCNN(CNN):
                 data_size = len(data)
 
                 # todo remove this for CNN ?
-                data = data.view(data_size, -1)
+                # data = data.view(data_size, -1)
 
                 # wrap data and target in variables- again, from the following experiment:
                 #   https://github.com/kuc2477/pytorch-ewc/blob/4a75734ef091e91a83ce82cab8b272be61af3ab6/train.py#L50
