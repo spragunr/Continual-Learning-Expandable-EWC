@@ -7,6 +7,8 @@ from VanillaMLP import VanillaMLP
 from VanillaCNN import VanillaCNN
 from EWCMLP import EWCMLP
 from EWCCNN import EWCCNN
+import h5py
+
 
 
 def parse_arguments():
@@ -250,6 +252,26 @@ def build_models(args, device):
         else:
             raise TypeError("Invalid Neural Network Type Specified: {}\n".format(net))
 
-    print(models)
-    exit()
     return models
+
+
+def setup_h5_files(args):
+
+    f = h5py.File(args.output_file, "w")
+
+    # NOTE: TO FACILITATE PARSING THERE IS A ZERO TACKED ONTO THE FRONT OF THIS LIST
+    # [0, 0, 1, 0, 2, 0] would mean that the network had to expand 0 times before successfully learning the 1st task,
+    # once before successfully learning the 2nd task, 0 MORE times before learning the 3rd task, twice MORE before
+    # successfully learning the 4th task (total of 3 expansions now) and 0 MORE times before successfully learning
+    # the 5th task
+    expansions = f.create_dataset("expansions", (args.tasks + 1,),
+                                              dtype='i')
+
+    # NOTE: TO FACILITATE PARSING THERE IS A ZERO TACKED ONTO THE FRONT OF THIS LIST
+    # avg accuracy on all tasks as new tasks are added
+    avg_acc = f.create_dataset("avg_acc_on_all_tasks", (args.tasks + 1,),
+                                            dtype='f')
+
+    # NOTE: TO FACILITATE PARSING THERE IS A ZERO TACKED ONTO THE FRONT OF THIS LIST
+    # final post-training accuracy on each individual task
+    task_accs = f.create_dataset("final_task_accs", (len(test_results),), dtype='f')

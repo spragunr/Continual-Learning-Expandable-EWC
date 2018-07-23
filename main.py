@@ -6,7 +6,6 @@ from EWCMLP import EWCMLP
 from VanillaMLP import VanillaMLP
 from VanillaCNN import VanillaCNN
 import numpy as np
-
 import h5py
 
 def main():
@@ -58,12 +57,12 @@ def main():
 
     retrain_task = False
 
+    setup.setup_h5_files()
+
     ### EVALUATION METRICS ###
-    f = h5py.File("55tasks_lam150_50hidden_1layer_no_expansion.hdf5", "w")
 
     test_results = []
-    expansion_before_tasks = f.create_dataset("expansion_before_tasks", (args.tasks + 1,), dtype='i') # list of task numbers before which the network needed to expand
-    avg_acc_on_all_tasks = f.create_dataset("avg_acc_on_all_tasks", (args.tasks + 1,), dtype='f') # avg accuracy on all tasks as new tasks are added
+
 
     expansion_before_tasks[...] = np.zeros(len(expansion_before_tasks))
     avg_acc_on_all_tasks[...] = np.zeros(len(avg_acc_on_all_tasks))
@@ -127,7 +126,6 @@ def main():
             # increment the number of the current task before re-entering while loop
             task_count += 1
 
-    final_task_accs = f.create_dataset("final_task_accs", (len(test_results),), dtype='f')  # accuracy on each task after training
     final_task_accs[...] = np.array(test_results)[...]
 
     f.flush()

@@ -423,6 +423,7 @@ def define_cifar100_labels():
     ]
 
 def generate_1_cifar10_task(args):
+
     transform = transforms.Compose(
         [transforms.ToTensor(),
          transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
@@ -438,3 +439,4 @@ def generate_1_cifar10_task(args):
                                              shuffle=False, num_workers=1)
 
     return trainloader, testloader
+
