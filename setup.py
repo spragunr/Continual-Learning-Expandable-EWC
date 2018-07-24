@@ -147,7 +147,7 @@ def parse_arguments():
         args.hidden_size = 20 # todo do something with this...
         args.validation_dataset_size = 0 # in THIS case, this is the validation data from each individual CLASS
         args.input_size = 1024
-        args.output_size = 100
+        args.output_size = 10
         args.scale_factor = 2
         args.accuracy_threshold = 0 # todo figure out what this should be...
         args.dataset = 'cifar'
