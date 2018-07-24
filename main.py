@@ -53,8 +53,8 @@ def main():
 
     files, expansions, avg_acc, task_acc = setup.setup_h5_file(args, models)
 
-    if args.dataset == "cifar":
-        train_loaders, validation_loaders, test_loaders = utils.generate_cifar_tasks(args, kwargs)
+    # if args.dataset == "cifar":
+    #     train_loaders, validation_loaders, test_loaders = utils.generate_cifar_tasks(args, kwargs)
 
     while task_count < (args.tasks + 1) :
 
@@ -63,12 +63,12 @@ def main():
         if not retrain_task:
 
             if args.dataset == "cifar":
-                train_loader = train_loaders[task_count - 1]
-                validation_loader = validation_loaders[task_count - 1]
-                test_loader = test_loaders[task_count - 1]
+                # train_loader = train_loaders[task_count - 1]
+                # validation_loader = validation_loaders[task_count - 1]
+                # test_loader = test_loaders[task_count - 1]
 
                 # todo remove- just for testing CNNs
-                #train_loader, test_loader = utils.generate_1_cifar10_task(args)
+                train_loader, test_loader = utils.generate_1_cifar10_task(args)
 
             else:
                 # get the DataLoaders for the training, validation, and testing data

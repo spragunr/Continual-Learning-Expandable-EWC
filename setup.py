@@ -50,10 +50,10 @@ def parse_arguments():
                         help='how many batches to wait before logging training status (default 10)')
 
     # [train dataset size] = [full MNIST train set (60,000)] - [validation set size]
-    parser.add_argument('--train-dataset-size', type=int, default=400, metavar='TDS',
+    parser.add_argument('--train-dataset-size', type=int, default=500, metavar='TDS',
                         help='number of images in the training dataset')
 
-    parser.add_argument('--validation-dataset-size', type=int, default=100, metavar='VDS',
+    parser.add_argument('--validation-dataset-size', type=int, default=0, metavar='VDS',
                         help='number of images in the validation dataset')
 
     # size of hidden layer in MLP in neurons OR initial number of filters in conv network
@@ -91,7 +91,7 @@ def parse_arguments():
     parser.add_argument('--overwrite', action='store_true', default=False,
                         help='overwrite old result data files without asking (will prompt otherwise)')
 
-    parser.add_argument('--nets', nargs='+', type=str, default=['EWCCNN'], metavar='NETS',
+    parser.add_argument('--nets', nargs='+', type=str, default=['VanillaCNN'], metavar='NETS',
                         help='neural net classes to train')
 
     args = parser.parse_args()
