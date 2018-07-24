@@ -143,9 +143,9 @@ def parse_arguments():
         args.momentum = 0.9
         args.no_cuda = False
         args.seed = 1
-        args.log_interval = 10
-        args.hidden_size = 50 # todo do something with this...
-        args.validation_dataset_size = 100 # in THIS case, this is the validation data from each individual CLASS
+        args.log_interval = 2000
+        args.hidden_size = 20 # todo do something with this...
+        args.validation_dataset_size = 0 # in THIS case, this is the validation data from each individual CLASS
         args.input_size = 1024
         args.output_size = 100
         args.scale_factor = 2
@@ -153,7 +153,7 @@ def parse_arguments():
         args.dataset = 'cifar'
         args.tasks = 20
         args.output_file = 'increm_cifar.h5'
-        args.nets = ['EWCCNN']
+        args.nets = ['VanillaCNN']
 
         # per-class train dataset size * classes per task
         args.train_dataset_size = (500 - args.validation_dataset_size) * (100 // args.tasks)
