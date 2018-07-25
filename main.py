@@ -68,7 +68,19 @@ def main():
                 # test_loader = test_loaders[task_count - 1]
 
                 # todo remove- just for testing CNNs
-                train_loader, test_loader = utils.generate_1_cifar10_task(args)
+                #train_loader, test_loader = utils.generate_1_cifar10_task(args)
+
+                utils.build_iCIFAR(args)
+                x_tr, x_te, n_inputs, n_outputs, n_tasks = utils.load_iCIFAR(args)
+
+                print("TRAINING DATA", x_tr.size())
+                print("TESTING DATA", x_te.size())
+                print("INPUTS", n_inputs)
+                print("OUTPUTS", n_outputs)
+                print("TASKS", n_tasks)
+
+                exit()
+
 
             else:
                 # get the DataLoaders for the training, validation, and testing data
