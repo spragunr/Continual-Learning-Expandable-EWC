@@ -73,8 +73,8 @@ def main():
                 utils.build_iCIFAR(args)
                 x_tr, x_te, n_inputs, n_outputs, n_tasks = utils.load_iCIFAR(args)
 
-                print("TRAINING DATA", x_tr.size())
-                print("TESTING DATA", x_te.size())
+                print("TRAINING DATA", torch.Tensor(x_tr).size())
+                print("TESTING DATA", torch.Tensor(x_te).size())
                 print("INPUTS", n_inputs)
                 print("OUTPUTS", n_outputs)
                 print("TASKS", n_tasks)
