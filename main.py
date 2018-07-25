@@ -87,7 +87,7 @@ def main():
 
                 (x, t, y) = next(continuum)
 
-                print(x)
+                print(x.size())
                 print(t)
                 print(y)
 
