@@ -459,7 +459,7 @@ def generate_1_cifar10_task(args):
 
 
 def load_iCIFAR(args):
-    d_tr, d_te = torch.load('data/cifar100.pt')
+    d_tr, d_te = torch.load('data/processed/cifar100.pt')
     n_inputs = d_tr[0][1].size(1)
     n_outputs = 0
     for i in range(len(d_tr)):
