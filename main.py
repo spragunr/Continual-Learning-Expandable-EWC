@@ -85,7 +85,7 @@ def main():
 
                 continuum = Continuum(x_tr, args)
 
-                (x, t, y) = next(continuum)
+                (x, t, y) = next(continuum) # this is how to get the needed data out of a continuum object...
 
                 print(x.size())
                 print(t)
