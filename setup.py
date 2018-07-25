@@ -156,7 +156,7 @@ def parse_arguments():
         args.scale_factor = 2
         args.accuracy_threshold = 0 # todo figure out what this should be...
         args.dataset = 'cifar'
-        args.tasks = 20
+        args.tasks = 10
         args.output_file = 'increm_cifar.h5'
         args.nets = ['VanillaCNN']
 
