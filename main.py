@@ -73,8 +73,8 @@ def main():
                 utils.build_iCIFAR(args)
                 x_tr, x_te, n_inputs, n_outputs, n_tasks = utils.load_iCIFAR(args)
 
-                print("TRAINING DATA", np.shape(x_tr[1][0]))
-                print(x_tr[1][0])
+                print("TRAINING DATA", np.shape(x_tr[0][0]))
+                print(x_tr[0][0])
                 print("TRAINING DATA", np.shape(x_tr[1][1]))
                 print("TRAINING DATA", np.shape(x_tr[1][2]))
                 print("TESTING DATA", np.shape(x_te[1]))
