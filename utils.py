@@ -523,7 +523,7 @@ def build_iCIFAR(args):
 
     processed_prefix = './data/processed/'
 
-    if not os.path.exists(prefix):
-        os.makedirs(prefix)
+    if not os.path.exists(processed_prefix):
+        os.makedirs(processed_prefix)
 
     torch.save([tasks_tr, tasks_te], processed_prefix + 'cifar100.pt')
