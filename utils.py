@@ -471,42 +471,43 @@ def load_iCIFAR(args):
 def build_iCIFAR(args):
     ########## DOWNLOAD AND FORMAT DATA ##########
 
-    if not os.path.exists('./data/raw'):
-        os.makedirs('./data/raw')
+    prefix = './data/raw/'
 
-    subprocess.call("cd data/raw", shell=True)
+    if not os.path.exists(prefix):
+        os.makedirs(prefix)
 
-    cifar_path = "cifar-100-python.tar.gz"
+    cifar_name = "cifar-100-python.tar.gz"
+
+    cifar_path = prefix + cifar_name
 
     # URL from: https://www.cs.toronto.edu/~kriz/cifar.html
     if not os.path.exists(cifar_path):
-        subprocess.call("wget https://www.cs.toronto.edu/~kriz/cifar-100-python.tar.gz", shell=True)
+        subprocess.call("wget -O {} https://www.cs.toronto.edu/~kriz/cifar-100-python.tar.gz".format(
+            cifar_path), shell=True)
 
-    subprocess.call("tar xzfv cifar-100-python.tar.gz", shell=True)
+    subprocess.call("tar xzfv {} -C {}".format(cifar_path, prefix), shell=True)
 
     def unpickle(file):
         with open(file, 'rb') as fo:
             dict = pickle.load(fo, encoding='bytes')
         return dict
 
-    cifar100_train = unpickle('cifar-100-python/train')
-    cifar100_test = unpickle('cifar-100-python/test')
+    cifar100_train = unpickle(prefix + 'cifar-100-python/train')
+    cifar100_test = unpickle(prefix + 'cifar-100-python/test')
 
     x_tr = torch.from_numpy(cifar100_train[b'data'])
     y_tr = torch.LongTensor(cifar100_train[b'fine_labels'])
     x_te = torch.from_numpy(cifar100_test[b'data'])
     y_te = torch.LongTensor(cifar100_test[b'fine_labels'])
 
-    torch.save((x_tr, y_tr, x_te, y_te), 'cifar100.pt')
+    torch.save((x_tr, y_tr, x_te, y_te), prefix + 'cifar100.pt')
 
     ######### SPLIT DATA INTO INCREMENTAL TASKS ##########
-
-    subprocess.call("cd ..", shell=True)
 
     tasks_tr = []
     tasks_te = []
 
-    x_tr, y_tr, x_te, y_te = torch.load(os.path.join('./raw/cifar100.pt'))
+    x_tr, y_tr, x_te, y_te = torch.load(prefix + 'cifar100.pt')
     x_tr = x_tr.float().view(x_tr.size(0), -1) / 255.0
     x_te = x_te.float().view(x_te.size(0), -1) / 255.0
 
@@ -520,4 +521,9 @@ def build_iCIFAR(args):
         tasks_tr.append([(c1, c2), x_tr[i_tr].clone(), y_tr[i_tr].clone()])
         tasks_te.append([(c1, c2), x_te[i_te].clone(), y_te[i_te].clone()])
 
-    torch.save([tasks_tr, tasks_te], 'cifar100.pt')
+    processed_prefix = './data/processed/'
+
+    if not os.path.exists(prefix):
+        os.makedirs(prefix)
+
+    torch.save([tasks_tr, tasks_te], processed_prefix + 'cifar100.pt')
