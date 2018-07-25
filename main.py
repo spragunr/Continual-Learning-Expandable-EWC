@@ -7,6 +7,7 @@ from VanillaMLP import VanillaMLP
 from VanillaCNN import VanillaCNN
 import numpy as np
 import h5py
+from Continuum import Continuum
 
 def main():
 
@@ -82,10 +83,18 @@ def main():
                 print("OUTPUTS", n_outputs)
                 print("TASKS", n_tasks)
 
+                continuum = Continuum(x_tr, args)
+
+                (x, t, y) = next(continuum)
+
+                print(x)
+                print(t)
+                print(y)
+
                 exit()
 
 
-            else:
+            else:# todo add this to the arg parser
                 # get the DataLoaders for the training, validation, and testing data
                 train_loader, validation_loader, test_loader = utils.generate_new_mnist_task(args, kwargs,
                     first_task=(task_count == 1)
