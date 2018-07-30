@@ -91,7 +91,7 @@ def main():
                 print(t)
                 print(y)
 
-                exit()
+                exit() # this is as far as we got with the facebook dataset...
 
 
             else:# todo add this to the arg parser
