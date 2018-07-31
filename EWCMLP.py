@@ -432,8 +432,9 @@ class EWCMLP(MLP):
 
         for parameter_index, parameter in enumerate(params.keys()):
 
-            print(parameter)
+            print(params.get(parameter), parameter_index)
+
             if parameter != 'modulelist.{}.weight'.format(len(self.modulelist) - 1) and \
                 parameter != 'modulelist.{}.biases'.format(len(self.modulelist) - 1):
 
-                params.get(parameter).grad /= 1 #torch.clamp(self.sum_Fx[parameter_index] * self.lam, min = 1)
+                params.get(parameter).grad /= torch.clamp(self.sum_Fx[parameter_index] * self.lam, min = 1)
