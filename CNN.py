@@ -14,6 +14,7 @@ class CNN(ExpandableModel):
         self.build()
 
         # todo use XAVIER 10 method for weight initialization
+        self.apply(self.init_weights_xavier)
 
     def forward(self, x):
 

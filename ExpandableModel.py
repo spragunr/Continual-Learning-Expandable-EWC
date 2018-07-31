@@ -1,4 +1,6 @@
 import torch.nn as nn
+import torch
+from scipy import stats
 from copy import deepcopy
 
 class ExpandableModel(nn.Module):
@@ -31,6 +33,40 @@ class ExpandableModel(nn.Module):
     def from_existing_model(cls, m, new_hidden_size):
 
         raise NotImplementedError("from_existing_model() is not implemented in ExpandableModel\n")
+
+    # initialize weights in the network in the same manner as in:
+    # https://github.com/ariseff/overcoming-catastrophic/blob/afea2d3c9f926d4168cc51d56f1e9a92989d7af0/model.py#L7
+    @staticmethod
+    def init_weights_trunc_norm(m):
+
+        # This function is intended to mimic the behavior of TensorFlow's tf.truncated_normal(), returning
+        # a tensor of the specified shape containing values sampled from a truncated normal distribution with the
+        # specified mean and standard deviation. Sampled values which fall outside of the range of +/- 2 standard deviations
+        # from the mean are dropped and re-picked.
+        def trunc_normal_weights(shape, mean=0.0, stdev=0.1):
+
+            num_samples = 1
+
+            for dim in list(shape):
+                num_samples *= dim
+
+            a, b = ((mean - 2 * stdev) - mean) / stdev, ((mean + 2 * stdev) - mean) / stdev
+
+            samples = stats.truncnorm.rvs(a, b, scale=stdev, loc=mean, size=num_samples)
+
+            return torch.Tensor(samples.reshape(tuple(shape)))
+
+        if type(m) == nn.Linear:
+            m.weight.data.copy_(trunc_normal_weights(m.weight.size()))
+            if m.bias is not None:
+                m.bias.data.fill_(0.1)
+
+    @staticmethod
+    def init_weights_xavier(m):
+        if type(m) == nn.Linear:
+            nn.init.xavier_uniform(m.weight)
+            if m.bias is not None:
+                m.bias.data.fill_(0.1)
 
     # kwargs contains validation_loader for EWC training (needed for Fisher estimation post-training)
     def train_model(self, args, train_loader, task_number, **kwargs):
