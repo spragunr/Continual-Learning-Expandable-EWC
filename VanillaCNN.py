@@ -53,6 +53,7 @@ class VanillaCNN(CNN):
 
 
         for epoch in range(1, args.epochs + 1):
+
             running_loss = 0.0
 
             # Enumerate will keep an automatic loop counter and store it in batch_idx.
