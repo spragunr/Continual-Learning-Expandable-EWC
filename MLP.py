@@ -81,6 +81,8 @@ class MLP(ExpandableModel):
             # weights which should not be taken into consideration)
             model = models.get(task_number + 1)
 
+            model.refresh_output_weights() # todo this should just print a dict for now
+
             # Set the module in "evaluation mode"
             # This is necessary because some network layers behave differently when training vs testing.
             # Dropout, for example, is used to zero/mask certain weights during TRAINING (e.g. model.train())
