@@ -432,6 +432,7 @@ class EWCMLP(MLP):
 
         for parameter_index, parameter in enumerate(params.keys()):
 
+            print(parameter)
             if parameter != 'modulelist.{}.weight'.format(len(self.modulelist) - 1) and \
                 parameter != 'modulelist.{}.biases'.format(len(self.modulelist) - 1):
 
