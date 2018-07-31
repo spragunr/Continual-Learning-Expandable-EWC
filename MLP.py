@@ -81,6 +81,7 @@ class MLP(ExpandableModel):
             # weights which should not be taken into consideration)
             model = models.get(task_number + 1)
 
+            print(len(self.modulelist))
             model.refresh_output_weights() # todo this should just print a dict for now
 
             # Set the module in "evaluation mode"
