@@ -428,14 +428,9 @@ class EWCMLP(MLP):
     # todo add modified version to EWCCNN
     def tune_variable_learning_rates(self):
 
-        params = self.state_dict()
+        for parameter_index, (name, parameter) in enumerate(self.named_parameters()):
+            print(name)
+            if name != 'modulelist.{}.weight'.format(len(self.modulelist) - 1) and \
+                name != 'modulelist.{}.biases'.format(len(self.modulelist) - 1):
 
-        for parameter_index, parameter in enumerate(params.keys()):
-
-            if parameter != 'modulelist.{}.weight'.format(len(self.modulelist) - 1) and \
-                parameter != 'modulelist.{}.biases'.format(len(self.modulelist) - 1):
-
-                print(params.get(parameter))
-                print(params.get(parameter).data.grad)
-
-                params.get(parameter).data.grad /= torch.clamp(self.sum_Fx[parameter_index] * self.lam, min = 1)
+                parameter.grad /= torch.clamp(self.sum_Fx[parameter_index] * self.lam, min = 1)
