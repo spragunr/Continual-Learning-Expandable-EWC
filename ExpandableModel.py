@@ -143,6 +143,3 @@ class ExpandableModel(nn.Module):
 
         return model_dictionary
 
-    def refresh_output_weights(self):
-        params = self.state_dict()
-        print(params)

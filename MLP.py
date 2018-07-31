@@ -81,8 +81,7 @@ class MLP(ExpandableModel):
             # weights which should not be taken into consideration)
             model = models.get(task_number + 1)
 
-            print(len(self.modulelist))
-            model.refresh_output_weights() # todo this should just print a dict for now
+            model.restore_output_weights()
 
             # Set the module in "evaluation mode"
             # This is necessary because some network layers behave differently when training vs testing.
@@ -233,3 +232,11 @@ class MLP(ExpandableModel):
         else:
             return test_accuracies # accuracy minimum threshold met
 
+
+    def restore_output_weights(self):
+        params = self.state_dict()
+        final_layer_weights = params.get('modulelist.{}.weight'.format(len(self.modulelist) - 1))
+        final_layer_biases = params.get('modulelist.{}.bias'.format(len(self.modulelist) - 1))
+
+        print(final_layer_weights)
+        print(final_layer_biases)
