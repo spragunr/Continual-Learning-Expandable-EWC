@@ -240,7 +240,6 @@ class MLP(ExpandableModel):
 
         old_weights = self.task_post_training_weights.get(task_number + 1)
 
-
         final_layer_weights.data[...] = \
             old_weights[len(old_weights) - 2][tuple(slice(0, n) for n in list(final_layer_weights.size()))]
 

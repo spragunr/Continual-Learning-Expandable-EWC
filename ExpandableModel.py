@@ -103,16 +103,21 @@ class ExpandableModel(nn.Module):
 
         # make a model of each size specified in model_sizes, add them to models list
         for hidden_size in model_sizes:
-            models.append(
-                # make a model of the type corresponding to the model's direct superclass (CNN or MLP) for testing-
-                # this way we don't need to pass lambda to the constructor, as it's not needed for testing
-                self.__class__.__bases__[0](
-                    hidden_size,
-                    self.input_size,
-                    self.output_size,
-                    self.device
-                ).to(self.device)
-            )
+
+            # make a model of the type corresponding to the model's direct superclass (CNN or MLP) for testing-
+            # this way we don't need to pass lambda to the constructor, as it's not needed for testing
+            test_model = self.__class__.__bases__[0](
+                hidden_size,
+                self.input_size,
+                self.output_size,
+                self.device
+            ).to(self.device)
+
+            # needed for restoration of output layer weights during testing
+            test_model.task_post_training_weights = self.task_post_training_weights
+            models.append(test_model)
+
+
 
         # copy weights from a larger to a smaller model - used when generating smaller models with subsets of current
         # model weights for testing the network on previous tasks...
