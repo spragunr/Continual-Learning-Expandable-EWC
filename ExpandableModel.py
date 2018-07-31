@@ -142,3 +142,7 @@ class ExpandableModel(nn.Module):
                 model_dictionary.update({task_number: model})
 
         return model_dictionary
+
+    def refresh_output_weights(self):
+        params = self.state_dict()
+        print(params)

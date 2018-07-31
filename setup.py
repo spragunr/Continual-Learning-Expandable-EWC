@@ -158,9 +158,9 @@ def parse_arguments():
         args.dataset = 'cifar'
         args.tasks = 10
         args.output_file = 'increm_cifar.h5'
-        args.nets = ['VanillaCNN']
-        args.samples_per_task = -1 # todo add this to the arg parser
-        args.shuffle_tasks = 'no' # todo add this to the arg parser
+        args.nets = ['VanillaCNN'] # todo change to EWCCNN
+        #args.samples_per_task = -1 # todo add this to the arg parser
+        #args.shuffle_tasks = 'no' # todo add this to the arg parser
 
         # per-class train dataset size * classes per task
         args.train_dataset_size = (500 - args.validation_dataset_size) * (100 // args.tasks)

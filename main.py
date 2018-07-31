@@ -32,7 +32,7 @@ def main():
     # todo fix kwargs (**kwargs)
     # todo fix num_workers in utils
 
-    cifar_classes = utils.define_cifar100_labels()
+    #cifar_classes = utils.define_cifar100_labels()
 
 
     # for task in range(args.tasks):
@@ -54,8 +54,8 @@ def main():
 
     files, expansions, avg_acc, task_acc = setup.setup_h5_file(args, models)
 
-    # if args.dataset == "cifar":
-    #     train_loaders, validation_loaders, test_loaders = utils.generate_cifar_tasks(args, kwargs)
+    if args.dataset == "cifar":
+        train_loaders, validation_loaders, test_loaders = utils.generate_cifar_tasks(args, kwargs)
 
     while task_count < (args.tasks + 1) :
 
@@ -64,34 +64,12 @@ def main():
         if not retrain_task:
 
             if args.dataset == "cifar":
-                # train_loader = train_loaders[task_count - 1]
-                # validation_loader = validation_loaders[task_count - 1]
-                # test_loader = test_loaders[task_count - 1]
+                train_loader = train_loaders[task_count - 1]
+                validation_loader = validation_loaders[task_count - 1]
+                test_loader = test_loaders[task_count - 1]
 
                 # todo remove- just for testing CNNs
                 #train_loader, test_loader = utils.generate_1_cifar10_task(args)
-
-                utils.build_iCIFAR(args)
-                x_tr, x_te, n_inputs, n_outputs, n_tasks = utils.load_iCIFAR(args)
-
-                print("TRAINING DATA", np.shape(x_tr[0][0]))
-                print(x_tr[0][0])
-                print("TRAINING DATA", np.shape(x_tr[1][1]))
-                print("TRAINING DATA", np.shape(x_tr[1][2]))
-                print("TESTING DATA", np.shape(x_te[1]))
-                print("INPUTS", n_inputs)
-                print("OUTPUTS", n_outputs)
-                print("TASKS", n_tasks)
-
-                continuum = Continuum(x_tr, args)
-
-                (x, t, y) = next(continuum) # this is how to get the needed data out of a continuum object...
-
-                print(x.size())
-                print(t)
-                print(y)
-
-                exit() # this is as far as we got with the facebook dataset...
 
 
             else:# todo add this to the arg parser
