@@ -429,6 +429,9 @@ class EWCCNN(CNN):
 
     def tune_variable_learning_rates(self):
 
+        for name, parameter in self.named_parameters():
+            print(name)
+
         for parameter_index, parameter in enumerate(self.parameters()):
 
             parameter.grad /= torch.clamp(self.sum_Fx[parameter_index] * self.lam, min = 1)
