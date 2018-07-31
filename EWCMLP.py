@@ -125,6 +125,7 @@ class EWCMLP(MLP):
                     pad_tuple = utils.pad_tuple(ewc_sums[ewc_sum][parameter_index],parameter)
                     ewc_sums[ewc_sum][parameter_index] = F.pad(ewc_sums[ewc_sum][parameter_index], pad_tuple, mode='constant', value=0)
 
+
     # calculate the EWC loss on previous tasks only (not incorporating current task cross entropy)
     def ewc_loss_prev_tasks(self):
 
