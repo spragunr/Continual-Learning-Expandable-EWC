@@ -245,7 +245,7 @@ class MLP(ExpandableModel):
             old_weights[len(old_weights) - 2][tuple(slice(0, n) for n in list(final_layer_weights.size()))]
 
         final_layer_biases[...] = \
-            old_weights[len(old_weights) - 1][tuple(slice(0, n) for n in list(final_layer_weights.size()))]
+            old_weights[len(old_weights) - 1][tuple(slice(0, n) for n in list(final_layer_biases.size()))]
 
         print(final_layer_weights)
         print(final_layer_biases)
