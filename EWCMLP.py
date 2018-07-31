@@ -429,8 +429,8 @@ class EWCMLP(MLP):
     def tune_variable_learning_rates(self):
 
         for parameter_index, (name, parameter) in enumerate(self.named_parameters()):
-            print(name)
+
             if name != 'modulelist.{}.weight'.format(len(self.modulelist) - 1) and \
-                name != 'modulelist.{}.biases'.format(len(self.modulelist) - 1):
+              name != 'modulelist.{}.biases'.format(len(self.modulelist) - 1):
 
                 parameter.grad /= torch.clamp(self.sum_Fx[parameter_index] * self.lam, min = 1)
