@@ -101,6 +101,7 @@ class VanillaCNN(CNN):
                 # todo may not need to wrap in variables - just to move to GPU if necessary
                 data, target = Variable(data).to(self.device), Variable(target).to(self.device)
 
+                print(target) # todo remove- for debugging
 
                 # Gradients are automatically accumulated- therefore, they need to be zeroed out before the next backward
                 # pass through the network so that they are replaced by newly computed gradients at later training iterations,
