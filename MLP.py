@@ -14,7 +14,7 @@ class MLP(ExpandableModel):
         self.build()
 
         # todo use XAVIER 10 method for weight initialization
-        self.apply(self.init_weights)
+        self.apply(self.init_weights_xavier)
 
     def forward(self, x):
 
@@ -253,3 +253,15 @@ class MLP(ExpandableModel):
             elif name == 'modulelist.{}.bias'.format(len(self.modulelist) - 1):
                 parameter.data[...] = \
                     old_weights[len(old_weights) - 1][tuple(slice(0, n) for n in list(parameter.size()))]
+
+    def reinitialize_output_weights(self):
+
+        for name, parameter in self.named_parameters():
+
+            # final layer weights
+            if name == 'modulelist.{}.weight'.format(len(self.modulelist) - 1):
+                torch.nn.init.xavier_uniform(parameter.data)
+
+            # final layer biases
+            elif name == 'modulelist.{}.bias'.format(len(self.modulelist) - 1):
+                parameter.data.fill_(0.1)
