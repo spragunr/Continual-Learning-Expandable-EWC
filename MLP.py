@@ -235,18 +235,16 @@ class MLP(ExpandableModel):
 
     def restore_output_weights(self, task_number):
 
-        params = self.state_dict()
-
-        final_layer_weights = params.get('modulelist.{}.weight'.format(len(self.modulelist) - 1))
-        final_layer_biases = params.get('modulelist.{}.bias'.format(len(self.modulelist) - 1))
-
         old_weights = self.task_post_training_weights.get(task_number)
 
-        final_layer_weights.data[...] = \
-            old_weights[len(old_weights) - 2][tuple(slice(0, n) for n in list(final_layer_weights.size()))]
+        for name, parameter in self.named_parameters():
 
-        final_layer_biases[...] = \
-            old_weights[len(old_weights) - 1][tuple(slice(0, n) for n in list(final_layer_biases.size()))]
+            # final layer weights
+            if name == 'modulelist.{}.weight'.format(len(self.modulelist) - 1):
+                parameter.data[...] = \
+                    old_weights[len(old_weights) - 2][tuple(slice(0, n) for n in list(parameter.size()))]
 
-        print(final_layer_weights)
-        print(final_layer_biases)
+            # final layer biases
+            elif name == 'modulelist.{}.bias'.format(len(self.modulelist) - 1):
+                parameter.data[...] = \
+                    old_weights[len(old_weights) - 1][tuple(slice(0, n) for n in list(parameter.size()))]
