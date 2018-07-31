@@ -146,7 +146,7 @@ class EWCMLP(MLP):
                 loss_prev_tasks -= 2 * torch.sum(parameter * self.sum_Fx_Wx[parameter_index])
                 loss_prev_tasks += torch.sum(self.sum_Fx_Wx_sq[parameter_index])
 
-        # mutliply error by fisher multiplier (lambda) divided by 2
+        # Mutliply error by fisher multiplier (lambda) divided by 2
         return loss_prev_tasks * (self.lam / 2.0)
 
     def train_model(self, args, train_loader, task_number, **kwargs):
