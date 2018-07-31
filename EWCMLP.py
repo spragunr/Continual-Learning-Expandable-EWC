@@ -425,9 +425,14 @@ class EWCMLP(MLP):
 
         self.task_fisher_diags.update({task_count: deepcopy(self.list_of_fisher_diags)})
 
-
+    # todo add modified version to EWCCNN
     def tune_variable_learning_rates(self):
 
-        for parameter_index, parameter in enumerate(self.parameters()):
+        params = self.state_dict()
 
-            parameter.grad /= torch.clamp(self.sum_Fx[parameter_index] * self.lam, min = 1)
+        for parameter_index, parameter in enumerate(params.keys()):
+
+            if parameter != 'modulelist.{}.weight'.format(len(self.modulelist) - 1) and \
+                parameter != 'modulelist.{}.biases'.format(len(self.modulelist) - 1):
+
+                params.get(parameter).grad /= torch.clamp(self.sum_Fx[parameter_index] * self.lam, min = 1)
