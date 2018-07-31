@@ -234,6 +234,7 @@ class MLP(ExpandableModel):
 
 
     def restore_output_weights(self, task_number):
+
         params = self.state_dict()
 
         final_layer_weights = params.get('modulelist.{}.weight'.format(len(self.modulelist) - 1))
