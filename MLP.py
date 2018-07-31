@@ -238,5 +238,8 @@ class MLP(ExpandableModel):
         final_layer_weights = params.get('modulelist.{}.weight'.format(len(self.modulelist) - 1))
         final_layer_biases = params.get('modulelist.{}.bias'.format(len(self.modulelist) - 1))
 
+        final_layer_weights.data[...] = 1.0
+        final_layer_biases[...] = 1.0
+
         print(final_layer_weights)
         print(final_layer_biases)
