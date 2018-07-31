@@ -141,8 +141,8 @@ def parse_arguments():
 
         args.batch_size = 10
         args.test_batch_size = 10
-        args.epochs = 1
-        args.lr = 1e-3
+        args.epochs = 3
+        args.lr = 0.1
         args.l2_reg_penalty = 0.0
         args.lam = 150
         args.momentum = 0.0
