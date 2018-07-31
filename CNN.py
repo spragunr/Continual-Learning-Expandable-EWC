@@ -158,7 +158,7 @@ class CNN(ExpandableModel):
                     # row). Otherwise, dim is squeezed (see torch.squeeze()), resulting in the output tensors having 1
                     # fewer dimension than input.
                     pred = output.max(1, keepdim=True)[1]
-
+                    print(pred) # todo remove- for debugging
                     # Check if predictions are correct, and if so add one to the total number of correct predictions across the
                     # entire testing set for each correct prediction.
                     #
