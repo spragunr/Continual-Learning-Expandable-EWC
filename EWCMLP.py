@@ -157,6 +157,8 @@ class EWCMLP(MLP):
         # However, during TESTING (e.g. model.eval()) we do not want this to happen.
         self.train()
 
+
+
         # Set the optimization algorithm for the model- in this case, Stochastic Gradient Descent with/without
         # momentum (depends on the value of args.momentum- default is 0.0, so no momentum by default).
         #

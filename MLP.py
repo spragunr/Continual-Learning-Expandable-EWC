@@ -86,7 +86,7 @@ class MLP(ExpandableModel):
             # weights which should not be taken into consideration)
             model = models.get(task_number + 1)
 
-            model.restore_output_weights(task_number + 1)
+            model.restore_output_weights(task_number + 1) # todo add to CNN
 
             # Set the module in "evaluation mode"
             # This is necessary because some network layers behave differently when training vs testing.
