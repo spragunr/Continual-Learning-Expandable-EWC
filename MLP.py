@@ -37,7 +37,7 @@ class MLP(ExpandableModel):
     # initialize weights in the network in the same manner as in:
     # https://github.com/ariseff/overcoming-catastrophic/blob/afea2d3c9f926d4168cc51d56f1e9a92989d7af0/model.py#L7
     @staticmethod
-    def init_weights(m):
+    def init_weights_trunc_norm(m):
 
         # This function is intended to mimic the behavior of TensorFlow's tf.truncated_normal(), returning
         # a tensor of the specified shape containing values sampled from a truncated normal distribution with the
@@ -61,7 +61,12 @@ class MLP(ExpandableModel):
             if m.bias is not None:
                 m.bias.data.fill_(0.1)
 
-
+    @staticmethod
+    def init_weights_xavier(m):
+        if type(m) == nn.Linear:
+            torch.nn.init.xavier_uniform(m.weight)
+            if m.bias is not None:
+                m.bias.data.fill_(0.1)
 
     def test(self, test_loaders, threshold, args):
 
