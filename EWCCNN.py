@@ -429,11 +429,13 @@ class EWCCNN(CNN):
         self.task_fisher_diags.update({task_count: deepcopy(self.list_of_fisher_diags)})
 
 
+
     def tune_variable_learning_rates(self):
 
-        for name, parameter in self.named_parameters():
-            print(name)
+        for parameter_index, (name, parameter) in enumerate(self.named_parameters()):
 
-        for parameter_index, parameter in enumerate(self.parameters()):
+            if name != 'fc3.weight'.format(len(self.modulelist) - 1) and \
+              name != 'fc3.bias'.format(len(self.modulelist) - 1):
 
-            parameter.grad /= torch.clamp(self.sum_Fx[parameter_index] * self.lam, min = 1)
+                parameter.grad /= torch.clamp(self.sum_Fx[parameter_index] * self.lam, min = 1)
+
