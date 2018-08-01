@@ -145,7 +145,7 @@ def parse_arguments():
         args.lr = 0.001
         args.l2_reg_penalty = 0.0
         args.lam = 150
-        args.momentum = 0.9
+        args.momentum = 0.0
         args.no_cuda = False
         args.seed = 1
         args.log_interval = 10
