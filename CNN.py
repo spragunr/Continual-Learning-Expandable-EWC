@@ -60,6 +60,8 @@ class CNN(ExpandableModel):
             # weights which should not be taken into consideration)
             model = models.get(task_number + 1)
 
+            model.restore_output_weights(task_number + 1)
+
             # Set the module in "evaluation mode"
             # This is necessary because some network layers behave differently when training vs testing.
             # Dropout, for example, is used to zero/mask certain weights during TRAINING (e.g. model.train())
@@ -209,3 +211,32 @@ class CNN(ExpandableModel):
 
         else:
             return test_accuracies # accuracy minimum threshold met
+
+
+    def restore_output_weights(self, task_number):
+
+        old_weights = self.task_post_training_weights.get(task_number)
+
+        for name, parameter in self.named_parameters():
+            # final layer weights
+            if name == 'modulelist.{}.weight'.format(len(self.modulelist) - 1):
+                parameter.data[...] = \
+                    old_weights[len(old_weights) - 2][tuple(slice(0, n) for n in list(parameter.size()))]
+
+            # final layer biases
+            elif name == 'modulelist.{}.bias'.format(len(self.modulelist) - 1):
+                parameter.data[...] = \
+                    old_weights[len(old_weights) - 1][tuple(slice(0, n) for n in list(parameter.size()))]
+
+    def reinitialize_output_weights(self):
+
+        for name, parameter in self.named_parameters():
+            print(name)
+
+            # final layer weights
+            if name == 'modulelist.{}.weight'.format(len(self.modulelist) - 1):
+                torch.nn.init.xavier_uniform(parameter.data)
+
+            # final layer biases
+            elif name == 'modulelist.{}.bias'.format(len(self.modulelist) - 1):
+                parameter.data.fill_(0.1)
