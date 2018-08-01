@@ -139,8 +139,8 @@ def parse_arguments():
 
         print('|-----[CONDUCTING INCREMENTAL CIFAR 100 EXPERIMENT]-----|')
 
-        args.batch_size = 10
-        args.test_batch_size = 10
+        args.batch_size = 4
+        args.test_batch_size = 4
         args.epochs = 2
         args.lr = 0.001
         args.l2_reg_penalty = 0.0
@@ -149,7 +149,7 @@ def parse_arguments():
         args.no_cuda = False
         args.seed = 1
         args.log_interval = 10
-        args.hidden_size = 20 # todo do something with this...
+        args.hidden_size = 50 # todo do something with this...
         args.validation_dataset_size = 0 # in THIS case, this is the validation data from each individual CLASS
         args.input_size = 1024
         args.output_size = 10
