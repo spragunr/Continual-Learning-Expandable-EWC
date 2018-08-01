@@ -139,7 +139,7 @@ class EWCMLP(MLP):
         for parameter_index, (name, parameter) in enumerate(self.named_parameters()):
 
             if name != 'modulelist.{}.weight'.format(len(self.modulelist) - 1) and \
-              name != 'modulelist.{}.biases'.format(len(self.modulelist) - 1):
+              name != 'modulelist.{}.bias'.format(len(self.modulelist) - 1):
 
                 # NOTE: * operator is element-wise multiplication
                 loss_prev_tasks += torch.sum(torch.pow(parameter, 2.0) * self.sum_Fx[parameter_index])

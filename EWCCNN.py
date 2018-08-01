@@ -134,11 +134,15 @@ class EWCCNN(CNN):
         #          sigma (Fisher_{task} * (Weights_{task}) ** 2)
         #
         # for each parameter, we add to the loss the above loss term calculated for each weight in the parameter (summed)
-        for parameter_index, parameter in enumerate(self.parameters()):
-            # NOTE: * operator is element-wise multiplication
-            loss_prev_tasks += torch.sum(torch.pow(parameter, 2.0) * self.sum_Fx[parameter_index])
-            loss_prev_tasks -= 2 * torch.sum(parameter * self.sum_Fx_Wx[parameter_index])
-            loss_prev_tasks += torch.sum(self.sum_Fx_Wx_sq[parameter_index])
+        for parameter_index, (name, parameter) in enumerate(self.named_parameters()):
+
+            if name != 'fc3.weight'.format(len(self.modulelist) - 1) and \
+              name != 'fc3.bias'.format(len(self.modulelist) - 1):
+
+                # NOTE: * operator is element-wise multiplication
+                loss_prev_tasks += torch.sum(torch.pow(parameter, 2.0) * self.sum_Fx[parameter_index])
+                loss_prev_tasks -= 2 * torch.sum(parameter * self.sum_Fx_Wx[parameter_index])
+                loss_prev_tasks += torch.sum(self.sum_Fx_Wx_sq[parameter_index])
 
         # mutliply error by fisher multiplier (lambda) divided by 2
         return loss_prev_tasks * (self.lam / 2.0)
@@ -434,8 +438,7 @@ class EWCCNN(CNN):
 
         for parameter_index, (name, parameter) in enumerate(self.named_parameters()):
 
-            if name != 'fc3.weight'.format(len(self.modulelist) - 1) and \
-              name != 'fc3.bias'.format(len(self.modulelist) - 1):
+            if name != 'fc3.weight' and name != 'fc3.bias':
 
                 parameter.grad /= torch.clamp(self.sum_Fx[parameter_index] * self.lam, min = 1)
 
