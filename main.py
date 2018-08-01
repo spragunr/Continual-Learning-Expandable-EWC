@@ -70,7 +70,6 @@ def main():
 
                 # todo remove- just for testing CNNs
                 train_loader, test_loader = utils.generate_1_cifar10_task(args)
-                print(len(test_loader))
 
             else:# todo add this to the arg parser
                 # get the DataLoaders for the training, validation, and testing data
