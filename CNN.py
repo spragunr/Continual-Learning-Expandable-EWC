@@ -219,12 +219,16 @@ class CNN(ExpandableModel):
 
         for name, parameter in self.named_parameters():
             # final layer weights
-            if name == 'modulelist.{}.weight'.format(len(self.modulelist) - 1):
+            if name == 'fc3.weight'.format(len(self.modulelist) - 1):
+                print("hello3")
+
                 parameter.data[...] = \
                     old_weights[len(old_weights) - 2][tuple(slice(0, n) for n in list(parameter.size()))]
 
             # final layer biases
-            elif name == 'modulelist.{}.bias'.format(len(self.modulelist) - 1):
+            elif name == 'fc3.bias'.format(len(self.modulelist) - 1):
+                print("hello4")
+
                 parameter.data[...] = \
                     old_weights[len(old_weights) - 1][tuple(slice(0, n) for n in list(parameter.size()))]
 
@@ -234,9 +238,11 @@ class CNN(ExpandableModel):
             print(name)
 
             # final layer weights
-            if name == 'modulelist.{}.weight'.format(len(self.modulelist) - 1):
+            if name == 'fc3.weight'.format(len(self.modulelist) - 1):
+                print("hello")
                 torch.nn.init.xavier_uniform(parameter.data)
 
             # final layer biases
-            elif name == 'modulelist.{}.bias'.format(len(self.modulelist) - 1):
+            elif name == 'fc3.bias'.format(len(self.modulelist) - 1):
+                print("hello2")
                 parameter.data.fill_(0.1)
