@@ -150,7 +150,7 @@ def parse_arguments():
         args.seed = 1
         args.log_interval = 10
         args.hidden_size = 20 # todo do something with this...
-        args.validation_dataset_size = 100 # in THIS case, this is the validation data from each individual CLASS
+        args.validation_dataset_size = 20 # in THIS case, this is the validation data from each individual CLASS
         args.input_size = 1024
         args.output_size = 100
         args.scale_factor = 2
