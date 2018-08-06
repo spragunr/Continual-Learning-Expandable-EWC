@@ -269,7 +269,7 @@ class EWCMLP(MLP):
                 loss.backward()
 
                 if task_number > 1: # todo change to hasattr() call
-                    self.tune_variable_learning_rates()
+                    # self.tune_variable_learning_rates() # TODO uncomment 
 
                 # Simplified abstraction provided by PyTorch which uses a single statement to update all model parameters
                 # according to gradients (with respect to the last loss function on which .backward() was called and
