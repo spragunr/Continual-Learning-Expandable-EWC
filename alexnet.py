@@ -14,7 +14,7 @@ class AlexNet(nn.Module):
 
     def __init__(self, filters=64, classification_width=4096, num_classes=100):
         """
-        Constructor for AlexNet architecture of varying sizes.
+        Constructor for AlexNet architecture of varying sizes (For use with CIFAR).
         
         Sizes of layers not specified by parameters are automatically adjusted accordingly.
 
@@ -31,19 +31,19 @@ class AlexNet(nn.Module):
         
         super(AlexNet, self).__init__()
         self.features = nn.Sequential(
-            nn.Conv2d(in_channels=3, out_channels=filters, kernel_size=11, stride=4, padding=2),
+            nn.Conv2d(in_channels=3, out_channels=filters, kernel_size=11, stride=4, padding=5),
             nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=3, stride=2),
+            nn.MaxPool2d(kernel_size=2, stride=2),
             nn.Conv2d(in_channels=filters, out_channels=filters*3, kernel_size=5, padding=2),
             nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=3, stride=2),
+            nn.MaxPool2d(kernel_size=2, stride=2),
             nn.Conv2d(in_channels=filters*3, out_channels=filters*6, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
             nn.Conv2d(in_channels=filters*6, out_channels=256, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
             nn.Conv2d(in_channels=256, out_channels=256, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=3, stride=2),
+            nn.MaxPool2d(kernel_size=2, stride=2),
         )
         self.classifier = nn.Sequential(
             nn.Dropout(),
