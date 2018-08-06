@@ -222,29 +222,52 @@ class CNN(ExpandableModel):
         old_weights = self.task_post_training_weights.get(task_number)
 
         for name, parameter in self.named_parameters():
-            # final layer weights
-            if name == 'fc3.weight':
+            # # final layer weights
+            # if name == 'fc3.weight':
 
+            #     parameter.data[...] = \
+            #         old_weights[len(old_weights) - 2][tuple(slice(0, n) for n in list(parameter.size()))]
+
+            # # final layer biases
+            # elif name == 'fc3.bias':
+
+            #     parameter.data[...] = \
+            #         old_weights[len(old_weights) - 1][tuple(slice(0, n) for n in list(parameter.size()))]
+            if name == 'alexnet.classifier.6.weight':
+                
                 parameter.data[...] = \
                     old_weights[len(old_weights) - 2][tuple(slice(0, n) for n in list(parameter.size()))]
+            
+            elif name == 'alexnet.classifier.6.bias':
 
-            # final layer biases
-            elif name == 'fc3.bias':
-
-                parameter.data[...] = \
-                    old_weights[len(old_weights) - 1][tuple(slice(0, n) for n in list(parameter.size()))]
+                parameter.data[...] = \                                                                                                                                                                
+                    old_weights[len(old_weights) - 1][tuple(slice(0, n) for n in list(parameter.size()))]      
 
     def reinitialize_output_weights(self):
 
         for name, parameter in self.named_parameters():
             print(name)
 
-            # final layer weights
-            if name == 'fc3.weight':
+           #  # final layer weights
+           #  if name == 'fc3.weight':
 
+           #      torch.nn.init.xavier_uniform(parameter.data)
+
+           #  # final layer biases
+           #  elif name == 'fc3.bias':
+
+           #      parameter.data.fill_(0.1)
+            
+
+            if name == 'alexnet.classifier.6.weight': 
+            
                 torch.nn.init.xavier_uniform(parameter.data)
 
-            # final layer biases
-            elif name == 'fc3.bias':
-
+            elif name == 'alexnet.classifier.6.bias':
+            
                 parameter.data.fill_(0.1)
+
+
+
+
+
