@@ -240,7 +240,7 @@ class CNN(ExpandableModel):
             
             elif name == 'alexnet.classifier.6.bias':
 
-                parameter.data[...] = \                                                                                                                                                                
+                parameter.data[...] = \
                     old_weights[len(old_weights) - 1][tuple(slice(0, n) for n in list(parameter.size()))]      
 
     def reinitialize_output_weights(self):
