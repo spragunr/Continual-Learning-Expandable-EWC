@@ -12,7 +12,7 @@ model_urls = {
 
 class AlexNet(nn.Module):
 
-    def __init__(self, filters=64, classification_width=4096, num_classes=1000):
+    def __init__(self, filters=64, classification_width=4096, num_classes=100):
         """
         Constructor for AlexNet architecture of varying sizes.
         
