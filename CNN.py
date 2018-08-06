@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch
 from torch.autograd import Variable
 from network_utils import ResNet18
+from alexnet import alexnet
 
 class CNN(ExpandableModel):
 
@@ -18,14 +19,15 @@ class CNN(ExpandableModel):
 
     def forward(self, x):
 
-        x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-        x = x.view(-1, 16 * 5 * 5)
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
-        self.y = x
-
+        # x = self.pool(F.relu(self.conv1(x)))
+        # x = self.pool(F.relu(self.conv2(x)))
+        # x = x.view(-1, 16 * 5 * 5)
+        # x = F.relu(self.fc1(x))
+        # x = F.relu(self.fc2(x))
+        # x = self.fc3(x)
+        # self.y = x
+        
+        self.y = self.alexnet.forward(x)
 
         # self.y = self.resnet.forward(x)
 
@@ -33,12 +35,14 @@ class CNN(ExpandableModel):
 
     def build(self):
 
-        self.conv1 = nn.Conv2d(3, 6, 5)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(6, 16, 5)
-        self.fc1 = nn.Linear(16 * 5 * 5, 120)
-        self.fc2 = nn.Linear(120, 84)
-        self.fc3 = nn.Linear(84, 100) # todo change back to 10 if using CIFAR 10 tester
+        # self.conv1 = nn.Conv2d(3, 6, 5)
+        # self.pool = nn.MaxPool2d(2, 2)
+        # self.conv2 = nn.Conv2d(6, 16, 5)
+        # self.fc1 = nn.Linear(16 * 5 * 5, 120)
+        # self.fc2 = nn.Linear(120, 84)
+        # self.fc3 = nn.Linear(84, 100) # todo change back to 10 if using CIFAR 10 tester
+        
+        self.alexnet = alexnet()
 
         # self.resnet = ResNet18(self.output_size, self.hidden_size)
 
