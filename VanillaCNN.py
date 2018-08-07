@@ -22,6 +22,7 @@ class VanillaCNN(CNN):
 
         return model
 
+
     def train_model(self, args, train_loader, task_number, **kwargs):
 
         # Set the module in "training mode"
