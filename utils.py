@@ -140,7 +140,8 @@ def expand(models, args):
 
     for model_num, model in enumerate(models):
         if model.__class__.__bases__[0].__name__ == 'MLP':
-            expanded_models.append(model.__class__.from_existing_model(model, model.hidden_size * args.scale_factor).to(model.device))
+            expanded_models.append(
+                model.__class__.from_existing_model(model, model.hidden_size * args.scale_factor).to(model.device))
         elif model.__class__.__bases__[0].__name__ == 'CNN':
             expanded_models.append(
                 model.__class__.from_existing_model(model, model.hidden_size + args.scale_factor).to(model.device))
