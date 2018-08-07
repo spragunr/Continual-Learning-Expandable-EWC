@@ -120,7 +120,7 @@ def main():
     threshold = 0
 
     for data in metadata_list[0]:
-        if data.startswith('threshold'):
+        if data.startswith('accuracy_threshold'):
             threshold = float(data[datadata.rfind(' '):])
     
     # just for testing... 
