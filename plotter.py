@@ -121,7 +121,7 @@ def main():
 
     for data in metadata_list[0]:
         if data.startswith('accuracy_threshold'):
-            threshold = float(data[datadata.rfind(' '):])
+            threshold = float(data[data.rfind(' '):])
     
     # just for testing... 
     print(avg_acc_list[0], expansion_indices_list[0], task_acc_list[0], metadata_list[0])
