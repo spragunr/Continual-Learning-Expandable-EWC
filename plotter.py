@@ -45,7 +45,7 @@ def plot_bar_each_task_acc(task_accuracies, labels, save):
     
     plt.ylabel('Accuracy')
     plt.xlabel('Task')
-    plt.xlim(0, len(task_accuracies[0])) + 1)
+    plt.xlim(0, len(task_accuracies[0]) + 1)
     plt.ylim(0, 100)
 
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
