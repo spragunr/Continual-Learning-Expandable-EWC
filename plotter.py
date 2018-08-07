@@ -4,12 +4,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def plot_line_avg_acc(avg_accuracies, expansion_markers, threshold, labels):
+def plot_line_avg_acc(avg_accuracies, expansion_markers, threshold, labels, save):
 
     plt.figure()
     
     for i, avg_acc in enumerate(avg_accuracies):
-        print(avg_acc)
         plt.plot(avg_acc, label=labels[i])
     
 
@@ -28,22 +27,25 @@ def plot_line_avg_acc(avg_accuracies, expansion_markers, threshold, labels):
     
     plt.show()
 
-    plt.savefig('avg_accs.eps', dpi=300, format='eps')
+    plt.savefig('{}.eps'.format(save), dpi=300, format='eps')
 
-def plot_bar_each_task_acc(single_task_accuracies1, label1, single_task_accuracies2=None, label2=None):
+def plot_bar_each_task_acc(task_accuracies, labels, save):
+    
     plt.figure()
 
-    x_values = np.arange(1, len(single_task_accuracies1) + 1)
+    x_values = np.arange(1, len(task_accuracies[0]) + 1)
 
-    w = 0.5
+    w = 1 / len(task_accuracies)
+    offset = w / len(task_accuracies)
+    
+    adjusted_xs = [x_values - offset, x_values + offset]
 
-    plt.bar(x_values-0.25, width=w, height=single_task_accuracies1, align='center', color='c', edgecolor='k', label=label1)
-    if single_task_accuracies2 is not None:
-        plt.bar(x_values+0.25, width=w, height=single_task_accuracies2, align='center', color='orange', edgecolor='k', label=label2)
-
+    for i, task_acc in enumerate(task_accuracies):
+        plt.bar(adjusted_xs[i], width=w, height=task_acc, align='center', edgecolor='k', label=labels[i])
+    
     plt.ylabel('Accuracy')
     plt.xlabel('Task')
-    plt.xlim(0, len(single_task_accuracies1) + 1)
+    plt.xlim(0, len(task_accuracies[0])) + 1)
     plt.ylim(0, 100)
 
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
@@ -51,7 +53,7 @@ def plot_bar_each_task_acc(single_task_accuracies1, label1, single_task_accuraci
     
     plt.show()
     
-    plt.savefig('final_per_task_acc.eps', dpi=300, format='eps')
+    plt.savefig('{}.eps'.format(save), dpi=300, format='eps')
 
 
 def parse_h5_file(filename):
@@ -106,6 +108,12 @@ def main():
     parser.add_argument('--labels', nargs='+', type=str, default=['NONE'], metavar='LABELS',
                         help='figure legend labels in same order as respective filenames')
     
+    parser.add_argument('--line', nargs='+', type=str, default=['NONE'], metavar='SAVE',
+                        help='filename for saved line graph (no extension)')
+    
+    parser.add_argument('--bar', nargs='+', type=str, default=['NONE'], metavar='BAR',
+                        help='filename for saved bar graph (no extension)')
+    
     args = parser.parse_args()
 
 
@@ -129,8 +137,9 @@ def main():
         if data.startswith('accuracy_threshold'):
             threshold = float(data[data.rfind(' '):])
     
-    plot_line_avg_acc(avg_acc_list, expansion_indices_list[0], threshold, args.labels)
-
+    plot_line_avg_acc(avg_acc_list, expansion_indices_list[0], threshold, args.labels, args.line)
+    
+    plot_bar_each_task_acc(task_acc_list, args.labels, args.bar)
 
 
 
