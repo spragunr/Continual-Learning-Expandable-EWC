@@ -93,7 +93,9 @@ def parse_h5_file(filename):
     return avg_acc, task_acc, expansion_indices, metadata
 
 def main():
-    
+    """
+    NOTE: pass me the name of the file with expansion first...
+    """
     
     parser = argparse.ArgumentParser(description='Plotting Tool')
     
@@ -123,9 +125,10 @@ def main():
         if data.startswith('accuracy_threshold'):
             threshold = float(data[data.rfind(' '):])
     
-    # just for testing... 
-    print(avg_acc_list[0], expansion_indices_list[0], task_acc_list[0], metadata_list[0])
-    print(threshold)
+    plot_line_avg_acc(avg_acc_list, expansion_indices_list[0], metadata_list, threshold)
+
+
+
 
 if __name__ == "__main__":
     main()
