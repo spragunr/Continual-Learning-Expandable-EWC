@@ -4,17 +4,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def plot_line_avg_acc(avg_accuracies, metadata, expansion_markers, threshold):
+def plot_line_avg_acc(avg_accuracies, expansion_markers, threshold, labels):
 
     plt.figure()
     
     for i, avg_acc in enumerate(avg_accuracies):
-        plt.plot(avg_acc, label=metadata[i])
+        print(avg_acc)
+        plt.plot(avg_acc, label=labels[i])
     
 
     plt.ylabel('Average Accuracy on All Tasks')
     plt.xlabel('Total Task Count')
-    plt.xlim(1, len(avg_accuracies))
+    plt.xlim(1, len(avg_accuracies[0]))
     plt.ylim(0, 100)
 
     for marker in expansion_markers:
@@ -102,6 +103,9 @@ def main():
     parser.add_argument('--filenames', nargs='+', type=str, default=['NONE'], metavar='FILENAMES',
                         help='names of .h5 files containing experimental result data')
 
+    parser.add_argument('--labels', nargs='+', type=str, default=['NONE'], metavar='LABELS',
+                        help='figure legend labels in same order as respective filenames')
+    
     args = parser.parse_args()
 
 
@@ -125,7 +129,7 @@ def main():
         if data.startswith('accuracy_threshold'):
             threshold = float(data[data.rfind(' '):])
     
-    plot_line_avg_acc(avg_acc_list, metadata, expansion_indices_list[0], threshold)
+    plot_line_avg_acc(avg_acc_list, expansion_indices_list[0], threshold, args.labels)
 
 
 
