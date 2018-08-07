@@ -107,8 +107,8 @@ def parse_arguments():
 
         args.batch_size = 100
         args.test_batch_size = 1000
-        args.epochs = 1
-        args.lr = 0.1
+        args.epochs = 10
+        args.lr = 0.01
         args.l2_reg_penalty = 0.0
         args.lam = 150
         args.momentum = 0.0
@@ -117,14 +117,14 @@ def parse_arguments():
         args.log_interval = 10
         args.train_dataset_size = 59800
         args.validation_dataset_size = 200
-        args.hidden_size = 30
+        args.hidden_size = 50
         args.input_size = 784
         args.output_size = 10
         args.scale_factor = 2
         args.accuracy_threshold = 0
         args.dataset = 'mnist'
         args.tasks = 100
-        args.output_file = 'perm_mnist_no_VLR.h5'
+        args.output_file = 'perm_mnist_no_expansion.h5'
         args.nets = ['EWCMLP']
 
         args_dict = vars(args)
