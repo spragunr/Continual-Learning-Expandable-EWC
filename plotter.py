@@ -125,7 +125,7 @@ def main():
         if data.startswith('accuracy_threshold'):
             threshold = float(data[data.rfind(' '):])
     
-    plot_line_avg_acc(avg_acc_list, expansion_indices_list[0], metadata_list, threshold)
+    plot_line_avg_acc(avg_acc_list, metadata, expansion_indices_list[0], threshold)
 
 
 
