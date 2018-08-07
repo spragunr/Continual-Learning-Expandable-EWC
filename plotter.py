@@ -1,4 +1,7 @@
-
+import argparse 
+import h5py
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 def plot_line_avg_acc(avg_accuracies, metadata, expansion_markers, threshold):
@@ -118,8 +121,8 @@ def main():
         metadata_list.append(metadata)
     
 
-
-
+if __name__ == "__main__":
+    main()
 
 
 
