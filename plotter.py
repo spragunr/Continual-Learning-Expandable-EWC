@@ -112,14 +112,20 @@ def main():
         
         avg_acc, task_acc, expansion_indices, metadata = parse_h5_file(filename)
         
-        print(metadata)
-        print(type(metadata))
-
         avg_acc_list.append(avg_acc)
         task_acc_list.append(task_acc)
         expansion_indices_list.append(expansion_indices)
         metadata_list.append(metadata)
     
+    threshold = 0
+
+    for data in metadata_list[0]:
+        if data.startswith('threshold'):
+            threshold = float(data[datadata.rfind(' '):])
+    
+    # just for testing... 
+    print(avg_acc_list[0], expansion_indices_list[0], task_acc_list[0], metadata_list[0])
+    print(threshold)
 
 if __name__ == "__main__":
     main()
