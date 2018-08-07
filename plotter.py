@@ -55,7 +55,7 @@ def plot_bar_each_task_acc(single_task_accuracies1, label1, single_task_accuraci
 
 def parse_h5_file(filename):
     
-    f = h5py.File('filename', 'r')
+    f = h5py.File(filename, 'r')
     
     avg_acc = []
     task_acc = []
