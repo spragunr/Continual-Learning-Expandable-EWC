@@ -108,10 +108,10 @@ def main():
     parser.add_argument('--labels', nargs='+', type=str, default=['NONE'], metavar='LABELS',
                         help='figure legend labels in same order as respective filenames')
     
-    parser.add_argument('--line', nargs='+', type=str, default=['NONE'], metavar='SAVE',
+    parser.add_argument('--line', type=str, default='NO_LINE', metavar='LINE',
                         help='filename for saved line graph (no extension)')
     
-    parser.add_argument('--bar', nargs='+', type=str, default=['NONE'], metavar='BAR',
+    parser.add_argument('--bar', type=str, default='NO_BAR', metavar='BAR',
                         help='filename for saved bar graph (no extension)')
     
     args = parser.parse_args()
