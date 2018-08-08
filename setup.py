@@ -124,7 +124,7 @@ def parse_arguments():
         args.accuracy_threshold = 0
         args.dataset = 'mnist'
         args.tasks = 100
-        args.output_file = 'perm_mnist_double_layer_no_expansion.h5'
+        args.output_file = 'checking_double_layer_expansion.h5'
         args.nets = ['EWCMLP']
 
         args_dict = vars(args)
