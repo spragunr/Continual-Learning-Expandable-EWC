@@ -73,16 +73,6 @@ class ExpandableModel(nn.Module):
 
         raise NotImplementedError("train_model() is not implemented in ExpandableModel\n")
 
-    def initialize_module_list(self):
-
-        if self.is_cifar:
-
-            self.build_conv()
-
-        else:
-
-            self.build_mlp()
-
     def test(self, test_loaders, threshold, args):
 
         raise NotImplementedError("test() is not implemented in ExpandableModel\n")

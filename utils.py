@@ -139,7 +139,15 @@ def expand(models, args):
     expanded_models = []
 
     for model_num, model in enumerate(models):
-        expanded_models.append(model.__class__.from_existing_model(model, model.hidden_size * args.scale_factor).to(model.device))
+        if model.__class__.__bases__[0].__name__ == 'MLP':
+            expanded_models.append(
+                model.__class__.from_existing_model(model, model.hidden_size * args.scale_factor).to(model.device))
+        elif model.__class__.__bases__[0].__name__ == 'CNN':
+            expanded_models.append(
+                model.__class__.from_existing_model(model, model.hidden_size + args.scale_factor).to(model.device))
+        else:
+            print("ERROR- invalid network type detected")
+
 
     return expanded_models
 
