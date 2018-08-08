@@ -136,7 +136,7 @@ class EWCCNN(CNN):
         # for each parameter, we add to the loss the above loss term calculated for each weight in the parameter (summed)
         for parameter_index, (name, parameter) in enumerate(self.named_parameters()):
 
-            if name != 'fc3.weight' and name != 'fc3.bias':
+            if name != 'alexnet.classifier.6.weight' and name != 'alexnet.classifier.6.bias':
 
                 # NOTE: * operator is element-wise multiplication
                 loss_prev_tasks += torch.sum(torch.pow(parameter, 2.0) * self.sum_Fx[parameter_index])
@@ -437,7 +437,7 @@ class EWCCNN(CNN):
 
         for parameter_index, (name, parameter) in enumerate(self.named_parameters()):
 
-            if name != 'fc3.weight' and name != 'fc3.bias':
+            if name != 'alexnet.classifier.6.weight' and name != 'alexnet.classifier.6.bias':
 
                 parameter.grad /= torch.clamp(self.sum_Fx[parameter_index] * self.lam, min = 1)
 
