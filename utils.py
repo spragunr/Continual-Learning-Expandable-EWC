@@ -148,6 +148,9 @@ def expand(models, args):
         else:
             print("ERROR- invalid network type detected")
 
+    for model in expanded_models:
+        for parameter in model.parameters():
+            print(parameter.size())
 
     return expanded_models
 
