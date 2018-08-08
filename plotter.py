@@ -24,8 +24,6 @@ def plot_line_avg_acc(avg_accuracies, expansion_markers, threshold, labels, save
 
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
                ncol=3, fancybox=True, shadow=True)
-    
-    plt.show()
 
     plt.savefig('{}.eps'.format(save), dpi=300, format='eps')
 
@@ -50,8 +48,6 @@ def plot_bar_each_task_acc(task_accuracies, labels, save):
 
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
               ncol=3, fancybox=True, shadow=True)
-    
-    plt.show()
     
     plt.savefig('{}.eps'.format(save), dpi=300, format='eps')
 
