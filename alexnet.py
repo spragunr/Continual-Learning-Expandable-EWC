@@ -32,7 +32,7 @@ class AlexNet(nn.Module):
         super(AlexNet, self).__init__()
 
         self.filters = filters
-        self.classification_width = (2 ** (filters - 64)) * 4096 # double dense layers width when filter added
+        classification_width = (2 ** (filters - 64)) * 4096 # double dense layers width when filter added
 
         self.features = nn.Sequential(
             nn.Conv2d(in_channels=3, out_channels=filters, kernel_size=11, stride=4, padding=5),

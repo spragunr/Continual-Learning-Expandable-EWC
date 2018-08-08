@@ -149,16 +149,16 @@ def parse_arguments():
         args.no_cuda = False
         args.seed = 1
         args.log_interval = 10
-        args.hidden_size = 20 # todo do something with this...
-        args.validation_dataset_size = 20 # in THIS case, this is the validation data from each individual CLASS
+        args.hidden_size = 64 # todo note changes in output layer sizes as a result of this
+        args.validation_dataset_size = 40 # in THIS case, this is the validation data from each individual CLASS
         args.input_size = 1024
         args.output_size = 100
         args.scale_factor = 1 # in this case, we ADD this many filters to first convolutional layer...
-        args.accuracy_threshold = 0 # todo figure out what this should be...
+        args.accuracy_threshold = 50 # todo figure out what this should be...
         args.dataset = 'cifar'
-        args.tasks = 10
+        args.tasks = 20
         args.output_file = 'increm_cifar.h5'
-        args.nets = ['VanillaCNN'] # todo change to EWCCNN
+        args.nets = ['EWCCNN'] # todo change to EWCCNN
         #args.samples_per_task = -1 # todo add this to the arg parser
         #args.shuffle_tasks = 'no' # todo add this to the arg parser
 

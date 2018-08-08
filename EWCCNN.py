@@ -7,9 +7,9 @@ from torch.autograd import Variable
 from copy import deepcopy
 
 class EWCCNN(CNN):
-    def __init__(self, filters, classifier_width, input_size, output_size, device, lam):
+    def __init__(self, hidden_size, input_size, output_size, device, lam):
 
-        super().__init__(filters, input_size, output_size, device)
+        super().__init__(hidden_size, input_size, output_size, device)
 
         self.lam = lam  # the value of lambda (fisher multiplier) to be used in EWC loss computation
 
