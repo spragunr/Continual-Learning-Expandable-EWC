@@ -145,6 +145,9 @@ def expand(models, args):
         elif model.__class__.__bases__[0].__name__ == 'CNN':
             expanded_models.append(
                 model.__class__.from_existing_model(model, model.hidden_size + args.scale_factor).to(model.device))
+        else:
+            print("ERROR- invalid network type detected")
+
 
     return expanded_models
 
