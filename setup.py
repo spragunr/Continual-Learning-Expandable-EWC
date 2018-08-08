@@ -141,7 +141,7 @@ def parse_arguments():
 
         args.batch_size = 4
         args.test_batch_size = 4
-        args.epochs = 10
+        args.epochs = 1 # todo change back to 10- just for testing
         args.lr = 0.01
         args.l2_reg_penalty = 0.0
         args.lam = 150
