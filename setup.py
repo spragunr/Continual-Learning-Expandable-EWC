@@ -144,7 +144,7 @@ def parse_arguments():
         args.epochs = 10 # todo change back to 10- just for testing
         args.lr = 0.01
         args.l2_reg_penalty = 0.0
-        args.lam = 150
+        args.lam = 400
         args.momentum = 0.0
         args.no_cuda = False
         args.seed = 1
@@ -154,10 +154,10 @@ def parse_arguments():
         args.input_size = 1024
         args.output_size = 100
         args.scale_factor = 1 # in this case, we ADD this many filters to first convolutional layer...
-        args.accuracy_threshold = 50 # todo figure out what this should be...
+        args.accuracy_threshold = 65 # todo figure out what this should be...
         args.dataset = 'cifar'
         args.tasks = 20
-        args.output_file = 'increm_cifar.h5'
+        args.output_file = 'increm_cifar_lam_400.h5'
         args.nets = ['EWCCNN'] # todo change to EWCCNN
         #args.samples_per_task = -1 # todo add this to the arg parser
         #args.shuffle_tasks = 'no' # todo add this to the arg parser
