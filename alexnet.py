@@ -29,10 +29,16 @@ class AlexNet(nn.Module):
                             classification problem
         """
         
+        CLASSIFICATION_STARTING_WIDTH = 512
+        CLASSIFICATION_SCALE_FACTOR = 2 
+
         super(AlexNet, self).__init__()
 
         self.filters = filters
-        classification_width = (2 ** (filters - 64)) * 4096 # double dense layers width when filter added
+       
+        # scale dense layers' widths by CLASSIFICATION_SCALE_FACTOR for each filter added
+        classification_width = \
+            (CLASSIFICATION_SCALE_FACTOR ** (filters - 64)) * CLASSIFICATION_STARTING_WIDTH 
 
         self.features = nn.Sequential(
             nn.Conv2d(in_channels=3, out_channels=filters, kernel_size=11, stride=4, padding=5),
