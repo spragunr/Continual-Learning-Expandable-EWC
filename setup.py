@@ -144,7 +144,7 @@ def parse_arguments():
         args.epochs = 10 # todo change back to 10- just for testing
         args.lr = 0.01
         args.l2_reg_penalty = 0.0
-        args.lam = 400
+        args.lam = 1500
         args.momentum = 0.0
         args.no_cuda = False
         args.seed = 1
