@@ -157,7 +157,7 @@ def parse_arguments():
         args.accuracy_threshold = 65 # todo figure out what this should be...
         args.dataset = 'cifar'
         args.tasks = 20
-        args.output_file = 'increm_cifar_lam_400.h5'
+        args.output_file = 'increm_cifar_lam_1500_5_fil_512_cw_scale_2.h5'
         args.nets = ['EWCCNN'] # todo change to EWCCNN
         #args.samples_per_task = -1 # todo add this to the arg parser
         #args.shuffle_tasks = 'no' # todo add this to the arg parser
