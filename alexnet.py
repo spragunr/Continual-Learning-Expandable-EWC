@@ -30,14 +30,16 @@ class AlexNet(nn.Module):
         
         CLASSIFICATION_STARTING_WIDTH = 512
         CLASSIFICATION_SCALE_FACTOR = 2 
+        
+        FILTER_EXPANSION = 5 # TODO replace this with a pass-through of args.scale_factor
 
         super(AlexNet, self).__init__()
 
         self.filters = filters
        
-        # scale dense layers' widths by CLASSIFICATION_SCALE_FACTOR for each filter added
+        # scale dense layers' widths by CLASSIFICATION_SCALE_FACTOR each time filters expands
         classification_width = \
-            (CLASSIFICATION_SCALE_FACTOR ** (filters - 64)) * CLASSIFICATION_STARTING_WIDTH 
+            (CLASSIFICATION_SCALE_FACTOR ** ((filters - 64) // FILTER_EXPANSION)) * CLASSIFICATION_STARTING_WIDTH 
 
         self.features = nn.Sequential(
             nn.Conv2d(in_channels=3, out_channels=filters, kernel_size=11, stride=4, padding=5),
