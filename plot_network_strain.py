@@ -78,18 +78,20 @@ def main():
 
     # strain_per_task is an array organized like so:
     # [
-    # (0, [])               row 0                     
-    # (c1, [x1, x2, x3])    row 1: (# of runs failed at task 1,
+    # [0, []]               row 0                     
+    # [c1, [x1, x2, x3]]    row 1: (# of runs failed at task 1,
     #                               average network strain per task (index) for runs ending at task 1)
-    # (c2, [y1, y2, y3])    row 2: (# of runs failed at task 2,
+    # [c2, [y1, y2, y3]]    row 2: (# of runs failed at task 2,
     #                               average network strain per task (index) for runs ending at task 2)
     # ...                            
     # ]
     strain_per_task = []
 
     for i in np.arange(0, highest+1):
-        strain_per_task.append((0, np.zeros(i)))
+        strain_per_task.append([0, np.zeros(i)])
     
+    print(strain_per_task)
+
     for data in runs:
         for t in range(len(data[1])):
             strain_per_task[data[0]][1][t] += data[1][t]
@@ -104,7 +106,9 @@ def main():
 
     for row in range(len(strain_per_task)):
         if strain_per_task[row][0] > 0:
-            run_groups.append(row, strain_per_task[row][1])
+            run_groups.append((row, strain_per_task[row][1]))
+    
+    plot_strain(run_groups)
 
 if __name__ == '__main__':
     main()
