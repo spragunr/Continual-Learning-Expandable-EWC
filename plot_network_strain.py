@@ -22,6 +22,9 @@ def plot_strain(run_groups):
     
     for run_group in run_groups:
         plt.plot(run_group[1], label=run_group[0])
+    
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
+               ncol=3, fancybox=True, shadow=True)
 
     plt.show()
 
@@ -90,17 +93,19 @@ def main():
     for i in np.arange(0, highest+1):
         strain_per_task.append([0, np.zeros(i)])
     
-    print(strain_per_task)
-
     for data in runs:
+        
         for t in range(len(data[1])):
             strain_per_task[data[0]][1][t] += data[1][t]
-            strain_per_task[data[0]][0] += 1
+        
+        strain_per_task[data[0]][0] += 1
     
     for row in range(len(strain_per_task)):
         for i in range(len(strain_per_task[row][1])):
             if strain_per_task[row][0] != 0:
                 strain_per_task[row][1][i] /= strain_per_task[row][0]
+    
+    print(strain_per_task)
 
     run_groups = []
 
@@ -108,6 +113,8 @@ def main():
         if strain_per_task[row][0] > 0:
             run_groups.append((row, strain_per_task[row][1]))
     
+    print(run_groups)
+
     plot_strain(run_groups)
 
 if __name__ == '__main__':
