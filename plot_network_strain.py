@@ -16,11 +16,14 @@ def plot_failures(failure_points, lowest, highest):
     
     plt.show() 
 
-def plot_strain():
-    return 0
+def plot_strain(run_groups):
+    
+    plt.figure()
+    
+    for run_group in run_groups:
+        plt.plot(run_group[1], label=run_group[0])
 
-def average_strain():
-    return 0
+    plt.show()
 
 def parse_h5(filename):
     
@@ -64,6 +67,15 @@ def main():
     
     plot_failures(failure_points, lowest, highest)
     
+    runs = [
+            (3, [0, 2, 9]),
+            (5, [0, 3, 4, 5, 9]),
+            (5, [0, 2, 6, 8, 10]),
+            (3, [0, 1, 8]),
+            (9, [0, 3, 4, 5, 6, 7, 10, 15, 23]),
+            (3, [0, .5, 7.5])
+            ]
+
     # strain_per_task is an array organized like so:
     # [
     # (0, [])               row 0                     
@@ -85,7 +97,8 @@ def main():
     
     for row in range(len(strain_per_task)):
         for i in range(len(strain_per_task[row][1])):
-            strain_per_task[row][1][i] /= strain_per_task[row][0]
+            if strain_per_task[row][0] != 0:
+                strain_per_task[row][1][i] /= strain_per_task[row][0]
 
     run_groups = []
 
