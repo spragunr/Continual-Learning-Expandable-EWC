@@ -95,8 +95,8 @@ def main():
     """
     NOTE: pass me the name of the file with expansion first...
     """
-    
-    parser = argparse.ArgumentParser(description='Plotting Tool')
+      
+    parserargparse.ArgumentParser(description='Plotting Tool')
     
     parser.add_argument('--filenames', nargs='+', type=str, default=['NONE'], metavar='FILENAMES',
                         help='names of .h5 files containing experimental result data')
