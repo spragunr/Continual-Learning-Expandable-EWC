@@ -6,6 +6,7 @@ import numpy as np
 
 
 
+
 def plot_failures(failure_points, lowest, highest):
   
     plt.figure()
