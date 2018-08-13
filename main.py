@@ -54,6 +54,8 @@ def main():
 
     files, expansions, avg_acc, task_acc = setup.setup_h5_file(args, models)
 
+    failure, strain =
+
     if args.dataset == "cifar":
         train_loaders, validation_loaders, test_loaders = utils.generate_cifar_tasks(args, kwargs)
 

@@ -83,10 +83,10 @@ def main():
     # strain_per_task is an array organized like so:
     # [
     # [0, []]               row 0                     
-    # [c1, [x1, x2, x3]]    row 1: (# of runs failed at task 1,
-    #                               average network strain per task (index) for runs ending at task 1)
-    # [c2, [y1, y2, y3]]    row 2: (# of runs failed at task 2,
-    #                               average network strain per task (index) for runs ending at task 2)
+    # [c1, [x1, x2, x3]]    row 1: [# of runs failed at task 1,
+    #                               average network strain per task (index) for runs ending at task 1]
+    # [c2, [y1, y2, y3]]    row 2: [# of runs failed at task 2,
+    #                               average network strain per task (index) for runs ending at task 2]
     # ...                            
     # ]
     strain_per_task = []
