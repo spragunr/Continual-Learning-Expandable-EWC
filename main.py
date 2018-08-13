@@ -52,9 +52,8 @@ def main():
 
     retrain_task = False
 
-    files, expansions, avg_acc, task_acc = setup.setup_h5_file(args, models)
+    files, expansions, avg_acc, task_acc, failure, strain = setup.setup_h5_file(args, models)
 
-    failure, strain =
 
     if args.dataset == "cifar":
         train_loaders, validation_loaders, test_loaders = utils.generate_cifar_tasks(args, kwargs)
