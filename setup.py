@@ -24,22 +24,22 @@ def parse_arguments():
     parser.add_argument('--experiment', type=str, default='custom', metavar='EXPERIMENT',
                         help='preconfigured experiment to run: mnist or cifar (defaults to custom)')
 
-    parser.add_argument('--batch-size', type=int, default=10, metavar='BS',
+    parser.add_argument('--batch-size', type=int, default=100, metavar='BS',
                         help='input batch size for training')
 
-    parser.add_argument('--test-batch-size', type=int, default=10, metavar='TBS',
+    parser.add_argument('--test-batch-size', type=int, default=1000, metavar='TBS',
                         help='input batch size for testing')
 
     parser.add_argument('--epochs', type=int, default=1, metavar='E',
                         help='number of epochs to train')
 
-    parser.add_argument('--lr', type=float, default=1e-3, metavar='LR',
+    parser.add_argument('--lr', type=float, default=0.1, metavar='LR',
                         help='learning rate')
 
     parser.add_argument('--l2-reg-penalty', type=float, default=0.0, metavar='L2',
                         help='l2 regularization penalty (weight decay) (default: 0.0)')
 
-    parser.add_argument('--lam', type=float, default=5000, metavar='LAM',
+    parser.add_argument('--lam', type=float, default=150, metavar='LAM',
                         help='ewc lambda value (fisher multiplier) (default: 15)')
 
     parser.add_argument('--momentum', type=float, default=0.0, metavar='M',
@@ -55,10 +55,10 @@ def parse_arguments():
                         help='how many batches to wait before logging training status (default 10)')
 
     # [train dataset size] = [full MNIST train set (60,000)] - [validation set size]
-    parser.add_argument('--train-dataset-size', type=int, default=500, metavar='TDS',
+    parser.add_argument('--train-dataset-size', type=int, default=59800, metavar='TDS',
                         help='number of images in the training dataset')
 
-    parser.add_argument('--validation-dataset-size', type=int, default=0, metavar='VDS',
+    parser.add_argument('--validation-dataset-size', type=int, default=200, metavar='VDS',
                         help='number of images in the validation dataset')
 
     # size of hidden layer in MLP in neurons OR initial number of filters in conv network
@@ -66,7 +66,7 @@ def parse_arguments():
                         help='# neurons in each hidden layer of MLP OR # filters in conv resnet')
 
     # 28 x 28 pixels = 784 pixels per MNIST image, 32 x 32 = 1024 for CIFAR 10
-    parser.add_argument('--input-size', type=int, default=1024, metavar='IS',
+    parser.add_argument('--input-size', type=int, default=784, metavar='IS',
                         help='size of each input data sampe to the network (default 784 (28 * 28))')
 
     # 10 classes - digits 0-9 for MNIST, 100 for CIFAR 100
@@ -83,20 +83,20 @@ def parse_arguments():
                         help='accuracy threshold (minimum) required on all tasks')
 
     # dataset on which to train/test model
-    parser.add_argument('--dataset', type=str, default='cifar', metavar='DS',
+    parser.add_argument('--dataset', type=str, default='mnist', metavar='DS',
                         help='dataset on which to train/test model (cifar100 or mnist)')
 
     # number of tasks
-    parser.add_argument('--tasks', type=int, default=20, metavar='T',
+    parser.add_argument('--tasks', type=int, default=100, metavar='T',
                         help='number of tasks')
 
-    parser.add_argument('--output-file', type=str, default='custom.h5', metavar='OUTPUT FILE',
+    parser.add_argument('--output-file', type=str, default='failure', metavar='OUTPUT FILE',
                         help='h5 file for storage of experimental results')
 
     parser.add_argument('--overwrite', action='store_true', default=False,
                         help='overwrite old result data files without asking (will prompt otherwise)')
 
-    parser.add_argument('--nets', nargs='+', type=str, default=['VanillaCNN'], metavar='NETS',
+    parser.add_argument('--nets', nargs='+', type=str, default=['EWCMLP'], metavar='NETS',
                         help='neural net classes to train')
 
     parser.add_argument('--run', type=int, default=0, metavar='RUN',
@@ -305,7 +305,7 @@ def setup_h5_file(args, models):
         model_type = str(type(model))
         model_type = model_type[model_type.index("'") + 1:model_type.rindex('.')]
 
-        filename = model_type + "_" + args.output_file
+        filename = model_type + "_" + args.output_file + "run_{}".format(args.run)
 
         path = Path(filename)
 

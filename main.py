@@ -15,7 +15,7 @@ def main():
 
     kwargs, device = setup.set_gpu_options(args)
 
-    setup.seed_rngs(args)
+    # setup.seed_rngs(args) # TODO: RE-ENABLE, DISABLED FOR FAILURE EXPERIMENTS
 
     # print 8 digits of precision when displaying floating point output from tensors
     torch.set_printoptions(precision=8)

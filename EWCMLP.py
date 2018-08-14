@@ -42,6 +42,9 @@ def save_metrics(h5file, failure, post_training_loss, fisher_st_dev, fisher_aver
     fisher_information = np.array(fisher_information)
     ds_fisher_information[...] = fisher_information[...]
 
+    h5file.flush()
+    h5file.close()
+
 
 class EWCMLP(MLP):
     def __init__(self, hidden_size, input_size, output_size, device, lam):
@@ -315,7 +318,7 @@ class EWCMLP(MLP):
                 loss.backward()
 
                 if task_number > 1: # todo change to hasattr() call
-                    self.tune_variable_learning_rates() 
+                    # self.tune_variable_learning_rates() # TODO: RE-ENABLE(DISABLED TO PRODUCE FAILURE)
 
                 # Simplified abstraction provided by PyTorch which uses a single statement to update all model parameters
                 # according to gradients (with respect to the last loss function on which .backward() was called and
