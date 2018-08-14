@@ -496,11 +496,11 @@ class EWCMLP(MLP):
 
         fisher_array = np.asarray(fisher_diags_numpy)
 
-        print(type(fisher_array[0]))
-
         fisher_information.append(fisher_array)
 
         flattened_fisher = np.ndarray.flatten(fisher_array)
+
+        print(flattened_fisher.shape)
 
         fisher_max.append(np.amax(flattened_fisher))
 
