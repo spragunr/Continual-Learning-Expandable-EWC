@@ -70,6 +70,24 @@ def parse_h5(filename):
 
     return (failure, total), (failure, st_dev), (failure, avg), (failure, maximum), (failure, loss), (failure, fisher_information)
 
+
+def plot_fisher_dist(run_group):
+
+    plt.figure()
+
+    tasks = []
+
+    for fi_data in run_group[1]:
+        tasks.append(fi_data)
+
+    plt.hist(fi_data, label=np.arange(0, run_group[0] + 1))
+
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
+               ncol=3, fancybox=True, shadow=True)
+
+    plt.show()
+
+
 def main():
 
 
@@ -174,8 +192,12 @@ def main():
     run_groups = []
 
     for row in range(len(fisher_summed)):
-        if strain_per_task[row][0] > 0:
-            run_groups.append((row, strain_per_task[row][1]))
+        if fisher_summed[row][0] > 0:
+            run_groups.append((row, fisher_summed[row][1]))
+
+    # run groups is now [...(failure_point, [[fisher info task 0][fi t1][fi t2]...])...]
+    for group in run_groups:
+        plot_fisher_dist(group)
 
 if __name__ == '__main__':
     main()

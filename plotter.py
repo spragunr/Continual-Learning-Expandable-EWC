@@ -27,6 +27,7 @@ def plot_line_avg_acc(avg_accuracies, expansion_markers, threshold, labels, save
 
     plt.savefig('{}.eps'.format(save), dpi=300, format='eps')
 
+
 def plot_bar_each_task_acc(task_accuracies, labels, save):
     
     plt.figure()
@@ -96,7 +97,7 @@ def main():
     NOTE: pass me the name of the file with expansion first...
     """
       
-    parserargparse.ArgumentParser(description='Plotting Tool')
+    parser = argparse.ArgumentParser(description='Plotting Tool')
     
     parser.add_argument('--filenames', nargs='+', type=str, default=['NONE'], metavar='FILENAMES',
                         help='names of .h5 files containing experimental result data')
