@@ -52,7 +52,8 @@ def main():
 
     retrain_task = False
 
-    files, expansions, avg_acc, task_acc, failure, strain = setup.setup_h5_file(args, models)
+    files, expansions, avg_acc, task_acc, failure, fisher_total, post_training_loss, fisher_average, \
+           fisher_st_dev, fisher_max, fisher_information = setup.setup_h5_file(args, models)
 
 
     if args.dataset == "cifar":
@@ -88,7 +89,16 @@ def main():
         retrain_task = False
 
         for model_num, model in enumerate(models):
-            train_args = {'validation_loader': validation_loader} if isinstance(model, (EWCMLP, EWCCNN)) else {}
+            train_args = {'validation_loader': validation_loader,
+                          'failure': failure,
+                          'fisher_total': fisher_total,
+                          'post_training_loss': post_training_loss,
+                          'fisher_average': fisher_average,
+                          'fisher_st_dev': fisher_st_dev,
+                          'fisher_max': fisher_max,
+                          'fisher_information': fisher_information
+                        } \
+            if isinstance(model, (EWCMLP, EWCCNN)) else {}
 
             # for each desired epoch, train the model on the latest task
             model.train_model(args, train_loader, task_count, **train_args)
