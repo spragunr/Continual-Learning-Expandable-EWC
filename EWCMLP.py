@@ -502,7 +502,7 @@ class EWCMLP(MLP):
 
         flattened_fisher = np.ndarray.flatten(fisher_array)
 
-        fisher_max.append(np.max(flattened_fisher))
+        fisher_max.append(np.amax(flattened_fisher))
 
         fisher_average.append(np.average(flattened_fisher))
 
