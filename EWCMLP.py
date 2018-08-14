@@ -492,6 +492,10 @@ class EWCMLP(MLP):
 
         fisher_diags_numpy = []
 
+        print(type(self.sum_Fx))
+
+
+        # TODO move all of this to train_...() after updating sums
         for diag in self.list_of_fisher_diags:
             fisher_diags_numpy.append(diag.cpu().numpy())
 
@@ -504,6 +508,7 @@ class EWCMLP(MLP):
         for fim_diagonal in fisher_array:
             flattened_fisher.append(np.ndarray.flatten(fim_diagonal))
 
+        print(len(flattened_fisher))
         fisher_max.append(np.amax(flattened_fisher))
 
         fisher_average.append(np.average(flattened_fisher))
