@@ -32,39 +32,37 @@ def plot_strain(run_groups):
 def parse_h5(filename):
     
     f = h5py.File(filename, 'r')                                                                                            
-    failure = deepcopy(f['failure'])                                                                                                           
+    failure = f['failure'][0]
     strain_per_task = []                                                                                                                
-    for data in f['strain']:
-        strain_per_task.append(data)
+    #for data in f['strain']:
+        #strain_per_task.append(data)
     
     f.close()
 
-    return (failure[0], strain_per_task)
+    return (failure, strain_per_task)
 
 def main():
 
 
-    # parserargparse.ArgumentParser(description='Plotting Tool')
-    # 
-    # parser.add_argument('--filenames', 
-    #         nargs='+', type=str, default=['NONE'], metavar='FILENAMES', 
-    #         help='names of .h5 files containing experimental result data')
-    # 
-    # args = parser.parse_args()
-    # 
-    # runs = []
+    parser = argparse.ArgumentParser(description='Plotting Tool')
 
-    # for filename in args.filenames:
-    #     runs.append(parse_h5(filename))
+    parser.add_argument('--filenames',
+            nargs='+', type=str, default=['NONE'], metavar='FILENAMES',
+            help='names of .h5 files containing experimental result data')
 
-    # failure_points = []
+    args = parser.parse_args()
 
-    # for data in runs:
-    #     failure_points.append(data[0])
-    # 
-    
-    failure_points = [4, 5, 4, 4, 2, 3, 3, 3, 3, 3, 5, 6, 9, 7]
-     
+    runs = []
+
+    for filename in args.filenames:
+        runs.append(parse_h5(filename))
+
+    failure_points = []
+
+    for data in runs:
+         failure_points.append(data[0])
+
+
     highest = np.amax(failure_points)
     
     lowest = np.amin(failure_points)
