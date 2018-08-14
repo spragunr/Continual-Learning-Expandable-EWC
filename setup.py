@@ -355,27 +355,7 @@ def setup_h5_file(args, models):
         task_acc[...] = np.zeros(len(task_acc))
         task_acc_list.append(task_acc)
 
-    failure = f.create_dataset("failure", (1,), dtype='i')
-    failure[0] = 0
 
-    fisher_total = f.create_dataset("fisher_total", (1,), dtype='f')
-    fisher_total[0] = 0
-
-    post_training_loss = f.create_dataset("post_training_loss", (1,), dtype='f')
-    post_training_loss[0] = 0
-
-    fisher_average = f.create_dataset("fisher_average", (1,), dtype='f')
-    fisher_average[0] = 0
-
-    fisher_st_dev = f.create_dataset("fisher_st_dev", (1,), dtype='f')
-    fisher_st_dev[0] = 0
-
-    fisher_max = f.create_dataset("fisher_max", (1,), dtype='f')
-    fisher_max[0] = 0
-
-    fisher_information = f.create_dataset('fisher_information', (100,), dtype=h5py.special_dtype(vlen=np.dtype('f')))
-    fisher_information[0] = [[0], [0], [0], [0], [0], [0]]
 
     # todo fix the models list style so only one model at a time, and make these lists into single h5 datasets
-    return files, expansions_list, avg_acc_list, task_acc_list, failure, fisher_total, post_training_loss, fisher_average, \
-           fisher_st_dev, fisher_max, fisher_information
+    return files, expansions_list, avg_acc_list, task_acc_list, f

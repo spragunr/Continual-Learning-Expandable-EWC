@@ -52,7 +52,7 @@ def main():
 
     retrain_task = False
 
-    files, expansions, avg_acc, task_acc = setup.setup_h5_file(args, models)
+    files, expansions, avg_acc, task_acc, h5file = setup.setup_h5_file(args, models)
 
     # metrics for measuring network strain- saved to h5 dataset later
     failure = [0] # task at which network fails without expansion
@@ -103,7 +103,8 @@ def main():
                           'fisher_average': fisher_average,
                           'fisher_st_dev': fisher_st_dev,
                           'fisher_max': fisher_max,
-                          'fisher_information': fisher_information
+                          'fisher_information': fisher_information,
+                          'h5file': h5file
                         } \
             if isinstance(model, (EWCMLP, EWCCNN)) else {}
 

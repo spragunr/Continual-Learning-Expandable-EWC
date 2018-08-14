@@ -8,6 +8,31 @@ from MLP import MLP
 import math
 import numpy as np
 
+# helper method for saving network strain metrics
+def save_metrics(h5file, failure, fisher_st_dev, fisher_average, fisher_max, fisher_total, fisher_information):
+
+    ds_failure = h5file.create_dataset("failure", (1,), dtype='i')
+    ds_failure[...] = failure
+
+    ds_fisher_total = h5file.create_dataset("fisher_total", (1,), dtype='f')
+    ds_fisher_total[0] = 0
+
+    ds_post_training_loss = h5file.create_dataset("post_training_loss", (1,), dtype='f')
+    ds_post_training_loss[0] = 0
+
+    ds_fisher_average = h5file.create_dataset("fisher_average", (1,), dtype='f')
+    ds_fisher_average[0] = 0
+
+    ds_fisher_st_dev = h5file.create_dataset("fisher_st_dev", (1,), dtype='f')
+    ds_fisher_st_dev[0] = 0
+
+    ds_fisher_max = h5file.create_dataset("fisher_max", (1,), dtype='f')
+    ds_fisher_max[0] = 0
+
+    ds_fisher_information = h5file.create_dataset('fisher_information', (100,), dtype=h5py.special_dtype(vlen=np.dtype('f')))
+    ds_fisher_information[0] = [[0], [0], [0], [0], [0], [0]]
+
+
 class EWCMLP(MLP):
     def __init__(self, hidden_size, input_size, output_size, device, lam):
 
@@ -150,6 +175,7 @@ class EWCMLP(MLP):
         # Mutliply error by fisher multiplier (lambda) divided by 2
         return loss_prev_tasks * (self.lam / 2.0)
 
+
     def train_model(self, args, train_loader, task_number, **kwargs):
 
         failure = kwargs.get('failure')
@@ -159,6 +185,7 @@ class EWCMLP(MLP):
         fisher_st_dev= kwargs.get('fisher_st_dev')
         fisher_max = kwargs.get('fisher_max')
         fisher_information = kwargs.get('fisher_information')
+        h5file = kwargs.get('h5file')
 
         # Set the module in "training mode"
         # This is necessary because some network layers behave differently when training vs testing.
@@ -307,6 +334,7 @@ class EWCMLP(MLP):
 
         if math.isnan(loss.item()) or math.isinf(loss.item()):
             failure[0] = task_number
+            save_metrics(h5file, failure, post_training_loss, fisher_st_dev, fisher_average, fisher_max, fisher_total, fisher_information)
         else:
             post_training_loss.append(loss.item())
 
@@ -317,7 +345,8 @@ class EWCMLP(MLP):
 
         # using validation set in Fisher Information Matrix computation as specified by:
         # https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
-        self.estimate_fisher(kwargs.get("validation_loader"), args)
+        self.estimate_fisher(kwargs.get("validation_loader"), args, fisher_total, fisher_average, fisher_st_dev, fisher_max,
+                        fisher_information)
 
         # update the ewc loss sums in the model to incorporate weights and fisher info from the task on which
         # we just trained the network
