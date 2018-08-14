@@ -169,8 +169,11 @@ def main():
     # plot summed fisher info distribution
     fisher_summed = []
 
+    print(len(runs[0][5][1][1]))
+
+
     for i in np.arange(0, highest + 1):
-        fisher_summed.append([0, np.zeros(i, len(runs[0][5][1][1]))])
+        fisher_summed.append([0, np.zeros((i, len(runs[0][5][1][1])))])
 
     for data in runs:
         for t in range(len(data[5][1])):
