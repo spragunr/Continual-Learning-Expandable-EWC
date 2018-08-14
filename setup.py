@@ -90,7 +90,7 @@ def parse_arguments():
     parser.add_argument('--tasks', type=int, default=100, metavar='T',
                         help='number of tasks')
 
-    parser.add_argument('--output-file', type=str, default='failure', metavar='OUTPUT FILE',
+    parser.add_argument('--output-file', type=str, default='failure2', metavar='OUTPUT FILE',
                         help='h5 file for storage of experimental results')
 
     parser.add_argument('--overwrite', action='store_true', default=False,

@@ -36,11 +36,13 @@ def save_metrics(h5file, failure, post_training_loss, fisher_st_dev, fisher_aver
     fisher_max = np.array(fisher_max)
     ds_fisher_max[...] = fisher_max[...]
 
-    #ds_fisher_information = h5file.create_dataset('fisher_information', (len(fisher_information),),
-                                                  #dtype=h5py.special_dtype(vlen=h5py.special_dtype(vlen=np.dtype('f'))))
+    ds_fisher_information = h5file.create_dataset('fisher_information', (len(fisher_information),),
+                                                  dtype=h5py.special_dtype(vlen=np.dtype('f')))
 
-    #fisher_information = np.array(fisher_information)
-    #ds_fisher_information[...] = fisher_information[...]
+    fisher_information = np.array(fisher_information)
+    print(len(fisher_information))
+    print(len(fisher_information[0]))
+    ds_fisher_information[...] = fisher_information[...]
 
     h5file.flush()
 
@@ -359,8 +361,7 @@ class EWCMLP(MLP):
 
         # using validation set in Fisher Information Matrix computation as specified by:
         # https://github.com/ariseff/overcoming-catastrophic/blob/master/experiment.ipynb
-        self.estimate_fisher(kwargs.get("validation_loader"), args, fisher_total, fisher_average, fisher_st_dev, fisher_max,
-                        fisher_information)
+        self.estimate_fisher(kwargs.get("validation_loader"), args)
 
         # update the ewc loss sums in the model to incorporate weights and fisher info from the task on which
         # we just trained the network
@@ -384,6 +385,8 @@ class EWCMLP(MLP):
             flattened_fisher = np.concatenate((flattened_fisher, np.ndarray.flatten(fim_diagonal)))
 
         print(len(flattened_fisher))
+
+        fisher_information.append(flattened_fisher)
 
         fisher_max.append(np.amax(flattened_fisher))
 
@@ -446,8 +449,7 @@ class EWCMLP(MLP):
         return loss_prev_tasks * (self.lam / 2.0)
 
     # used for whole batch
-    def estimate_fisher(self, validation_loader, args, fisher_total, fisher_average, fisher_st_dev, fisher_max,
-                        fisher_information):
+    def estimate_fisher(self, validation_loader, args):
 
         # List to hold the computed fisher diagonals for the task on which the network was just trained.
         # Fisher Information Matrix diagonals are stored as a list of tensors of the same dimensions and in the same

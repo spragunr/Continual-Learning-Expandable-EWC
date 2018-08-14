@@ -63,7 +63,7 @@ def main():
     fisher_average = [0] # avg of FIM diags
     fisher_st_dev = [0] # standard deviation of FIM diags
     fisher_max = [0] # maximum Fisher Info of any parameter in the network
-    fisher_information = [[[0], [0], [0], [0], [0], [0]]] # actual FIM diagonals
+    fisher_information = [[0]] # actual FIM diagonals
 
     if args.dataset == "cifar":
         train_loaders, validation_loaders, test_loaders = utils.generate_cifar_tasks(args, kwargs)
