@@ -119,7 +119,7 @@ def main():
         for data in runs:
 
             for t in range(len(data[strain_metric][1])):
-                strain_per_task[data[0]][1][t] += data[strain_metric][1][t]
+                strain_per_task[data[strain_metric][0]][1][t] += data[strain_metric][1][t]
 
             strain_per_task[data[strain_metric][0]][0] += 1
 
