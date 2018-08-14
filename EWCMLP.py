@@ -317,7 +317,7 @@ class EWCMLP(MLP):
                 # parameters
                 loss.backward()
 
-                if task_number > 1: # todo change to hasattr() call
+                #if task_number > 1: # todo change to hasattr() call
                     # self.tune_variable_learning_rates() # TODO: RE-ENABLE(DISABLED TO PRODUCE FAILURE)
 
                 # Simplified abstraction provided by PyTorch which uses a single statement to update all model parameters
