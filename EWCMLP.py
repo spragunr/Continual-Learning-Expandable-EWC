@@ -488,7 +488,7 @@ class EWCMLP(MLP):
 
 
         # update metrics for measuring network strain
-        fisher_array = self.list_of_fisher_diags.numpy()
+        fisher_array = np.asarray(self.list_of_fisher_diags)
 
         fisher_information.append(fisher_array)
 
