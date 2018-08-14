@@ -43,7 +43,6 @@ def save_metrics(h5file, failure, post_training_loss, fisher_st_dev, fisher_aver
     #ds_fisher_information[...] = fisher_information[...]
 
     h5file.flush()
-    h5file.close()
 
 
 class EWCMLP(MLP):
