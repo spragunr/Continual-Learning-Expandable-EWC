@@ -492,7 +492,7 @@ class EWCMLP(MLP):
         fisher_diags_numpy = []
 
         for diag in self.list_of_fisher_diags:
-            fisher_diags_numpy.append(diag.numpy())
+            fisher_diags_numpy.append(diag.cpu().numpy())
 
         fisher_array = np.asarray(fisher_diags_numpy)
 
