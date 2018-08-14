@@ -499,6 +499,8 @@ class EWCMLP(MLP):
         fisher_information.append(fisher_array)
 
         flattened_fisher = np.ndarray.flatten(fisher_array)
+        flattened_fisher = np.ndarray.flatten(fisher_array[0])
+
 
         print(flattened_fisher.shape)
 
