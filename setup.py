@@ -99,6 +99,9 @@ def parse_arguments():
     parser.add_argument('--nets', nargs='+', type=str, default=['VanillaCNN'], metavar='NETS',
                         help='neural net classes to train')
 
+    parser.add_argument('--run', type=int, default=0, metavar='RUN',
+                        help='if running repeatedly, use this arg to signal from bash script what run # this is')
+
     args = parser.parse_args()
 
     if args.experiment == 'mnist':
