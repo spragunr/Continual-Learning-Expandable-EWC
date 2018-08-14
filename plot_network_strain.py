@@ -33,13 +33,31 @@ def parse_h5(filename):
     
     f = h5py.File(filename, 'r')                                                                                            
     failure = f['failure'][0]
-    strain_per_task = []                                                                                                                
-    #for data in f['strain']:
-        #strain_per_task.append(data)
-    
+
+    total = []
+    st_dev = []
+    avg = []
+    maximum = []
+    loss = []
+
+    for data in f['fisher_total']:
+        total.append(data)
+
+    for data in f['post_training_loss']:
+        loss.append(data)
+
+    for data in f['fisher_average']:
+        avg.append(data)
+
+    for data in f['fisher_st_dev']:
+        st_dev.append(data)
+
+    for data in f['fisher_max']:
+        maximum.append(data)
+
     f.close()
 
-    return (failure, strain_per_task)
+    return (failure, total), (failure, st_dev), (failure, avg), (failure, maximum), (failure, loss)
 
 def main():
 
@@ -61,7 +79,6 @@ def main():
 
     for data in runs:
          failure_points.append(data[0])
-
 
     highest = np.amax(failure_points)
     
