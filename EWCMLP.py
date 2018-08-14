@@ -366,6 +366,33 @@ class EWCMLP(MLP):
         # we just trained the network
         self.update_ewc_sums()
 
+        # update metrics for measuring network strain
+        fisher_diags_numpy = []
+
+        print(type(self.sum_Fx))
+
+        for diag in self.sum_Fx:
+            fisher_diags_numpy.append(diag.cpu().numpy())
+
+        fisher_array = np.asarray(fisher_diags_numpy)
+
+        print(fisher_array.shape)
+
+        flattened_fisher = []
+
+        for fim_diagonal in fisher_array:
+            flattened_fisher = np.concatenate((flattened_fisher, np.ndarray.flatten(fim_diagonal)))
+
+        print(len(flattened_fisher))
+
+        fisher_max.append(np.amax(flattened_fisher))
+
+        fisher_average.append(np.average(flattened_fisher))
+
+        fisher_st_dev.append(np.std(flattened_fisher))
+
+        fisher_total.append(np.sum(flattened_fisher))
+
         # store the current fisher diagonals for use with plotting and comparative loss calculations
         # using the method in model.alternative_ewc_loss()
         self.save_fisher_diags(task_number)
@@ -487,35 +514,6 @@ class EWCMLP(MLP):
         for parameter in range(len(self.list_of_fisher_diags)):
             self.list_of_fisher_diags[parameter] /= args.validation_dataset_size
 
-
-        # update metrics for measuring network strain
-
-        fisher_diags_numpy = []
-
-        print(type(self.sum_Fx))
-
-
-        # TODO move all of this to train_...() after updating sums
-        for diag in self.list_of_fisher_diags:
-            fisher_diags_numpy.append(diag.cpu().numpy())
-
-        fisher_array = np.asarray(fisher_diags_numpy)
-
-        print(fisher_array.shape)
-
-        flattened_fisher = []
-
-        for fim_diagonal in fisher_array:
-            flattened_fisher = np.concatenate((flattened_fisher, np.ndarray.flatten(fim_diagonal)))
-
-        print(len(flattened_fisher))
-        fisher_max.append(np.amax(flattened_fisher))
-
-        fisher_average.append(np.average(flattened_fisher))
-
-        fisher_st_dev.append(np.std(flattened_fisher))
-
-        fisher_total.append(np.sum(flattened_fisher))
 
     def save_fisher_diags(self, task_count):
 

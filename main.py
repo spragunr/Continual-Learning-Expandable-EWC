@@ -55,6 +55,8 @@ def main():
     files, expansions, avg_acc, task_acc, h5file = setup.setup_h5_file(args, models)
 
     # metrics for measuring network strain- saved to h5 dataset later
+
+    ### ALL OF THESE ARE EVALUATED BASED ON THE RUNNING SUMS OF THE FISHER INFO ###
     failure = [0] # task at which network fails without expansion
     fisher_total = [0] # sum of all calculated FIM diagonals for each task
     post_training_loss = [0] # training loss after final training iteration on each task
