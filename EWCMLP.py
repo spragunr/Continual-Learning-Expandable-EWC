@@ -36,11 +36,11 @@ def save_metrics(h5file, failure, post_training_loss, fisher_st_dev, fisher_aver
     fisher_max = np.array(fisher_max)
     ds_fisher_max[...] = fisher_max[...]
 
-    ds_fisher_information = h5file.create_dataset('fisher_information', (len(fisher_information),),
-                                                  dtype=h5py.special_dtype(vlen=h5py.special_dtype(vlen=np.dtype('f'))))
+    #ds_fisher_information = h5file.create_dataset('fisher_information', (len(fisher_information),),
+                                                  #dtype=h5py.special_dtype(vlen=h5py.special_dtype(vlen=np.dtype('f'))))
 
-    fisher_information = np.array(fisher_information)
-    ds_fisher_information[...] = fisher_information[...]
+    #fisher_information = np.array(fisher_information)
+    #ds_fisher_information[...] = fisher_information[...]
 
     h5file.flush()
     h5file.close()
