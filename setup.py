@@ -305,7 +305,7 @@ def setup_h5_file(args, models):
         model_type = str(type(model))
         model_type = model_type[model_type.index("'") + 1:model_type.rindex('.')]
 
-        filename = model_type + "_" + args.output_file + "_run_{}".format(args.run)
+        filename = model_type + "_" + args.output_file + "_run_{}.h5".format(args.run)
 
         path = Path(filename)
 
