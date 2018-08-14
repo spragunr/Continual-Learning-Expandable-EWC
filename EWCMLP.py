@@ -499,9 +499,10 @@ class EWCMLP(MLP):
 
         print(fisher_array.shape)
 
-        fisher_information.append(fisher_array)
+        flattened_fisher = []
 
-        flattened_fisher = np.ndarray.flatten(fisher_array)
+        for fim_diagonal in fisher_array:
+            flattened_fisher.append(np.ndarray.flatten(fim_diagonal))
 
         fisher_max.append(np.amax(flattened_fisher))
 
