@@ -13,25 +13,34 @@ import h5py
 def save_metrics(h5file, failure, post_training_loss, fisher_st_dev, fisher_average, fisher_max, fisher_total, fisher_information):
 
     ds_failure = h5file.create_dataset("failure", (1,), dtype='i')
+    failure = np.array(failure)
     ds_failure[...] = failure[...]
 
     ds_fisher_total = h5file.create_dataset("fisher_total", (len(fisher_total),), dtype='f')
+    fisher_total = np.array(fisher_total)
     ds_fisher_total[...] = fisher_total[...]
 
     ds_post_training_loss = h5file.create_dataset("post_training_loss", (len(post_training_loss),), dtype='f')
+    post_training_loss = np.array(post_training_loss)
     ds_post_training_loss[...] = post_training_loss[...]
 
     ds_fisher_average = h5file.create_dataset("fisher_average", (len(fisher_average),), dtype='f')
+    fisher_average = np.array(fisher_average)
     ds_fisher_average[...] = fisher_average[...]
 
     ds_fisher_st_dev = h5file.create_dataset("fisher_st_dev", (len(fisher_st_dev),), dtype='f')
+    fisher_st_dev = np.array(fisher_st_dev)
     ds_fisher_st_dev[...] = fisher_st_dev[...]
 
     ds_fisher_max = h5file.create_dataset("fisher_max", (len(fisher_max),), dtype='f')
+    fisher_max = np.array(fisher_max)
     ds_fisher_max[...] = fisher_max[...]
 
-    ds_fisher_information = h5file.create_dataset('fisher_information', (100,), dtype=h5py.special_dtype(vlen=np.dtype('f')))
-    ds_fisher_information[0] = [[0], [0], [0], [0], [0], [0]]
+    ds_fisher_information = h5file.create_dataset('fisher_information', (len(fisher_information),),
+                                                  dtype=h5py.special_dtype(vlen=h5py.special_dtype(vlen=np.dtype('f'))))
+
+    fisher_information = np.array(fisher_information)
+    ds_fisher_information[...] = fisher_information[...]
 
 
 class EWCMLP(MLP):
