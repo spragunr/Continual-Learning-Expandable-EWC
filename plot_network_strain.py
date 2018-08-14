@@ -185,7 +185,7 @@ def main():
     # average fisher summed info for each task for each run group
     for row in range(len(fisher_summed)):
         for task in range(len(fisher_summed[row][1])):
-            for fisher_info in range(len(task)):
+            for fisher_info in range(len(fisher_summed[row][1][task])):
                 if fisher_summed[row][0] != 0:
                     fisher_summed[row][1][task][fisher_info] /= fisher_summed[row][0]
 
