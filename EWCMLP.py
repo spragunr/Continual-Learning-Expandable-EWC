@@ -347,6 +347,8 @@ class EWCMLP(MLP):
         if math.isnan(loss.item()) or math.isinf(loss.item()) or loss.item() > 1000:
             failure[0] = task_number
             save_metrics(h5file, failure, post_training_loss, fisher_st_dev, fisher_average, fisher_max, fisher_total, fisher_information)
+            h5file.close()
+            exit()
         else:
             post_training_loss.append(loss.item())
 
@@ -500,16 +502,13 @@ class EWCMLP(MLP):
         flattened_fisher = np.ndarray.flatten(fisher_array)
         flattened_fisher = np.ndarray.flatten(fisher_array[0])
 
-
-        print(flattened_fisher.shape)
-
         fisher_max.append(np.amax(flattened_fisher))
 
         fisher_average.append(np.average(flattened_fisher))
 
         fisher_st_dev.append(np.std(flattened_fisher))
 
-        fisher_total.append(sum(flattened_fisher))
+        fisher_total.append(np.sum(flattened_fisher))
 
     def save_fisher_diags(self, task_count):
 
