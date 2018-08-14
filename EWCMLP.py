@@ -5,7 +5,7 @@ import torch.optim as optim
 from torch.autograd import Variable
 from copy import deepcopy
 from MLP import MLP
-
+import math
 
 class EWCMLP(MLP):
     def __init__(self, hidden_size, input_size, output_size, device, lam):
@@ -151,6 +151,14 @@ class EWCMLP(MLP):
 
     def train_model(self, args, train_loader, task_number, **kwargs):
 
+        failure = kwargs.get('failure')
+        fisher_total = kwargs.get('fisher_total')
+        post_training_loss = kwargs.get('post_training_loss')
+        fisher_average = kwargs.get('fisher_average')
+        fisher_st_dev= kwargs.get('fisher_st_dev')
+        fisher_max = kwargs.get('fisher_max')
+        fisher_information = kwargs.get('fisher_information')
+
         # Set the module in "training mode"
         # This is necessary because some network layers behave differently when training vs testing.
         # Dropout, for example, is used to zero/mask certain weights during TRAINING to prevent overfitting.
@@ -294,6 +302,14 @@ class EWCMLP(MLP):
                                                                                     loss.item()
                                                                                     ))
 
+        # update stored metrics for measuring strain on the network
+
+        if math.isnan(loss.item()) or math.isinf(loss.item()):
+            failure[0] = task_number
+        else:
+            post_training_loss.append(loss.item())
+
+        self.compute_metrics(fisher_total, fisher_average, fisher_st_dev, fisher_max, fisher_information)
 
         # update the model size dictionary
         self.update_size_dict(task_number)
@@ -441,3 +457,6 @@ class EWCMLP(MLP):
               name != 'modulelist.{}.bias'.format(len(self.modulelist) - 1):
 
                 parameter.grad /= torch.clamp(self.sum_Fx[parameter_index] * self.lam, min = 1)
+
+    def compute_metrics(self, fisher_total, fisher_average, fisher_st_dev, fisher_max, fisher_information):
+
