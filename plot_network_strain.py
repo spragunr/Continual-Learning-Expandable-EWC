@@ -80,7 +80,7 @@ def plot_fisher_dist(run_group):
     for fi_data in run_group[1]:
         tasks.append(fi_data)
 
-    plt.hist(fi_data, label=np.arange(0, run_group[0] + 1))
+    plt.hist(tasks, label=np.arange(0, run_group[0] + 1))
 
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
                ncol=3, fancybox=True, shadow=True)
@@ -194,11 +194,13 @@ def main():
 
     run_groups = []
 
-    print(run_groups)
+
 
     for row in range(len(fisher_summed)):
         if fisher_summed[row][0] > 0:
             run_groups.append((row, fisher_summed[row][1]))
+
+    print(run_groups)
 
     # run groups is now [...(failure_point, [[fisher info task 0][fi t1][fi t2]...])...]
     for group in run_groups:
