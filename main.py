@@ -52,9 +52,16 @@ def main():
 
     retrain_task = False
 
-    files, expansions, avg_acc, task_acc, failure, fisher_total, post_training_loss, fisher_average, \
-           fisher_st_dev, fisher_max, fisher_information = setup.setup_h5_file(args, models)
+    files, expansions, avg_acc, task_acc = setup.setup_h5_file(args, models)
 
+    # metrics for measuring network strain- saved to h5 dataset later
+    failure = [0] # task at which network fails without expansion
+    fisher_total = [0] # sum of all calculated FIM diagonals for each task
+    post_training_loss = [0] # training loss after final training iteration on each task
+    fisher_average = [0] # avg of FIM diags
+    fisher_st_dev = [0] # standard deviation of FIM diags
+    fisher_max = [0] # maximum Fisher Info of any parameter in the network
+    fisher_information = [[[0], [0], [0], [0], [0], [0]]] # actual FIM diagonals
 
     if args.dataset == "cifar":
         train_loaders, validation_loaders, test_loaders = utils.generate_cifar_tasks(args, kwargs)

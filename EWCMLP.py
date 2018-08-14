@@ -6,6 +6,7 @@ from torch.autograd import Variable
 from copy import deepcopy
 from MLP import MLP
 import math
+import numpy as np
 
 class EWCMLP(MLP):
     def __init__(self, hidden_size, input_size, output_size, device, lam):
@@ -309,8 +310,6 @@ class EWCMLP(MLP):
         else:
             post_training_loss.append(loss.item())
 
-        self.compute_metrics(fisher_total, fisher_average, fisher_st_dev, fisher_max, fisher_information)
-
         # update the model size dictionary
         self.update_size_dict(task_number)
 
@@ -377,7 +376,8 @@ class EWCMLP(MLP):
         return loss_prev_tasks * (self.lam / 2.0)
 
     # used for whole batch
-    def estimate_fisher(self, validation_loader, args):
+    def estimate_fisher(self, validation_loader, args, fisher_total, fisher_average, fisher_st_dev, fisher_max,
+                        fisher_information):
 
         # List to hold the computed fisher diagonals for the task on which the network was just trained.
         # Fisher Information Matrix diagonals are stored as a list of tensors of the same dimensions and in the same
@@ -444,6 +444,22 @@ class EWCMLP(MLP):
         for parameter in range(len(self.list_of_fisher_diags)):
             self.list_of_fisher_diags[parameter] /= args.validation_dataset_size
 
+
+        # update metrics for measuring network strain
+        fisher_array = np.array(self.list_of_fisher_diags)
+
+        fisher_information.append(fisher_array)
+
+        flattened_fisher = np.ndarray.flatten(fisher_array)
+
+        fisher_max.append(np.max(flattened_fisher))
+
+        fisher_average.append(np.average(flattened_fisher))
+
+        fisher_st_dev.append(np.std(flattened_fisher))
+
+        fisher_total.append(sum(flattened_fisher))
+
     def save_fisher_diags(self, task_count):
 
         self.task_fisher_diags.update({task_count: deepcopy(self.list_of_fisher_diags)})
@@ -458,5 +474,4 @@ class EWCMLP(MLP):
 
                 parameter.grad /= torch.clamp(self.sum_Fx[parameter_index] * self.lam, min = 1)
 
-    def compute_metrics(self, fisher_total, fisher_average, fisher_st_dev, fisher_max, fisher_information):
 
