@@ -44,6 +44,7 @@ def parse_h5(filename):
     avg = []
     maximum = []
     loss = []
+    fisher_information = []
 
     for data in f['fisher_total']:
         total.append(data)
@@ -60,9 +61,14 @@ def parse_h5(filename):
     for data in f['fisher_max']:
         maximum.append(data)
 
+    for data in f['fisher_information']:
+        fisher_information.append([])
+        for task in data:
+            fisher_information[len(fisher_information) - 1].append(task)
+
     f.close()
 
-    return (failure, total), (failure, st_dev), (failure, avg), (failure, maximum), (failure, loss)
+    return (failure, total), (failure, st_dev), (failure, avg), (failure, maximum), (failure, loss), (failure, fisher_information)
 
 def main():
 
@@ -79,12 +85,13 @@ def main():
 
     for filename in args.filenames:
         runs.append([])
-        total, st_dev, avg, maximum, loss = parse_h5(filename)
+        total, st_dev, avg, maximum, loss, fisher_information = parse_h5(filename)
         runs[len(runs) - 1].append(total)
         runs[len(runs) - 1].append(st_dev)
         runs[len(runs) - 1].append(avg)
         runs[len(runs) - 1].append(maximum)
         runs[len(runs) - 1].append(loss)
+        runs[len(runs) - 1].append(fisher_information)
 
     failure_points = []
 
@@ -140,6 +147,21 @@ def main():
 
         metric = metrics[strain_metric]
         plot_strain(run_groups, metric)
+
+    # plot summed fisher info distribution
+    fisher_summed = []
+
+    for i in np.arange(0, highest + 1):
+        fisher_summed.append([0, np.zeros(i, len(runs[0][5][1][1]))])
+
+    for data in runs:
+        for t in range(len(data[5][1])):
+            for fi in range(len(data[5][1][t])):
+                fisher_summed[data[5][0]][1][t][fi] += data[5][1][t][fi]
+
+        fisher_summed[data[5][0]][0] += 1
+
+
 
 if __name__ == '__main__':
     main()
