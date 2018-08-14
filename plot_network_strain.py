@@ -194,6 +194,8 @@ def main():
 
     run_groups = []
 
+    print(run_groups)
+
     for row in range(len(fisher_summed)):
         if fisher_summed[row][0] > 0:
             run_groups.append((row, fisher_summed[row][1]))
