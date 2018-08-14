@@ -168,7 +168,11 @@ def main():
                 if fisher_summed[row][0] != 0:
                     fisher_summed[row][1][task][fisher_info] /= fisher_summed[row][0]
 
+    run_groups = []
 
+    for row in range(len(fisher_summed)):
+        if strain_per_task[row][0] > 0:
+            run_groups.append((row, strain_per_task[row][1]))
 
 if __name__ == '__main__':
     main()
