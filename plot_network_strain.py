@@ -14,10 +14,12 @@ def plot_failures(failure_points, lowest, highest):
     # plt.xlim(lowest - 0.5, highest + 0.5)
 
     plt.hist(failure_points, align='left', bins=np.arange(lowest, highest+2), color='orange', edgecolor='k')
-    
+
+    plt.xlabel('Task')
+
     plt.show() 
 
-def plot_strain(run_groups):
+def plot_strain(run_groups, metric):
     
     plt.figure()
     
@@ -26,6 +28,9 @@ def plot_strain(run_groups):
     
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
                ncol=3, fancybox=True, shadow=True)
+
+    plt.ylabel(metric)
+    plt.xlabel('Task')
 
     plt.show()
 
@@ -73,65 +78,67 @@ def main():
     runs = []
 
     for filename in args.filenames:
-        runs.append(parse_h5(filename))
+        runs.append([])
+        total, st_dev, avg, maximum, loss = parse_h5(filename)
+        runs[len(runs) - 1].append(total)
+        runs[len(runs) - 1].append(st_dev)
+        runs[len(runs) - 1].append(avg)
+        runs[len(runs) - 1].append(maximum)
+        runs[len(runs) - 1].append(loss)
 
     failure_points = []
 
     for data in runs:
-         failure_points.append(data[0])
+        failure_points.append(data[0][0])
 
     highest = np.amax(failure_points)
     
     lowest = np.amin(failure_points)
     
     plot_failures(failure_points, lowest, highest)
-    
-    runs = [
-            (3, [0, 2, 9]),
-            (5, [0, 3, 4, 5, 9]),
-            (5, [0, 2, 6, 8, 10]),
-            (3, [0, 1, 8]),
-            (9, [0, 3, 4, 5, 6, 7, 10, 15, 23]),
-            (3, [0, .5, 7.5])
-            ]
 
-    # strain_per_task is an array organized like so:
-    # [
-    # [0, []]               row 0                     
-    # [c1, [x1, x2, x3]]    row 1: [# of runs failed at task 1,
-    #                               average network strain per task (index) for runs ending at task 1]
-    # [c2, [y1, y2, y3]]    row 2: [# of runs failed at task 2,
-    #                               average network strain per task (index) for runs ending at task 2]
-    # ...                            
-    # ]
-    strain_per_task = []
 
-    for i in np.arange(0, highest+1):
-        strain_per_task.append([0, np.zeros(i)])
-    
-    for data in runs:
-        
-        for t in range(len(data[1])):
-            strain_per_task[data[0]][1][t] += data[1][t]
-        
-        strain_per_task[data[0]][0] += 1
-    
-    for row in range(len(strain_per_task)):
-        for i in range(len(strain_per_task[row][1])):
-            if strain_per_task[row][0] != 0:
-                strain_per_task[row][1][i] /= strain_per_task[row][0]
-    
-    print(strain_per_task)
+    metrics = ['Sum of Fisher Information','Standard Deviation of Fisher Information','Average of Fisher Information',
+               'Maximum Fisher Information Value','Final Training Iteration Loss']
 
-    run_groups = []
+    for strain_metric in range(5):
+        # strain_per_task is an array organized like so:
+        # [
+        # [0, []]               row 0
+        # [c1, [x1, x2, x3]]    row 1: [# of runs failed at task 1,
+        #                               average network strain per task (index) for runs ending at task 1]
+        # [c2, [y1, y2, y3]]    row 2: [# of runs failed at task 2,
+        #                               average network strain per task (index) for runs ending at task 2]
+        # ...
+        # ]
+        strain_per_task = []
 
-    for row in range(len(strain_per_task)):
-        if strain_per_task[row][0] > 0:
-            run_groups.append((row, strain_per_task[row][1]))
-    
-    print(run_groups)
+        for i in np.arange(0, highest+1):
+            strain_per_task.append([0, np.zeros(i)])
 
-    plot_strain(run_groups)
+        for data in runs:
+
+            for t in range(len(data[1])):
+                strain_per_task[data[0]][1][t] += data[1][t]
+
+            strain_per_task[data[0]][0] += 1
+
+        for row in range(len(strain_per_task)):
+            for i in range(len(strain_per_task[row][1])):
+                if strain_per_task[row][0] != 0:
+                    strain_per_task[row][1][i] /= strain_per_task[row][0]
+
+        print(strain_per_task)
+
+        run_groups = []
+
+        for row in range(len(strain_per_task)):
+            if strain_per_task[row][0] > 0:
+                run_groups.append((row, strain_per_task[row][1]))
+
+        print(run_groups)
+
+        plot_strain(run_groups, metric)
 
 if __name__ == '__main__':
     main()
