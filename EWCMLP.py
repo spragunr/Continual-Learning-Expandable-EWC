@@ -344,7 +344,7 @@ class EWCMLP(MLP):
 
         # update stored metrics for measuring strain on the network
 
-        if math.isnan(loss.item()) or math.isinf(loss.item()):
+        if math.isnan(loss.item()) or math.isinf(loss.item()) or loss.item > 1000:
             failure[0] = task_number
             save_metrics(h5file, failure, post_training_loss, fisher_st_dev, fisher_average, fisher_max, fisher_total, fisher_information)
         else:
