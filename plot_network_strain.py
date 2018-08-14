@@ -168,6 +168,9 @@ def main():
                 if fisher_summed[row][0] != 0:
                     fisher_summed[row][1][task][fisher_info] /= fisher_summed[row][0]
 
+### YOU WERE HERE>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>###
+
+
     run_groups = []
 
     for row in range(len(fisher_summed)):
