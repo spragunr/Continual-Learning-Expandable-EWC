@@ -5,7 +5,7 @@ import h5py
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
-
+from scipy import stats
 
 
 def plot_failures(failure_points, lowest, highest):
