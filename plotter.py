@@ -17,8 +17,15 @@ def plot_line_avg_acc(avg_accuracies, expansion_markers, threshold, labels, save
     plt.xlim(1, len(avg_accuracies[0]))
     plt.ylim(0, 100)
 
+
+    markers = []
+
     for marker in expansion_markers:
-        plt.axvline(x=marker, color='r')
+        if marker not in markers:
+            plt.axvline(x=marker, color='r')
+            markers.append(marker)
+        else:
+            plt.axvline(x=marker, color='g')
 
     plt.axhline(y=threshold, linestyle='dashed')
 
@@ -88,6 +95,8 @@ def parse_h5_file(filename):
         if expansions[i] == 1:
             expansion_indices.append(i)
         elif expansions[i] > 1:
+            for exp in range(i):
+                expansion_indices.append(i)
             print("You'd better take a look at {}, Captain...".format(filename))
 
     return avg_acc, task_acc, expansion_indices, metadata
