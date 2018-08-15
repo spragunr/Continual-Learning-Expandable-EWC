@@ -83,10 +83,13 @@ def plot_fisher_dist(run_group):
 
     # bins = np.arange(0, 2.5, 0.01)
 
-    # plt.hist(tasks, label=np.arange(0, run_group[0] + 1))
+    print(len(tasks))
+    print(len(tasks[1]))
 
-    for task in enumerate(tasks):
-        sns.distplot(task, label=task)
+    plt.hist(tasks, label=np.arange(0, run_group[0] + 1))
+
+    #for task in enumerate(tasks):
+        #sns.distplot(task, label=task)
 
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
                ncol=3, fancybox=True, shadow=True)
@@ -96,7 +99,7 @@ def plot_fisher_dist(run_group):
 
 def main():
 
-    sns.set(color_codes=True)
+    #sns.set(color_codes=True)
 
     parser = argparse.ArgumentParser(description='Plotting Tool')
 
