@@ -83,14 +83,14 @@ def plot_fisher_dist(run_group):
 
     # bins = np.arange(0, 2.5, 0.01)
 
-    # plt.hist(tasks, label=np.arange(0, run_group[0] + 1))
+    plt.hist(tasks, label=np.arange(0, run_group[0] + 1))
 
     plt.xlim(0, .25)
 
-    for i, task in enumerate(tasks):
-        sns.distplot(task)
+    # for i, task in enumerate(tasks):
+    #     sns.distplot(task)
 
-    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
+    plt.legend(loc='upper right', bbox_to_anchor=(0.5, 1.05),
                ncol=3, fancybox=True, shadow=True)
 
     plt.show()
