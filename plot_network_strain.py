@@ -7,6 +7,7 @@ import numpy as np
 import seaborn as sns
 from scipy import stats
 
+DIRECTORY = 'failure_run_2/plots/'
 
 def plot_failures(failure_points, lowest, highest):
   
@@ -18,7 +19,7 @@ def plot_failures(failure_points, lowest, highest):
 
     plt.xlabel('Task')
 
-    plt.show() 
+    plt.savefig('{}failures.eps'.format(DIRECTORY), dpi=300, format='eps')
 
 def plot_strain(run_groups, metric):
     
@@ -33,7 +34,7 @@ def plot_strain(run_groups, metric):
     plt.ylabel(metric)
     plt.xlabel('Task')
 
-    plt.show()
+    plt.savefig('{}{}.eps'.format(DIRECTORY, metric), dpi=300, format='eps')
 
 def parse_h5(filename):
     
@@ -85,15 +86,13 @@ def plot_fisher_dist(run_group):
 
     plt.hist(tasks, label=np.arange(0, run_group[0] + 1))
 
-    plt.xlim(0, .25)
 
     # for i, task in enumerate(tasks):
     #     sns.distplot(task)
 
-    plt.legend(loc='upper right', bbox_to_anchor=(0.5, 1.05),
-               ncol=3, fancybox=True, shadow=True)
+    plt.legend(loc='upper right', fancybox=True, shadow=True)
 
-    plt.show()
+    plt.savefig('{}fisher_distribution_failure_at_{}.eps'.format(DIRECTORY, run_group[0]), dpi=300, format='eps')
 
 
 def main():
