@@ -94,6 +94,7 @@ def plot_fisher_dist(run_group):
 
 def main():
 
+    sns.set(color_codes=True)
 
     parser = argparse.ArgumentParser(description='Plotting Tool')
 
