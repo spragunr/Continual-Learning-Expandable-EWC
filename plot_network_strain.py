@@ -7,7 +7,7 @@ import numpy as np
 import seaborn as sns
 from scipy import stats
 
-DIRECTORY = 'failure_run_2/plots/'
+DIRECTORY = 'failure_experiments/plots/' # TODO change this as needed
 
 def plot_failures(failure_points, lowest, highest):
   
@@ -28,11 +28,10 @@ def plot_strain(run_groups, metric):
     for run_group in run_groups:
         plt.plot(run_group[1], label=run_group[0])
     
-    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
-               ncol=3, fancybox=True, shadow=True)
+    plt.legend(loc='upper left', fancybox=True, shadow=True)
 
-    if metric == 'Final Training Iteration Loss':
-        plt.ylim(0, 20)
+    # if metric == 'Final Training Iteration Loss':
+    #     plt.ylim(0, 10)
 
 
     plt.ylabel(metric)
@@ -67,14 +66,14 @@ def parse_h5(filename):
     for data in f['fisher_max']:
         maximum.append(data)
 
-    for data in f['fisher_information']:
-        fisher_information.append([])
-        for task in data:
-            fisher_information[len(fisher_information) - 1].append(task)
+    # for data in f['fisher_information']:
+    #     fisher_information.append([])
+    #     for task in data:
+    #         fisher_information[len(fisher_information) - 1].append(task)
 
     f.close()
 
-    return (failure, total), (failure, st_dev), (failure, avg), (failure, maximum), (failure, loss), (failure, fisher_information)
+    return (failure, total), (failure, st_dev), (failure, avg), (failure, maximum), (failure, loss)#, (failure, fisher_information)
 
 
 def plot_fisher_dist(run_group):
@@ -115,13 +114,14 @@ def main():
 
     for filename in args.filenames:
         runs.append([])
-        total, st_dev, avg, maximum, loss, fisher_information = parse_h5(filename)
+        #total, st_dev, avg, maximum, loss, fisher_information = parse_h5(filename)
+        total, st_dev, avg, maximum, loss = parse_h5(filename)
         runs[len(runs) - 1].append(total)
         runs[len(runs) - 1].append(st_dev)
         runs[len(runs) - 1].append(avg)
         runs[len(runs) - 1].append(maximum)
         runs[len(runs) - 1].append(loss)
-        runs[len(runs) - 1].append(fisher_information)
+        #runs[len(runs) - 1].append(fisher_information)
 
     failure_points = []
 
@@ -179,40 +179,41 @@ def main():
         plot_strain(run_groups, metric)
 
     # plot summed fisher info distribution
-    fisher_summed = []
 
-    print(len(runs[0][5][1][1]))
-
-
-    for i in np.arange(0, highest + 1):
-        fisher_summed.append([0, np.zeros((i, len(runs[0][5][1][1])))])
-
-    for data in runs:
-        for t in range(len(data[5][1])):
-            for fi in range(len(data[5][1][t])):
-                fisher_summed[data[5][0]][1][t][fi] += data[5][1][t][fi]
-
-        fisher_summed[data[5][0]][0] += 1
-
-    # average fisher summed info for each task for each run group
-    for row in range(len(fisher_summed)):
-        for task in range(len(fisher_summed[row][1])):
-            for fisher_info in range(len(fisher_summed[row][1][task])):
-                if fisher_summed[row][0] != 0:
-                    fisher_summed[row][1][task][fisher_info] /= fisher_summed[row][0]
-
-
-    run_groups = []
-
-    for row in range(len(fisher_summed)):
-        if fisher_summed[row][0] > 0:
-            run_groups.append((row, fisher_summed[row][1]))
-
-    print(run_groups)
-
-    # run groups is now [...(failure_point, [[fisher info task 0][fi t1][fi t2]...])...]
-    for group in run_groups:
-        plot_fisher_dist(group)
+    # fisher_summed = []
+    #
+    # print(len(runs[0][5][1][1]))
+    #
+    #
+    # for i in np.arange(0, highest + 1):
+    #     fisher_summed.append([0, np.zeros((i, len(runs[0][5][1][1])))])
+    #
+    # for data in runs:
+    #     for t in range(len(data[5][1])):
+    #         for fi in range(len(data[5][1][t])):
+    #             fisher_summed[data[5][0]][1][t][fi] += data[5][1][t][fi]
+    #
+    #     fisher_summed[data[5][0]][0] += 1
+    #
+    # # average fisher summed info for each task for each run group
+    # for row in range(len(fisher_summed)):
+    #     for task in range(len(fisher_summed[row][1])):
+    #         for fisher_info in range(len(fisher_summed[row][1][task])):
+    #             if fisher_summed[row][0] != 0:
+    #                 fisher_summed[row][1][task][fisher_info] /= fisher_summed[row][0]
+    #
+    #
+    # run_groups = []
+    #
+    # for row in range(len(fisher_summed)):
+    #     if fisher_summed[row][0] > 0:
+    #         run_groups.append((row, fisher_summed[row][1]))
+    #
+    # print(run_groups)
+    #
+    # # run groups is now [...(failure_point, [[fisher info task 0][fi t1][fi t2]...])...]
+    # for group in run_groups:
+    #     plot_fisher_dist(group)
 
 if __name__ == '__main__':
     main()
