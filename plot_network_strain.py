@@ -85,6 +85,8 @@ def plot_fisher_dist(run_group):
 
     # plt.hist(tasks, label=np.arange(0, run_group[0] + 1))
 
+    plt.xlim(0, .25)
+
     for i, task in enumerate(tasks):
         sns.distplot(task)
 
