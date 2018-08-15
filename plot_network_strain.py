@@ -1,5 +1,6 @@
 import argparse
 from copy import deepcopy
+import pandas as pd
 import h5py
 import matplotlib.pyplot as plt
 import numpy as np
@@ -84,7 +85,8 @@ def plot_fisher_dist(run_group):
 
     # plt.hist(tasks, label=np.arange(0, run_group[0] + 1))
 
-    sns.distplot(tasks, label=np.arange(0, run_group[0] + 1))
+    for task in enumerate(tasks):
+        sns.distplot(task, label=task)
 
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
                ncol=3, fancybox=True, shadow=True)
