@@ -31,6 +31,10 @@ def plot_strain(run_groups, metric):
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
                ncol=3, fancybox=True, shadow=True)
 
+    if metric == 'Final Training Iteration Loss':
+        plt.ylim(0, 20)
+
+
     plt.ylabel(metric)
     plt.xlabel('Task')
 
