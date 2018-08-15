@@ -3,7 +3,7 @@ from copy import deepcopy
 import h5py
 import matplotlib.pyplot as plt
 import numpy as np
-
+import seaborn as sns
 
 
 
@@ -80,7 +80,11 @@ def plot_fisher_dist(run_group):
     for fi_data in run_group[1]:
         tasks.append(fi_data)
 
-    plt.hist(tasks, label=np.arange(0, run_group[0] + 1))
+    # bins = np.arange(0, 2.5, 0.01)
+
+    # plt.hist(tasks, label=np.arange(0, run_group[0] + 1))
+
+    sns.distplot(tasks, label=np.arange(0, run_group[0] + 1))
 
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
                ncol=3, fancybox=True, shadow=True)
@@ -189,12 +193,8 @@ def main():
                 if fisher_summed[row][0] != 0:
                     fisher_summed[row][1][task][fisher_info] /= fisher_summed[row][0]
 
-### YOU WERE HERE>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>###
-
 
     run_groups = []
-
-
 
     for row in range(len(fisher_summed)):
         if fisher_summed[row][0] > 0:
