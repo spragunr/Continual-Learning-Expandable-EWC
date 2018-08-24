@@ -102,7 +102,7 @@ def parse_arguments():
     parser.add_argument('--run', type=int, default=0, metavar='RUN',
                         help='if running repeatedly, use this arg to signal from bash script what run # this is')
     
-    parser.add_argument('--perm', type=int, default=100, metavar='PERM',
+    parser.add_argument('--perm', type=int, default=30, metavar='PERM',
                         help='percent permutation to be applied to mnist images')
 
     args = parser.parse_args()
@@ -111,12 +111,12 @@ def parse_arguments():
 
         print('|-----[CONDUCTING PERMUTED MNIST EXPERIMENT]-----|')
 
-        args.batch_size = 100
-        args.test_batch_size = 1000
-        args.epochs = 10
-        args.lr = 0.01
+        args.batch_size = 50 # TODO change back to 100
+        args.test_batch_size = 50 # TODO change back to 1000
+        args.epochs = 1 # TODO change back to 10
+        args.lr = 0.1 # TODO change back to 0.01
         args.l2_reg_penalty = 0.0
-        args.lam = 150
+        args.lam = 15 # TODO change back to 150
         args.momentum = 0.0
         args.no_cuda = False
         args.seed = 1
