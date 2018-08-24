@@ -10,10 +10,11 @@ import h5py
 from Continuum import Continuum
 import matplotlib.pyplot as plt
 
-def show_mnist_img(img):
+def show_mnist_img(img, task, index):
+    plt.figure()
     npimg = img.numpy()
     plt.imshow(npimg)
-    plt.show()
+    plt.savefig("./perms/task{}_img{}".format(task, index))
 
 def main():
 
@@ -104,13 +105,13 @@ def main():
             # verify percent permuation of images
             train_batch, labels = next(iter(train_loader))
 
-            for img in train_batch:
-                show_mnist_img(img)
+            for i, img in enumerate(train_batch):
+                show_mnist_img(img, task_count, i)
             
             test_batch, labels = next(iter(test_loader))
 
-            for img in test_batch:
-                show_mnist_img(img)
+            for i, img in enumerate(test_batch):
+                show_mnist_img(img, task_count, i)
 
         retrain_task = False
 
