@@ -13,10 +13,10 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 def show_mnist_img(img, task, index):
-    # plt.figure()
+    fig = plt.figure()
     npimg = img.numpy()
     plt.imshow(npimg)
-    plt.savefig("./perms/task{}_img{}".format(task, index))
+    fig.savefig("./perms/task{}_img{}".format(task, index))
 
 def main():
 
