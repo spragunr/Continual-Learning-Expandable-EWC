@@ -130,7 +130,7 @@ def parse_arguments():
         args.accuracy_threshold = 0
         args.dataset = 'mnist'
         args.tasks = 100
-        args.output_file = 'checking_double_layer_expansion.h5' 
+        args.output_file = 'checking_perms' 
         args.nets = ['EWCMLP']
         
 
