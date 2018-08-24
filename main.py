@@ -8,6 +8,8 @@ from VanillaCNN import VanillaCNN
 import numpy as np
 import h5py
 from Continuum import Continuum
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 def show_mnist_img(img, task, index):
