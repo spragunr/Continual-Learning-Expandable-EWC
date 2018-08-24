@@ -8,6 +8,12 @@ from VanillaCNN import VanillaCNN
 import numpy as np
 import h5py
 from Continuum import Continuum
+import matplotlib.pyplot as plt
+
+def show_mnist_img(img):
+    npimg = img.numpy()
+    plt.imshow(npimg)
+    plt.show()
 
 def main():
 
@@ -87,13 +93,24 @@ def main():
                 train_loader, validation_loader, test_loader = utils.generate_new_mnist_task(args, kwargs,
                     first_task=(task_count == 1)
                 )
-
+    
             # add the new test_loader for this task to the list of testing dataset DataLoaders for later re-use
             # to evaluate how well the models retain accuracy on old tasks after learning new ones
             #
             # NOTE: this list also includes the current test_loader, which we are appending here, because we also
             # need to test each network on the current task after training
             prev_test_loaders.append(test_loader)
+                
+            # verify percent permuation of images
+            train_batch, labels = next(iter(train_loader))
+
+            for img in train_batch:
+                show_mnist_img(img)
+            
+            test_batch, labels = next(iter(test_loader))
+
+            for img in test_batch:
+                show_mnist_img(img)
 
         retrain_task = False
 
