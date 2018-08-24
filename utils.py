@@ -10,44 +10,81 @@ import os
 import subprocess
 import pickle
 
+def generate_percent_permutation(percent, length):
+    
+    perm_size = int(length * (percent / 100.0))
+    
+    indices = np.random.choice(length, size=perm_size, replace=False)
+    
+    return indices
+
+def apply_permutation(image, indices):
+
+    permute_sample = image[indices]
+    np.random.shuffle(permute_sample)
+    
+    image[indices] = permute_sample
+    
+    return image
+
 # generate the DataLoaders corresponding to a permuted mnist task
 def generate_new_mnist_task(args, kwargs, first_task):
+    
+    if args.perm == 100:
+        # permutation to be applied to all images in the dataset (if this is not the first dataset being generated)
+        pixel_permutation = torch.randperm(args.input_size)
 
-    # permutation to be applied to all images in the dataset (if this is not the first dataset being generated)
-    pixel_permutation = torch.randperm(args.input_size)
+        # transforms.Compose() composes several transforms together.
+        #
+        # IF this is NOT the FIRST task, we should permute the original MNIST dataset to form a new task.
+        #
+        #  The transforms composed here are as follows:
+        #
+        # transforms.ToTensor():
+        #     Converts a PIL Image or numpy.ndarray (H x W x C) in the range [0, 255] to a
+        #     torch.FloatTensor of shape (C x H x W) in the range [0.0, 1.0].
+        #
+        # transforms.Normalize(mean, std):
+        #     Normalize a tensor image with mean and standard deviation. Given mean: (M1,...,Mn) and
+        #     std: (S1,..,Sn) for n channels, this transform will normalize each channel of the
+        #     input torch.*Tensor i.e. input[channel] = (input[channel] - mean[channel]) / std[channel]
+        #
+        #     NOTE: the values used here for mean and std are those computed on the MNIST dataset
+        #           SOURCE: https://discuss.pytorch.org/t/normalization-in-the-mnist-example/457
+        #
+        # transforms.Lambda() applies the enclosed lambda function to each image (x) in the DataLoader
+        # todo comment on sequential mnist and pixel permuation
+        # permutation from: https://discuss.pytorch.org/t/sequential-mnist/2108 (first response)
+        transformations = transforms.Compose(
+            [
+                transforms.ToTensor(),
+                #transforms.Normalize((0.1307,), (0.3081,)), # TODO determine why network performs better w/o normalization
+                transforms.Lambda(lambda x: x.view(-1, 1))
+            ]) if first_task else transforms.Compose(
+            [
+                transforms.ToTensor(),
+                #transforms.Normalize((0.1307,), (0.3081,)), # TODO determine why network performs better w/o normalization
+                transforms.Lambda(lambda x: x.view(-1, 1)[pixel_permutation])
+            ])
+    
+    else:
+        # permute only a specified percentage of the pixels in the image
 
-    # transforms.Compose() composes several transforms together.
-    #
-    # IF this is NOT the FIRST task, we should permute the original MNIST dataset to form a new task.
-    #
-    #  The transforms composed here are as follows:
-    #
-    # transforms.ToTensor():
-    #     Converts a PIL Image or numpy.ndarray (H x W x C) in the range [0, 255] to a
-    #     torch.FloatTensor of shape (C x H x W) in the range [0.0, 1.0].
-    #
-    # transforms.Normalize(mean, std):
-    #     Normalize a tensor image with mean and standard deviation. Given mean: (M1,...,Mn) and
-    #     std: (S1,..,Sn) for n channels, this transform will normalize each channel of the
-    #     input torch.*Tensor i.e. input[channel] = (input[channel] - mean[channel]) / std[channel]
-    #
-    #     NOTE: the values used here for mean and std are those computed on the MNIST dataset
-    #           SOURCE: https://discuss.pytorch.org/t/normalization-in-the-mnist-example/457
-    #
-    # transforms.Lambda() applies the enclosed lambda function to each image (x) in the DataLoader
-    # todo comment on sequential mnist and pixel permuation
-    # permutation from: https://discuss.pytorch.org/t/sequential-mnist/2108 (first response)
-    transformations = transforms.Compose(
-        [
-            transforms.ToTensor(),
-            #transforms.Normalize((0.1307,), (0.3081,)), # TODO determine why network performs better w/o normalization
-            transforms.Lambda(lambda x: x.view(-1, 1))
-        ]) if first_task else transforms.Compose(
-        [
-            transforms.ToTensor(),
-            #transforms.Normalize((0.1307,), (0.3081,)), # TODO determine why network performs better w/o normalization
-            transforms.Lambda(lambda x: x.view(-1, 1)[pixel_permutation])
-        ])
+        permutation = generate_percent_permutation(args.perm, 784)
+
+        
+        transformations = transforms.Compose(
+            [
+                transforms.ToTensor(),
+                #transforms.Normalize((0.1307,), (0.3081,)), # TODO determine why network performs better w/o normalization
+                transforms.Lambda(lambda x: x.view(-1, 1))
+            ]) if first_task else transforms.Compose(
+            [
+                transforms.ToTensor(),
+                #transforms.Normalize((0.1307,), (0.3081,)), # TODO determine why network performs better w/o normalization
+                transforms.Lambda(lambda x: x.view(-1, 1)),
+                transforms.Lambda(lambda x: apply_permutation(x, permutation))
+            ])
 
     # Split the PyTorch MNIST training dataset into training and validation datasets, and transform the data.
     #
