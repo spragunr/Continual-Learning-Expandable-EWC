@@ -11,7 +11,7 @@ from Continuum import Continuum
 import matplotlib.pyplot as plt
 
 def show_mnist_img(img, task, index):
-    plt.figure()
+    # plt.figure()
     npimg = img.numpy()
     plt.imshow(npimg)
     plt.savefig("./perms/task{}_img{}".format(task, index))
