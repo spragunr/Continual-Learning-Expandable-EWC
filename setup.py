@@ -101,6 +101,9 @@ def parse_arguments():
 
     parser.add_argument('--run', type=int, default=0, metavar='RUN',
                         help='if running repeatedly, use this arg to signal from bash script what run # this is')
+    
+    parser.add_argument('--perm', type=int, default=100, metavar='PERM',
+                        help='percent permutation to be applied to mnist images')
 
     args = parser.parse_args()
 
@@ -127,8 +130,9 @@ def parse_arguments():
         args.accuracy_threshold = 0
         args.dataset = 'mnist'
         args.tasks = 100
-        args.output_file = 'checking_double_layer_expansion.h5'
+        args.output_file = 'checking_double_layer_expansion.h5' 
         args.nets = ['EWCMLP']
+        
 
         args_dict = vars(args)
 
