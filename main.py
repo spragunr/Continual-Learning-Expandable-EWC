@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 def show_mnist_img(img, task, index):
     fig = plt.figure()
     npimg = img.numpy()
+    npimg = np.resize(npimg, (28,28))
     plt.imshow(npimg)
     plt.show()
     fig.savefig("./perms/task{}_img{}".format(task, index))
