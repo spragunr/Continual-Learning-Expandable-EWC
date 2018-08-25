@@ -12,7 +12,7 @@ from Continuum import Continuum
 # matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-def show_mnist_img(batch, task, index):
+def show_mnist_img(batch, task):
     fig = plt.figure()
     
     for i, img in enumerate(batch):
