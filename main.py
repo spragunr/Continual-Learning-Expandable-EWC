@@ -8,14 +8,15 @@ from VanillaCNN import VanillaCNN
 import numpy as np
 import h5py
 from Continuum import Continuum
-import matplotlib
-matplotlib.use('Agg')
+# import matplotlib
+# matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 def show_mnist_img(img, task, index):
     fig = plt.figure()
     npimg = img.numpy()
     plt.imshow(npimg)
+    plt.show()
     fig.savefig("./perms/task{}_img{}".format(task, index))
 
 def main():
