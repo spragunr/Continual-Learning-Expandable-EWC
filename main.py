@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 def show_mnist_img(batch, task):
     fig = plt.figure()
     
-    for i, img in enumerate(batch):
+    for i, img in enumerate(batch, 1):
         plt.subplot(len(batch) // 10, 10, i)
         npimg = img.numpy()
         npimg = np.resize(npimg, (28,28))
