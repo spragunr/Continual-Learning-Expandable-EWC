@@ -12,13 +12,16 @@ from Continuum import Continuum
 # matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-def show_mnist_img(img, task, index):
+def show_mnist_img(batch, task, index):
     fig = plt.figure()
-    npimg = img.numpy()
-    npimg = np.resize(npimg, (28,28))
-    plt.imshow(npimg)
+    
+    for i, img in enumerate(batch):
+        plt.subplot(len(batch) // 10, 10, i)
+        npimg = img.numpy()
+        npimg = np.resize(npimg, (28,28))
+        plt.imshow(npimg)
+    
     plt.show()
-    fig.savefig("./perms/task{}_img{}".format(task, index))
 
 def main():
 
@@ -109,13 +112,11 @@ def main():
             # verify percent permuation of images
             train_batch, labels = next(iter(train_loader))
 
-            for i, img in enumerate(train_batch):
-                show_mnist_img(img, task_count, i)
+            show_mnist_img(train_batch, task_count)
             
             test_batch, labels = next(iter(test_loader))
 
-            for i, img in enumerate(test_batch):
-                show_mnist_img(img, task_count, i)
+            show_mnist_img(test_batch, task_count)
 
         retrain_task = False
 
