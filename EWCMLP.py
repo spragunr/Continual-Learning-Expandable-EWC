@@ -208,6 +208,7 @@ class EWCMLP(MLP):
         fisher_max = kwargs.get('fisher_max')
         fisher_information = kwargs.get('fisher_information')
         h5file = kwargs.get('h5file')
+        ewc_pen = kwargs.get('ewc_pen')
 
         # Set the module in "training mode"
         # This is necessary because some network layers behave differently when training vs testing.
