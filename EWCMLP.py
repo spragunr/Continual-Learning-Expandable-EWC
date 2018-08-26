@@ -10,7 +10,7 @@ import numpy as np
 import h5py
 
 # helper method for saving network strain metrics
-def save_metrics(h5file, failure, post_training_loss, fisher_st_dev, fisher_average, fisher_max, fisher_total, fisher_information):
+def save_metrics(h5file, failure, post_training_loss, fisher_st_dev, fisher_average, fisher_max, fisher_total, fisher_information, ewc_pen):
 
     ds_failure = h5file.create_dataset("failure", (1,), dtype='i')
     failure = np.array(failure)
@@ -43,6 +43,14 @@ def save_metrics(h5file, failure, post_training_loss, fisher_st_dev, fisher_aver
     print(len(fisher_information))
     print(len(fisher_information[0]))
     ds_fisher_information[...] = fisher_information[...]
+    
+
+    # NOTE: TO FACILITATE PARSING THERE IS A ZERO TACKED ONTO THE FRONT OF THIS LIST
+    # ewc penalty (final iteration training loss on all tasks except current) per task 
+    ds_ewc_pen = h5file.create_dataset("ewc_pen", (len(ewc_pen),), dtype='f')
+    ewc_pen = np.array(ewc_pen)
+    ewc_pen[...] = ewc_pen[...] 
+
 
     h5file.flush()
 
@@ -305,7 +313,8 @@ class EWCMLP(MLP):
                 #   https://arxiv.org/pdf/1612.00796.pdf#section.2
                 if task_number > 1: # todo change to hasattr() call
                     # This statement computes loss on previous tasks using the summed fisher terms as in ewc_loss_prev_tasks()
-                    loss += self.ewc_loss_prev_tasks()
+                    ewc_penalty = self.ewc_loss_prev_tasks()
+                    loss += ewc_penalty
 
                     # Using the commented-out version statement below instead of the one above will calculate ewc loss
                     # on previous tasks by multiplying the square of the difference between the current network
@@ -353,6 +362,9 @@ class EWCMLP(MLP):
             exit()
         else:
             post_training_loss.append(loss.item())
+        
+        if task_number > 1:
+            ewc_pen.append(ewc_penalty.item())
 
         # update the model size dictionary
         self.update_size_dict(task_number)

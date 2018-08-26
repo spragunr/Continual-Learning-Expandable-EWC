@@ -29,7 +29,7 @@ def main():
 
     kwargs, device = setup.set_gpu_options(args)
 
-    #setup.seed_rngs(args) # TODO: RE-ENABLE - DISABLED FOR FAILURE EXPERIMENTS
+    setup.seed_rngs(args)
 
     # print 8 digits of precision when displaying floating point output from tensors
     torch.set_printoptions(precision=8)
@@ -78,6 +78,7 @@ def main():
     fisher_st_dev = [0] # standard deviation of FIM diags
     fisher_max = [0] # maximum Fisher Info of any parameter in the network
     fisher_information = [[0]] # actual FIM diagonals
+    ewc_pen = [0, 0] # ewc penalty (loss on previous tasks only) is 0 for task 1 and 0 (filler)
 
     if args.dataset == "cifar":
         train_loaders, validation_loaders, test_loaders = utils.generate_cifar_tasks(args, kwargs)
@@ -129,7 +130,8 @@ def main():
                           'fisher_st_dev': fisher_st_dev,
                           'fisher_max': fisher_max,
                           'fisher_information': fisher_information,
-                          'h5file': h5file
+                          'h5file': h5file,
+                          'ewc_pen': ewc_pen
                         } \
             if isinstance(model, (EWCMLP, EWCCNN)) else {}
 

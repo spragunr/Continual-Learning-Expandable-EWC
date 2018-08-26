@@ -111,8 +111,8 @@ def parse_arguments():
 
         print('|-----[CONDUCTING PERMUTED MNIST EXPERIMENT]-----|')
 
-        args.batch_size = 50 # TODO change back to 100
-        args.test_batch_size = 50 # TODO change back to 1000
+        args.batch_size = 100 # TODO change back to 100
+        args.test_batch_size = 1000 # TODO change back to 1000
         args.epochs = 1 # TODO change back to 10
         args.lr = 0.1 # TODO change back to 0.01
         args.l2_reg_penalty = 0.0
@@ -123,14 +123,14 @@ def parse_arguments():
         args.log_interval = 10
         args.train_dataset_size = 59800
         args.validation_dataset_size = 200
-        args.hidden_size = 20
+        args.hidden_size = 30
         args.input_size = 784
         args.output_size = 10
         args.scale_factor = 2
         args.accuracy_threshold = 0
         args.dataset = 'mnist'
         args.tasks = 100
-        args.output_file = 'checking_perms' 
+        args.output_file = 'perms/perm_{}'.format(args.perm) 
         args.nets = ['EWCMLP']
         
 
@@ -359,7 +359,7 @@ def setup_h5_file(args, models):
         task_acc[...] = np.zeros(len(task_acc))
         task_acc_list.append(task_acc)
 
-
+        
 
     # todo fix the models list style so only one model at a time, and make these lists into single h5 datasets
     return files, expansions_list, avg_acc_list, task_acc_list, f
