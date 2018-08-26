@@ -296,7 +296,7 @@ def build_models(args, device):
 
 def setup_h5_file(args, models):
     
-    DIR = perms
+    DIR = "perms"
 
     files = []
     expansions_list = []
