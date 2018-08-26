@@ -111,13 +111,13 @@ def main():
             prev_test_loaders.append(test_loader)
                 
             # verify percent permuation of images
-            train_batch, labels = next(iter(train_loader))
+            # train_batch, labels = next(iter(train_loader))
 
-            show_mnist_img(train_batch, task_count)
-            
-            test_batch, labels = next(iter(test_loader))
+            # show_mnist_img(train_batch, task_count)
+            # 
+            # test_batch, labels = next(iter(test_loader))
 
-            show_mnist_img(test_batch, task_count)
+            # show_mnist_img(test_batch, task_count)
 
         retrain_task = False
 
