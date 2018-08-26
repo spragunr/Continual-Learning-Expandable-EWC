@@ -130,7 +130,7 @@ def parse_arguments():
         args.accuracy_threshold = 0
         args.dataset = 'mnist'
         args.tasks = 100
-        args.output_file = 'perms/perm_{}'.format(args.perm) 
+        args.output_file = 'perm_{}'.format(args.perm) 
         args.nets = ['EWCMLP']
         
 
@@ -295,6 +295,8 @@ def build_models(args, device):
 
 
 def setup_h5_file(args, models):
+    
+    DIR = perms
 
     files = []
     expansions_list = []
@@ -308,8 +310,8 @@ def setup_h5_file(args, models):
 
         model_type = str(type(model))
         model_type = model_type[model_type.index("'") + 1:model_type.rindex('.')]
-
-        filename = model_type + "_" + args.output_file + "_run_{}.h5".format(args.run)
+        
+        filename = DIR + "/" + model_type + "_" + args.output_file + "_run_{}.h5".format(args.run)
 
         path = Path(filename)
 

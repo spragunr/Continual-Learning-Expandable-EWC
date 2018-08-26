@@ -357,7 +357,7 @@ class EWCMLP(MLP):
 
         if math.isnan(loss.item()) or math.isinf(loss.item()) or loss.item() > 1000:
             failure[0] = task_number
-            save_metrics(h5file, failure, post_training_loss, fisher_st_dev, fisher_average, fisher_max, fisher_total, fisher_information)
+            save_metrics(h5file, failure, post_training_loss, fisher_st_dev, fisher_average, fisher_max, fisher_total, fisher_information, ewc_pen)
             h5file.close()
             exit()
         else:
@@ -411,6 +411,10 @@ class EWCMLP(MLP):
         # store the current fisher diagonals for use with plotting and comparative loss calculations
         # using the method in model.alternative_ewc_loss()
         self.save_fisher_diags(task_number)
+        
+        if task_number == args.tasks:
+            
+            save_metrics(h5file, failure, post_training_loss, fisher_st_dev, fisher_average, fisher_max, fisher_total, fisher_information, ewc_pen)
 
     # Defines loss based on all extant Fisher diagonals and previous task weights
     def alternative_ewc_loss(self, task_count):
