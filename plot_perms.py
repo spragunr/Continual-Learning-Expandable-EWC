@@ -7,7 +7,7 @@ import numpy as np
 import seaborn as sns
 from scipy import stats
 
-DIRECTORY = 'alexnet_runs/plots/' # TODO change this as needed
+DIRECTORY = 'perm_results/plots/' # TODO change this as needed
 
 
 def parse_h5(filename):
@@ -72,8 +72,10 @@ def main():
     parser.add_argument('--filenames',
             nargs='+', type=str, default=['NONE'], metavar='FILENAMES',
             help='names of .h5 files containing experimental result data')
-
+    
     args = parser.parse_args()
+    
+    print(args.filenames)
 
     ewc_pens_list = []
     avg_accs_list = []
