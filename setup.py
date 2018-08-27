@@ -123,14 +123,14 @@ def parse_arguments():
         args.log_interval = 10
         args.train_dataset_size = 59800
         args.validation_dataset_size = 200
-        args.hidden_size = 30
+        args.hidden_size = 20
         args.input_size = 784
         args.output_size = 10
         args.scale_factor = 2
         args.accuracy_threshold = 0
         args.dataset = 'mnist'
         args.tasks = 100
-        args.output_file = 'modified_negative1_perm_{}'.format(args.perm) 
+        args.output_file = 'perm_{}'.format(args.perm) 
         args.nets = ['EWCMLP']
         
 
@@ -296,7 +296,7 @@ def build_models(args, device):
 
 def setup_h5_file(args, models):
     
-    DIR = "perms"
+    DIR = "perms2"
 
     files = []
     expansions_list = []

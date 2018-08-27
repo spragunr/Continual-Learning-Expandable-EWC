@@ -10,22 +10,28 @@ import os
 import subprocess
 import pickle
 
+
 def generate_percent_permutation(percent, length):
     
     perm_size = int(length * (percent / 100.0))
     
     indices = np.random.choice(length, size=perm_size, replace=False)
     
-    return indices
+    perm = np.arange(len(indices))
+    np.random.shuffle(perm)
 
-def apply_permutation(image, indices):
+    return indices, perm
+
+def apply_permutation(image, indices, perm):
 
     permute_sample = image[indices]
-    np.random.shuffle(permute_sample)
+
+    permute_sample = permute_sample[perm]
     
     image[indices] = permute_sample
     
     return image
+
 
 # generate the DataLoaders corresponding to a permuted mnist task
 def generate_new_mnist_task(args, kwargs, first_task):
@@ -70,7 +76,7 @@ def generate_new_mnist_task(args, kwargs, first_task):
     else:
         # permute only a specified percentage of the pixels in the image
 
-        permutation = generate_percent_permutation(args.perm, 784)
+        indices, perm = generate_percent_permutation(args.perm, args.input_size)
 
         
         transformations = transforms.Compose(
@@ -83,7 +89,7 @@ def generate_new_mnist_task(args, kwargs, first_task):
                 transforms.ToTensor(),
                 #transforms.Normalize((0.1307,), (0.3081,)), # TODO determine why network performs better w/o normalization
                 transforms.Lambda(lambda x: x.view(-1, 1)),
-                transforms.Lambda(lambda x: apply_permutation(x, permutation))
+                transforms.Lambda(lambda x: apply_permutation(x, indices, perm))
             ])
 
     # Split the PyTorch MNIST training dataset into training and validation datasets, and transform the data.
