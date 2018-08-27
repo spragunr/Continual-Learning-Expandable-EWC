@@ -129,7 +129,7 @@ def parse_arguments():
         args.scale_factor = 2
         args.accuracy_threshold = 0
         args.dataset = 'mnist'
-        args.tasks = 100
+        args.tasks = 3
         args.output_file = 'perm_{}'.format(args.perm) 
         args.nets = ['EWCMLP']
         
@@ -296,7 +296,7 @@ def build_models(args, device):
 
 def setup_h5_file(args, models):
     
-    DIR = "alexnet_runs"
+    DIR = "perms3"
 
     files = []
     expansions_list = []

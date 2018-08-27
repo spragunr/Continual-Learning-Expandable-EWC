@@ -49,7 +49,7 @@ def save_metrics(h5file, failure, post_training_loss, fisher_st_dev, fisher_aver
     # ewc penalty (final iteration training loss on all tasks except current) per task 
     ds_ewc_pen = h5file.create_dataset("ewc_pen", (len(ewc_pen),), dtype='f')
     ewc_pen = np.array(ewc_pen)
-    ewc_pen[...] = ewc_pen[...] 
+    ds_ewc_pen[...] = ewc_pen[...] 
 
 
     h5file.flush()
