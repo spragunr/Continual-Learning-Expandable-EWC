@@ -129,7 +129,7 @@ def parse_arguments():
         args.scale_factor = 2
         args.accuracy_threshold = 0
         args.dataset = 'mnist'
-        args.tasks = 3
+        args.tasks = 100
         args.output_file = 'perm_{}'.format(args.perm) 
         args.nets = ['EWCMLP']
         
