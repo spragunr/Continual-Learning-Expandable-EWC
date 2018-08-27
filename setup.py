@@ -151,7 +151,7 @@ def parse_arguments():
         args.epochs =  10
         args.lr = 0.01
         args.l2_reg_penalty = 0.0
-        args.lam = 4000
+        args.lam = 2500
         args.momentum = 0.0
         args.no_cuda = False
         args.seed = 1
@@ -164,7 +164,7 @@ def parse_arguments():
         args.accuracy_threshold = 0 # todo figure out what this should be...
         args.dataset = 'cifar'
         args.tasks = 20
-        args.output_file = 'increm_cifar_lam_4000_8_fil_start_at_32_512_cw_scale_2'
+        args.output_file = 'increm_cifar_lam_2500_8_fil_start_at_32_512_cw_scale_2'
         args.nets = ['EWCCNN'] # todo change to EWCCNN
         #args.samples_per_task = -1 # todo add this to the arg parser
         #args.shuffle_tasks = 'no' # todo add this to the arg parser
