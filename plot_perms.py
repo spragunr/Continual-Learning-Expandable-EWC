@@ -86,11 +86,11 @@ def main():
         ewc_pens_list.append(ewc_pens)
         avg_accs_list.append(avg_accs)
     
-    labels = ['10%', '20%', '30%', '40%', '50%', '60%', '70%', '80%', '90%', '100%']
+    labels = ['100%', '10%', '20%', '30%', '40%', '50%', '60%', '70%', '80%', '90%']
     
     plot_line_avg_acc(avg_accs_list, labels)
 
-    plt_line_ewc_pen(ewc_pens_list, labels)
+    plot_line_ewc_pen(ewc_pens_list, labels)
 
 if __name__ == '__main__':
     main()
