@@ -30,7 +30,7 @@ def apply_permutation(image, indices):
 # generate the DataLoaders corresponding to a permuted mnist task
 def generate_new_mnist_task(args, kwargs, first_task):
     
-    if args.perm == -1: # TODO reset to 100
+    if args.perm == 100: # TODO reset to 100
         # permutation to be applied to all images in the dataset (if this is not the first dataset being generated)
         pixel_permutation = torch.randperm(args.input_size)
 
