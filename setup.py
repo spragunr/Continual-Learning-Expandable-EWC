@@ -148,23 +148,23 @@ def parse_arguments():
 
         args.batch_size = 4
         args.test_batch_size = 4
-        args.epochs = 10 # todo change back to 10- just for testing
+        args.epochs =  10
         args.lr = 0.01
         args.l2_reg_penalty = 0.0
-        args.lam = 1500
+        args.lam = 4000
         args.momentum = 0.0
         args.no_cuda = False
         args.seed = 1
         args.log_interval = 10
-        args.hidden_size = 64 # todo note changes in output layer sizes as a result of this
+        args.hidden_size = 32 # todo note changes in output layer sizes as a result of this
         args.validation_dataset_size = 40 # in THIS case, this is the validation data from each individual CLASS
         args.input_size = 1024
         args.output_size = 100
-        args.scale_factor = 5 # in this case, we ADD this many filters to first convolutional layer...
-        args.accuracy_threshold = 57 # todo figure out what this should be...
+        args.scale_factor = 8 # in this case, we ADD this many filters to first convolutional layer...
+        args.accuracy_threshold = 0 # todo figure out what this should be...
         args.dataset = 'cifar'
         args.tasks = 20
-        args.output_file = 'increm_cifar_lam_1500_5_fil_512_cw_scale_2'
+        args.output_file = 'increm_cifar_lam_4000_8_fil_start_at_32_512_cw_scale_2'
         args.nets = ['EWCCNN'] # todo change to EWCCNN
         #args.samples_per_task = -1 # todo add this to the arg parser
         #args.shuffle_tasks = 'no' # todo add this to the arg parser
@@ -296,7 +296,7 @@ def build_models(args, device):
 
 def setup_h5_file(args, models):
     
-    DIR = "perms2"
+    DIR = "alexnet_runs"
 
     files = []
     expansions_list = []
