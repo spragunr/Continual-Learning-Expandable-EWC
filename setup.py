@@ -296,7 +296,7 @@ def build_models(args, device):
 
 def setup_h5_file(args, models):
     
-    DIR = "perms3"
+    DIR = "alexnet_runs_no_exp"
 
     files = []
     expansions_list = []
