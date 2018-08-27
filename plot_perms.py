@@ -55,7 +55,7 @@ def plot_line_ewc_pen(ewc_pens, labels):
 
     plt.ylabel('Elastic Weight Consolidation Loss Penalty')
     plt.xlabel('Total Task Count')
-    plt.xlim(1, len(avg_accuracies[0]))
+    plt.xlim(1, len(ewc_pens[0]))
 
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
                ncol=3, fancybox=True, shadow=True)
