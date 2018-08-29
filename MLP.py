@@ -32,8 +32,8 @@ class MLP(ExpandableModel):
 
         self.modulelist.append(nn.Linear(self.input_size, self.hidden_size))
         self.modulelist.append(nn.ReLU())
-        self.modulelist.append(nn.Linear(self.hidden_size, self.hidden_size))
-        self.modulelist.append(nn.ReLU())
+        # self.modulelist.append(nn.Linear(self.hidden_size, self.hidden_size))
+        # self.modulelist.append(nn.ReLU())
         self.modulelist.append(nn.Linear(self.hidden_size, self.output_size))
 
 

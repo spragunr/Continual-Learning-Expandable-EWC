@@ -113,10 +113,10 @@ def parse_arguments():
 
         args.batch_size = 100 # TODO change back to 100
         args.test_batch_size = 1000 # TODO change back to 1000
-        args.epochs = 10 # TODO change back to 10
-        args.lr = 0.01 # TODO change back to 0.01
+        args.epochs = 1 # TODO change back to 10
+        args.lr = 0.1 # TODO change back to 0.01
         args.l2_reg_penalty = 0.0
-        args.lam = 150 # TODO change back to 150
+        args.lam = 15 # TODO change back to 150
         args.momentum = 0.0
         args.no_cuda = False
         args.seed = 1
@@ -130,7 +130,7 @@ def parse_arguments():
         args.accuracy_threshold = 0
         args.dataset = 'mnist'
         args.tasks = 100
-        args.output_file = 'non_expandable_mlp' 
+        args.output_file = 'perm{}'.format(args.perm) 
         args.nets = ['EWCMLP']
         
 
