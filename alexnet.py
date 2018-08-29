@@ -12,7 +12,7 @@ model_urls = {
 
 class AlexNet(nn.Module):
 
-    def __init__(self, filters=64, num_classes=100):
+    def __init__(self, filters=32, num_classes=100):
         """
         Constructor for AlexNet architecture of varying sizes (For use with CIFAR).
         
@@ -36,8 +36,8 @@ class AlexNet(nn.Module):
         CLASSIFICATION_STARTING_WIDTH = 512
         CLASSIFICATION_SCALE_FACTOR = 2 
         
-        FILTERS_START = 64
-        FILTER_EXPANSION = 1 # TODO replace this with a pass-through of args.scale_factor
+        FILTERS_START = 32
+        FILTER_EXPANSION = 8 # TODO replace this with a pass-through of args.scale_factor
 
         super(AlexNet, self).__init__()
         
