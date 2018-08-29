@@ -146,8 +146,8 @@ def parse_arguments():
 
         print('|-----[CONDUCTING INCREMENTAL CIFAR 100 EXPERIMENT]-----|')
 
-        args.batch_size = 4
-        args.test_batch_size = 4
+        args.batch_size = 32
+        args.test_batch_size = 32
         args.epochs =  10
         args.lr = 0.1
         args.l2_reg_penalty = 0.0
