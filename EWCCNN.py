@@ -309,7 +309,7 @@ class EWCCNN(CNN):
         # store the current fisher diagonals for use with plotting and comparative loss calculations
         # using the method in model.alternative_ewc_loss()
         # TODO re-enable this, disabled for reduced memory consumption 
-        # self.save_fisher_diags(task_number)
+        self.save_fisher_diags(task_number)
 
     # Defines loss based on all extant Fisher diagonals and previous task weights
     def alternative_ewc_loss(self, task_count):
