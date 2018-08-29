@@ -299,7 +299,8 @@ def generate_new_cifar_task(args, kwargs, first_task):
 
 # generate the DataLoaders corresponding to incremental CIFAR 100 tasks
 def generate_cifar_tasks(args, kwargs):
-
+    
+    print(random.randint(1, 10000))
     # for indicating progress...
     symbols = ['|', '/', '-', '\\']
     symbol_index = 0
