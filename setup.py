@@ -226,6 +226,8 @@ def seed_rngs(args):
     # set a manual seed for python random number generation
     random.seed(args.seed)
 
+    torch.backends.cudnn.deterministic = True
+
 def set_gpu_options(args):
 
     # determines if CUDA should be used - only if available AND not disabled via arguments
