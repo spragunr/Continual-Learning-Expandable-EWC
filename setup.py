@@ -151,7 +151,7 @@ def parse_arguments():
         args.epochs =  10
         args.lr = 0.1
         args.l2_reg_penalty = 0.0
-        args.lam = 1500
+        args.lam = 4000
         args.momentum = 0.0
         args.no_cuda = False
         args.seed = 1
