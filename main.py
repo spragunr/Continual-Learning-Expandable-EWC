@@ -8,6 +8,7 @@ from VanillaCNN import VanillaCNN
 import numpy as np
 import scipy as sp
 import h5py
+import random
 from Continuum import Continuum
 # import matplotlib
 # matplotlib.use('Agg')
@@ -38,8 +39,8 @@ def main():
     print(np.random.randint(low=1, high=10000))
     print(sp.stats.randint.rvs(1, 10000, size=1))
     print(torch.randint(1, 10000, (1,), device=torch.device('cpu')))
-    print(torch.randint(1, 10000, (1,), device=torch.device('cuda')))                                                                                                                          
-
+    print(torch.randint(1, 10000, (1,), device=torch.device('cuda'))) 
+    print(random.randint(1, 10000))
 
     # print 8 digits of precision when displaying floating point output from tensors
     torch.set_printoptions(precision=8)
