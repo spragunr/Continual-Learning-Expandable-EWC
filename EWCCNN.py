@@ -221,7 +221,8 @@ class EWCCNN(CNN):
                 #   set the device (CPU or GPU) to be used with data and target to device variable (defined in main())
                 data, target = Variable(data).to(self.device), Variable(target).to(self.device)
                 
-                print(target)
+                # for debugging...
+                # print(target)
 
                 # Gradients are automatically accumulated- therefore, they need to be zeroed out before the next backward
                 # pass through the network so that they are replaced by newly computed gradients at later training iterations,
