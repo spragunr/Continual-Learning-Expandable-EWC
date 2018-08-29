@@ -127,10 +127,10 @@ def parse_arguments():
         args.input_size = 784
         args.output_size = 10
         args.scale_factor = 2
-        args.accuracy_threshold = 0
+        args.accuracy_threshold = 90
         args.dataset = 'mnist'
         args.tasks = 100
-        args.output_file = 'non_expandable_mlp' 
+        args.output_file = 'expandable_mlp' 
         args.nets = ['EWCMLP']
         
 
