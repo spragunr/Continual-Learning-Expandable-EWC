@@ -46,13 +46,16 @@ def main():
     torch.set_printoptions(precision=8)
 
     models = setup.build_models(args, device)
+    
+    for model in models:
+        for parameter in model.parameters():
+            print(parameter.size())
 
     # The number of the task on which we are CURRENTLY training in the loop below-
     # e.g. when training on task 3 this value will be 3
     task_count = 1
 
     #utils.output_tensorboard_graph(args, device, models, task_count) # TODO change this to model.device in utils/ model constructor
-
 
     # todo fix kwargs (**kwargs)
     # todo fix num_workers in utils
