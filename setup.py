@@ -163,7 +163,7 @@ def parse_arguments():
         args.scale_factor = 1 # in this case, we ADD this many filters to first convolutional layer...
         args.accuracy_threshold = 0 # todo figure out what this should be...
         args.dataset = 'cifar'
-        args.tasks = 20
+        args.tasks = 1 # TODO change back to 20
         args.output_file = 'expanding_increm_cifar_lam_{}_all_fil_{}_512_cw_scale_2'.format(args.lam, args.hidden_size)
         args.nets = ['EWCCNN'] # todo change to EWCCNN
         #args.samples_per_task = -1 # todo add this to the arg parser
