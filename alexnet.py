@@ -27,7 +27,11 @@ class AlexNet(nn.Module):
         num_classes (int): width of the output layer (predictions)- number of classes in 
                             classification problem
         """
+
         
+        print(torch.randint(1, 10000, (1,), device=torch.device('cpu')))
+        print(torch.randint(1, 10000, (1,), device=torch.device('cuda'))) 
+
         CLASSIFICATION_STARTING_WIDTH = 512
         CLASSIFICATION_SCALE_FACTOR = 2 
         
