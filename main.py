@@ -36,7 +36,7 @@ def main():
     
     # test seeding...
     print(np.random.randint(low=1, high=10000))
-    print(sp.randint.rvs(1, 10000, size=1))
+    print(sp.stats.randint.rvs(1, 10000, size=1))
     print(torch.randint(1, 10000, (1,), device=torch.device('cpu')))
     print(torch.randint(1, 10000, (1,), device=torch.device('cuda')))                                                                                                                          
 
