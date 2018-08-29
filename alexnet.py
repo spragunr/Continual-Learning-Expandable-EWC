@@ -11,7 +11,7 @@ model_urls = {
 
 class AlexNet(nn.Module):
 
-    def __init__(self, filters=32, num_classes=100):
+    def __init__(self, filters=64, num_classes=100):
         """
         Constructor for AlexNet architecture of varying sizes (For use with CIFAR).
         
@@ -31,16 +31,24 @@ class AlexNet(nn.Module):
         CLASSIFICATION_STARTING_WIDTH = 512
         CLASSIFICATION_SCALE_FACTOR = 2 
         
-        FILTERS_START = 32
-        FILTER_EXPANSION = 8 # TODO replace this with a pass-through of args.scale_factor
+        FILTERS_START = 64
+        FILTER_EXPANSION = 1 # TODO replace this with a pass-through of args.scale_factor
 
         super(AlexNet, self).__init__()
+        
 
         self.filters = filters
        
+        
         # scale dense layers' widths by CLASSIFICATION_SCALE_FACTOR each time filters expands
         classification_width = \
             (CLASSIFICATION_SCALE_FACTOR ** ((filters - FILTERS_START) // FILTER_EXPANSION)) * CLASSIFICATION_STARTING_WIDTH 
+        
+
+        
+        # TODO remove this - this is to prevent filters from expanding but maintain the 
+        # expansion of the classification width correctly 
+        filters = FILTERS_START
 
         self.features = nn.Sequential(
             nn.Conv2d(in_channels=3, out_channels=filters, kernel_size=11, stride=4, padding=5),
@@ -55,7 +63,7 @@ class AlexNet(nn.Module):
             nn.ReLU(inplace=True),
             nn.Conv2d(in_channels=256, out_channels=256, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.MaxPool2d(kernel_size=2, stride=1),
         )
         self.classifier = nn.Sequential(
             nn.Dropout(),
