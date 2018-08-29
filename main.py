@@ -28,6 +28,8 @@ def main():
     args = setup.parse_arguments()
 
     kwargs, device = setup.set_gpu_options(args)
+    
+    print(device)
 
     setup.seed_rngs(args)
 
