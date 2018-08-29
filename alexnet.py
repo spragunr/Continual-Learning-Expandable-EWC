@@ -53,7 +53,7 @@ class AlexNet(nn.Module):
         
         # TODO remove this - this is to prevent filters from expanding but maintain the 
         # expansion of the classification width correctly 
-        filters = FILTERS_START
+        # filters = FILTERS_START
 
         self.features = nn.Sequential(
             nn.Conv2d(in_channels=3, out_channels=filters, kernel_size=11, stride=4, padding=5),
