@@ -102,7 +102,7 @@ def parse_arguments():
     parser.add_argument('--run', type=int, default=0, metavar='RUN',
                         help='if running repeatedly, use this arg to signal from bash script what run # this is')
     
-    parser.add_argument('--perm', type=int, default=30, metavar='PERM',
+    parser.add_argument('--perm', type=int, default=100, metavar='PERM',
                         help='percent permutation to be applied to mnist images')
 
     args = parser.parse_args()
@@ -130,7 +130,7 @@ def parse_arguments():
         args.accuracy_threshold = 0
         args.dataset = 'mnist'
         args.tasks = 100
-        args.output_file = 'expandable_mlp' 
+        args.output_file = 'non_expandable_mlp' 
         args.nets = ['EWCMLP']
         
 
