@@ -129,7 +129,7 @@ def parse_arguments():
         args.scale_factor = 2
         args.accuracy_threshold = 0
         args.dataset = 'mnist'
-        args.tasks = 20
+        args.tasks = 30
         args.output_file = 'EWC_without_VLR_run{}'.format(args.run) 
         args.nets = ['EWCMLP']
         
@@ -161,7 +161,7 @@ def parse_arguments():
         args.input_size = 1024
         args.output_size = 100
         args.scale_factor = 8 # in this case, we ADD this many filters to first convolutional layer...
-        args.accuracy_threshold = 60 # todo figure out what this should be...
+        args.accuracy_threshold = 59 # todo figure out what this should be...
         args.dataset = 'cifar'
         args.tasks = 20
         args.output_file = 'expanding_increm_cifar_lam_{}_all_fil_{}_256_cw_scale_2_bs_1'.format(args.lam, args.hidden_size)
