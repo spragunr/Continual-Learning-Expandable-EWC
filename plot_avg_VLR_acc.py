@@ -12,13 +12,23 @@ def plot_line_avg_acc(avg_accuracies, expansion_markers, threshold, labels, save
 
     plt.figure()
     
-    for i, avg_acc in enumerate(avg_accuracies):
-        plt.plot(avg_acc, label=labels[i])
+    averaged_accs = np.zeros(31)
+    
+    print(len(avg_accuracies))
+
+    for avg_acc in avg_accuracies:
+        for i, acc in enumerate(avg_acc):
+            averaged_accs[i] += acc
+
+    for i in range(len(averaged_accs)):
+        averaged_accs[i] /= 100
+        
+    plt.plot(averaged_accs)
     
 
     plt.ylabel('Average Accuracy on All Tasks')
     plt.xlabel('Total Task Count')
-    plt.xlim(1, len(avg_accuracies[0]))
+    plt.xlim(1, 30)
     plt.ylim(0, 100)
 
 
@@ -30,41 +40,15 @@ def plot_line_avg_acc(avg_accuracies, expansion_markers, threshold, labels, save
             markers.append(marker)
         else:
             plt.axvline(x=marker, color='g')
-    
-    print(markers)
 
-    plt.axhline(y=threshold, linestyle='dashed', color='m')
+    plt.axhline(y=threshold, linestyle='dashed')
 
-    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
-               ncol=3, fancybox=True, shadow=True)
+    # plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
+    #           ncol=3, fancybox=True, shadow=True)
 
     plt.savefig('{}.eps'.format(save), dpi=300, format='eps')
 
 
-def plot_bar_each_task_acc(task_accuracies, labels, save):
-    
-    plt.figure()
-
-    x_values = np.arange(0, len(task_accuracies[0]))
-
-    # w = 1 / len(task_accuracies)
-    # offset = w / len(task_accuracies)
-    
-    # adjusted_xs = [x_values - offset, x_values + offset]
-
-    for i, task_acc in enumerate(task_accuracies):
-        plt.bar(x_values, alpha=0.5, height=task_acc, align='center', edgecolor='k', label=labels[i])
-    
-    plt.ylabel('Accuracy')
-    plt.xlabel('Task')
-    plt.xlim(0.5, len(task_accuracies[0]) - 0.5)
-    plt.ylim(0, 100)
-    plt.xticks(np.arange(5, len(task_accuracies[0]), 5))
-
-    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
-              ncol=3, fancybox=True, shadow=True)
-    
-    plt.savefig('{}.png'.format(save), dpi=300, format='png')
 
 
 def parse_h5_file(filename):
@@ -124,9 +108,6 @@ def main():
     parser.add_argument('--line', type=str, default='NO_LINE', metavar='LINE',
                         help='filename for saved line graph (no extension)')
     
-    parser.add_argument('--bar', type=str, default='NO_BAR', metavar='BAR',
-                        help='filename for saved bar graph (no extension)')
-    
     args = parser.parse_args()
 
 
@@ -152,9 +133,6 @@ def main():
     
     plot_line_avg_acc(avg_acc_list, expansion_indices_list[0], threshold, args.labels, args.line)
     
-    plot_bar_each_task_acc(task_acc_list, args.labels, args.bar)
-
-
 
 if __name__ == "__main__":
     main()

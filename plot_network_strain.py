@@ -20,11 +20,13 @@ def plot_failures(failure_points, lowest, highest):
 
     plt.figure()
     
-    # plt.xlim(lowest - 0.5, highest + 0.5)
+    plt.xlim(13.5, 18.5)
 
-    plt.hist(failure_points, cumulative=True, color='orange', edgecolor='k')
+    plt.hist(failure_points, bins=[14.5, 15.5, 16.5, 17.5, 18.5], cumulative=True, color='orange', edgecolor='k')
     
-    plt.ylabel('% Networks Undergone Failure')
+    plt.xticks([14, 15, 16, 17, 18])
+
+    plt.ylabel('% Networks Failed')
     plt.xlabel('Total Task Count')
 
     plt.savefig('{}failures.eps'.format(DIRECTORY), dpi=300, format='eps')
@@ -95,9 +97,9 @@ def plot_fisher_dist(run_group):
 
     # bins = np.arange(0, 2.5, 0.01)
 
-    plt.hist(tasks, label=np.arange(0, run_group[0] + 1))
+    plt.hist(tasks, bins=[15, 16, 17, 18], label=np.arange(0, run_group[0] + 1))
 
-
+    plt.xticks([15, 16, 17, 18])
     # for i, task in enumerate(tasks):
     #     sns.distplot(task)
 
