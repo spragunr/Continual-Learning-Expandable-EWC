@@ -3,6 +3,10 @@ import h5py
 import matplotlib.pyplot as plt
 import numpy as np
 
+import matplotlib.pylab as pylab
+params = {'axes.titlesize':'x-large',
+        'axes.labelsize': 'x-large'}
+pylab.rcParams.update(params)
 
 def plot_line_avg_acc(avg_accuracies, expansion_markers, threshold, labels, save):
 

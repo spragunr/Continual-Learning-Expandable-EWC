@@ -6,6 +6,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 from scipy import stats
+import matplotlib.pylab as pylab
+params = {'axes.titlesize':'x-large',
+        'axes.labelsize': 'x-large'}
+pylab.rcParams.update(params)
 
 DIRECTORY = 'final/plots/' # TODO change this as needed
 
@@ -39,7 +43,7 @@ def plot_line_avg_acc(avg_accuracies, labels):
     plt.xlabel('Total Task Count')
     plt.xlim(1, len(avg_accuracies[0]))
 
-    plt.legend(loc='lower center', ncol=5, fancybox=True, shadow=True)
+    plt.legend(ncol=1, fancybox=True, shadow=True)
     # plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
     #            ncol=3, fancybox=True, shadow=True)
 
@@ -54,11 +58,13 @@ def plot_line_ewc_pen(ewc_pens, labels):
         plt.plot(ewc_pen, label=labels[i])
     
 
-    plt.ylabel('Elastic Weight Consolidation Loss Penalty')
+    plt.ylabel('EWC Loss Penalty')
     plt.xlabel('Total Task Count')
     plt.xlim(1, len(ewc_pens[0]))
+    plt.ylim(0.0, 1.8)
 
-    plt.legend(ncol=10)
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
+          fancybox=True, shadow=True, ncol=5) 
     # plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
     #            ncol=3, fancybox=True, shadow=True)
 
