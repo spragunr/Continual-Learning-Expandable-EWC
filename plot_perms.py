@@ -39,8 +39,9 @@ def plot_line_avg_acc(avg_accuracies, labels):
     plt.xlabel('Total Task Count')
     plt.xlim(1, len(avg_accuracies[0]))
 
-    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
-               ncol=3, fancybox=True, shadow=True)
+    plt.legend(loc='lower center', ncol=5, fancybox=True, shadow=True)
+    # plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
+    #            ncol=3, fancybox=True, shadow=True)
 
     plt.savefig('{}avg_acc.eps'.format(DIRECTORY), dpi=300, format='eps')
 
@@ -57,8 +58,9 @@ def plot_line_ewc_pen(ewc_pens, labels):
     plt.xlabel('Total Task Count')
     plt.xlim(1, len(ewc_pens[0]))
 
-    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
-               ncol=3, fancybox=True, shadow=True)
+    plt.legend(ncol=10)
+    # plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
+    #            ncol=3, fancybox=True, shadow=True)
 
     plt.savefig('{}ewc_pen.eps'.format(DIRECTORY), dpi=300, format='eps')
 
@@ -86,7 +88,7 @@ def main():
         ewc_pens_list.append(ewc_pens)
         avg_accs_list.append(avg_accs)
     
-    labels = ['100%', '10%', '20%', '30%', '40%', '50%', '60%', '70%', '80%', '90%']
+    labels = ['10%', '20%', '30%', '40%', '50%', '60%', '70%', '80%', '90%', '100%']
     
     print(ewc_pens_list)
 
