@@ -130,7 +130,7 @@ def parse_arguments():
         args.accuracy_threshold = 0
         args.dataset = 'mnist'
         args.tasks = 30
-        args.output_file = 'EWC_without_VLR_run{}'.format(args.run) 
+        args.output_file = 'EWC_with_VLR_run{}'.format(args.run) 
         args.nets = ['EWCMLP']
         
 
