@@ -151,7 +151,7 @@ def parse_arguments():
         args.epochs =  10
         args.lr = 0.01
         args.l2_reg_penalty = 0.0
-        args.lam = 100000
+        args.lam = 40000
         args.momentum = 0.0
         args.no_cuda = False
         args.seed = 1
@@ -161,7 +161,7 @@ def parse_arguments():
         args.input_size = 1024
         args.output_size = 100
         args.scale_factor = 8 # in this case, we ADD this many filters to first convolutional layer...
-        args.accuracy_threshold = 55 # todo figure out what this should be...
+        args.accuracy_threshold = 50 # todo figure out what this should be...
         args.dataset = 'cifar'
         args.tasks = 20
         args.output_file = 'expanding_increm_cifar_lam_{}_all_fil_{}_256_cw_scale_2_bs_1'.format(args.lam, args.hidden_size)
