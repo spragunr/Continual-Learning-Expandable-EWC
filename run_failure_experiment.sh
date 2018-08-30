@@ -2,6 +2,6 @@
 
 for i in {1..100}
 do
-     python main.py --run $i
+     python main.py --experiment mnist --run $i
 done
 

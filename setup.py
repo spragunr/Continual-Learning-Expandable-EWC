@@ -119,7 +119,7 @@ def parse_arguments():
         args.lam = 15 # TODO change back to 150
         args.momentum = 0.0
         args.no_cuda = False
-        # args.seed = 1
+        args.seed = args.run
         args.log_interval = 10
         args.train_dataset_size = 59800
         args.validation_dataset_size = 200
@@ -129,7 +129,7 @@ def parse_arguments():
         args.scale_factor = 2
         args.accuracy_threshold = 0
         args.dataset = 'mnist'
-        args.tasks = 100
+        args.tasks = 20
         args.output_file = 'EWC_with_VLR_run{}'.format(args.run) 
         args.nets = ['EWCMLP']
         
