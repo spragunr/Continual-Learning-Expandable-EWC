@@ -7,7 +7,7 @@ import numpy as np
 import seaborn as sns
 from scipy import stats
 
-DIRECTORY = 'perm_results3/plots/' # TODO change this as needed
+DIRECTORY = 'final/plots/' # TODO change this as needed
 
 
 def parse_h5(filename):
