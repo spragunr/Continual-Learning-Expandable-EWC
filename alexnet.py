@@ -33,7 +33,7 @@ class AlexNet(nn.Module):
         print(torch.randint(1, 10000, (1,), device=torch.device('cpu')))
         print(torch.randint(1, 10000, (1,), device=torch.device('cuda'))) 
 
-        CLASSIFICATION_STARTING_WIDTH = 512
+        CLASSIFICATION_STARTING_WIDTH = 256
         CLASSIFICATION_SCALE_FACTOR = 2 
         
         FILTERS_START = 32
