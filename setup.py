@@ -156,7 +156,7 @@ def parse_arguments():
         args.no_cuda = False
         args.seed = 1
         args.log_interval = 10
-        args.hidden_size = 32 # todo note changes in output layer sizes as a result of this
+        args.hidden_size = 8 # todo note changes in output layer sizes as a result of this
         args.validation_dataset_size = 40 # in THIS case, this is the validation data from each individual CLASS
         args.input_size = 1024
         args.output_size = 100
