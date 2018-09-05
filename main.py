@@ -158,6 +158,9 @@ def main():
             test_results = model.test(prev_test_loaders, threshold, args)
 
             if test_results == -1:
+                print(len(ewc_pen))
+                del ewc_pen[-1] # if expanding, we want to rewrite this or it will be inaccurate
+                print(len(ewc_pen))
                 retrain_task = True
                 break
 
