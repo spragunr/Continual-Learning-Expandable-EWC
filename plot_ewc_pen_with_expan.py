@@ -33,7 +33,8 @@ def parse_h5(filename):
 
 def plot_line_avg_acc(avg_accuracies, labels):
 
-    plt.figure()
+    
+    plt.figure(figsize=(4,3))
     
     for i, avg_acc in enumerate(avg_accuracies):
         plt.plot(avg_acc, label=labels[i])
@@ -47,13 +48,13 @@ def plot_line_avg_acc(avg_accuracies, labels):
     # plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
     #            ncol=3, fancybox=True, shadow=True)
 
-    plt.savefig('{}avg_acc.eps'.format(DIRECTORY), dpi=300, format='eps')
+    plt.savefig('{}avg_acc.pdf'.format(DIRECTORY), dpi=300, format='pdf')
 
 
 def plot_line_ewc_pen(ewc_pens, labels):
 
-    plt.figure()
     
+    plt.figure(figsize=(4,3))
     for i, ewc_pen in enumerate(ewc_pens):
         plt.plot(ewc_pen, label=labels[i])
     
@@ -63,7 +64,7 @@ def plot_line_ewc_pen(ewc_pens, labels):
     plt.xlim(1, len(ewc_pens[0]))
     plt.ylim(0.0, 0.8)
     
-    markers = [3, 5, 7, 11, 17, 27]
+    markers = [2, 4, 6, 10, 16, 40]
     
     for mark in markers:
         plt.axvline(x=mark, color='r')
@@ -73,7 +74,7 @@ def plot_line_ewc_pen(ewc_pens, labels):
     # plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
     #            ncol=3, fancybox=True, shadow=True)
 
-    plt.savefig('{}ewc_pen_w_exp.eps'.format(DIRECTORY), dpi=300, format='eps')
+    plt.savefig('{}ewc_pen_w_exp.pdf'.format(DIRECTORY), dpi=300, format='pdf')
 
 
 def main():

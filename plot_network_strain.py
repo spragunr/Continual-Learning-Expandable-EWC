@@ -17,8 +17,8 @@ DIRECTORY = 'final/plots/' # TODO change this as needed
 def plot_failures(failure_points, lowest, highest):
   
     print(len(failure_points))
-
-    plt.figure()
+ 
+    plt.figure(figsize=(4,3))
     
     plt.xlim(0, 18.5)
 
@@ -29,11 +29,11 @@ def plot_failures(failure_points, lowest, highest):
     plt.ylabel('% Networks Failed')
     plt.xlabel('Total Task Count')
 
-    plt.savefig('{}failures.eps'.format(DIRECTORY), dpi=300, format='eps')
+    plt.savefig('{}failures.pdf'.format(DIRECTORY), dpi=300, format='pdf')
 
 def plot_strain(run_groups, metric):
     
-    plt.figure()
+    plt.figure(figsize=(4,3))
     
     for run_group in run_groups:
         plt.plot(run_group[1], label=run_group[0])
@@ -47,7 +47,7 @@ def plot_strain(run_groups, metric):
     plt.ylabel(metric)
     plt.xlabel('Task')
 
-    plt.savefig('{}{}.eps'.format(DIRECTORY, metric), dpi=300, format='eps')
+    plt.savefig('{}{}.pdf'.format(DIRECTORY, metric), dpi=300, format='pdf')
 
 def parse_h5(filename):
     

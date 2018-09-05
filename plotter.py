@@ -10,8 +10,8 @@ pylab.rcParams.update(params)
 
 def plot_line_avg_acc(avg_accuracies, expansion_markers, threshold, labels, save):
 
-    plt.figure()
     
+    plt.figure(figsize=(4,3))
     for i, avg_acc in enumerate(avg_accuracies):
         plt.plot(avg_acc, label=labels[i])
     
@@ -38,13 +38,13 @@ def plot_line_avg_acc(avg_accuracies, expansion_markers, threshold, labels, save
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
                ncol=3, fancybox=True, shadow=True)
 
-    plt.savefig('{}.eps'.format(save), dpi=300, format='eps')
+    plt.savefig('{}.pdf'.format(save), dpi=300, format='pdf')
 
 
 def plot_bar_each_task_acc(task_accuracies, labels, save):
     
-    plt.figure()
 
+    plt.figure(figsize=(4,3))
     x_values = np.arange(0, len(task_accuracies[0]))
 
     # w = 1 / len(task_accuracies)
@@ -64,7 +64,7 @@ def plot_bar_each_task_acc(task_accuracies, labels, save):
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
               ncol=3, fancybox=True, shadow=True)
     
-    plt.savefig('{}.png'.format(save), dpi=300, format='png')
+    plt.savefig('{}.pdf'.format(save), dpi=300, format='pdf')
 
 
 def parse_h5_file(filename):
