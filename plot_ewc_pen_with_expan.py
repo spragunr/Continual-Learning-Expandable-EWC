@@ -99,7 +99,9 @@ def main():
         ewc_pens_list.append(ewc_pens)
         avg_accs_list.append(avg_accs)
         
-    print(ewc_pens_list)
+    print(len(ewc_pens_list))
+    print(len(ewc_pens_list[0]))
+    print(len(ewc_pens_list[1]))
     
     labels = ["Variable Capacity", "Fixed Size"]
 

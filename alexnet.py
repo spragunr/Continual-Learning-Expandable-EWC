@@ -48,7 +48,7 @@ class AlexNet(nn.Module):
         # scale dense layers' widths by CLASSIFICATION_SCALE_FACTOR each time filters expands
         # NOTE: now we're just adding, not multiplying by, CLASSIFICATION SCALE FACTOR
         classification_width = \
-            (CLASSIFICATION_SCALE_FACTOR ** ((filters - FILTERS_START) // FILTER_EXPANSION)) + CLASSIFICATION_STARTING_WIDTH 
+            (CLASSIFICATION_SCALE_FACTOR * ((filters - FILTERS_START) // FILTER_EXPANSION)) + CLASSIFICATION_STARTING_WIDTH 
         
 
         
