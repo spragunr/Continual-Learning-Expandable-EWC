@@ -11,7 +11,7 @@ pylab.rcParams.update(params)
 def plot_line_avg_acc(avg_accuracies, expansion_markers, threshold, labels, save):
 
     
-    plt.figure(figsize=(4,3))
+    plt.figure()
     for i, avg_acc in enumerate(avg_accuracies):
         plt.plot(avg_acc, label=labels[i])
     
@@ -44,7 +44,7 @@ def plot_line_avg_acc(avg_accuracies, expansion_markers, threshold, labels, save
 def plot_bar_each_task_acc(task_accuracies, labels, save):
     
 
-    plt.figure(figsize=(4,3))
+    plt.figure()
     x_values = np.arange(0, len(task_accuracies[0]))
 
     # w = 1 / len(task_accuracies)

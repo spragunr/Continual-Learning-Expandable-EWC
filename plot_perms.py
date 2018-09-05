@@ -47,7 +47,7 @@ def plot_line_avg_acc(avg_accuracies, labels):
     # plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
     #            ncol=3, fancybox=True, shadow=True)
 
-    plt.savefig('{}avg_acc.eps'.format(DIRECTORY), dpi=300, format='eps')
+    plt.savefig('{}avg_acc.pdf'.format(DIRECTORY), dpi=300, format='pdf')
 
 
 def plot_line_ewc_pen(ewc_pens, labels):
@@ -68,7 +68,7 @@ def plot_line_ewc_pen(ewc_pens, labels):
     # plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
     #            ncol=3, fancybox=True, shadow=True)
 
-    plt.savefig('{}ewc_pen.eps'.format(DIRECTORY), dpi=300, format='eps')
+    plt.savefig('{}ewc_pen.pdf'.format(DIRECTORY), dpi=300, format='pdf')
 
 
 def main():

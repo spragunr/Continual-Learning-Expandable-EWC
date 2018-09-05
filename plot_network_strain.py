@@ -18,7 +18,7 @@ def plot_failures(failure_points, lowest, highest):
   
     print(len(failure_points))
  
-    plt.figure(figsize=(4,3))
+    plt.figure()
     
     plt.xlim(0, 18.5)
 
@@ -33,8 +33,8 @@ def plot_failures(failure_points, lowest, highest):
 
 def plot_strain(run_groups, metric):
     
-    plt.figure(figsize=(4,3))
-    
+
+    plt.figure()
     for run_group in run_groups:
         plt.plot(run_group[1], label=run_group[0])
     

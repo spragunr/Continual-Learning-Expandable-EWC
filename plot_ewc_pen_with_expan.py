@@ -34,7 +34,7 @@ def parse_h5(filename):
 def plot_line_avg_acc(avg_accuracies, labels):
 
     
-    plt.figure(figsize=(4,3))
+    plt.figure()
     
     for i, avg_acc in enumerate(avg_accuracies):
         plt.plot(avg_acc, label=labels[i])
@@ -54,7 +54,7 @@ def plot_line_avg_acc(avg_accuracies, labels):
 def plot_line_ewc_pen(ewc_pens, labels):
 
     
-    plt.figure(figsize=(4,3))
+    plt.figure()
     for i, ewc_pen in enumerate(ewc_pens):
         plt.plot(ewc_pen, label=labels[i])
     

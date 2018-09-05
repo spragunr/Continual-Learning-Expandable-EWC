@@ -41,12 +41,12 @@ def plot_line_avg_acc(avg_accuracies, expansion_markers, threshold, labels, save
         else:
             plt.axvline(x=marker, color='g')
 
-    plt.axhline(y=threshold, linestyle='dashed')
+    # plt.axhline(y=threshold, linestyle='dashed')
 
     # plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
     #           ncol=3, fancybox=True, shadow=True)
 
-    plt.savefig('{}.eps'.format(save), dpi=300, format='eps')
+    plt.savefig('final/plots/{}.pdf'.format(save), dpi=300, format='pdf')
 
 
 
