@@ -159,7 +159,8 @@ def main():
 
             if test_results == -1:
                 print(len(ewc_pen))
-                del ewc_pen[-1] # if expanding, we want to rewrite this or it will be inaccurate
+                if len(ewc_pen) > 2:
+                    del ewc_pen[-1] # if expanding, we want to rewrite this or it will be inaccurate
                 print(len(ewc_pen))
                 retrain_task = True
                 break

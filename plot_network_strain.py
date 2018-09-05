@@ -20,11 +20,11 @@ def plot_failures(failure_points, lowest, highest):
 
     plt.figure()
     
-    plt.xlim(13.5, 18.5)
+    plt.xlim(0, 18.5)
 
-    plt.hist(failure_points, bins=[14.5, 15.5, 16.5, 17.5, 18.5], cumulative=True, color='orange', edgecolor='k')
+    plt.hist(failure_points, bins=np.arange(0.5, 19.5, 1), cumulative=True, color='orange', edgecolor='k')
     
-    plt.xticks([14, 15, 16, 17, 18])
+    plt.xticks(np.arange(1, 19))
 
     plt.ylabel('% Networks Failed')
     plt.xlabel('Total Task Count')
