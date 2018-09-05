@@ -113,10 +113,10 @@ def parse_arguments():
 
         args.batch_size = 100 # TODO change back to 100
         args.test_batch_size = 1000 # TODO change back to 1000
-        args.epochs = 1 # TODO change back to 10
-        args.lr = 0.1 # TODO change back to 0.01
+        args.epochs = 10 # TODO change back to 10
+        args.lr = 0.01 # TODO change back to 0.01
         args.l2_reg_penalty = 0.0
-        args.lam = 15 # TODO change back to 150
+        args.lam = 150 # TODO change back to 150
         args.momentum = 0.0
         args.no_cuda = False
         args.seed = args.run
@@ -127,10 +127,10 @@ def parse_arguments():
         args.input_size = 784
         args.output_size = 10
         args.scale_factor = 2
-        args.accuracy_threshold = 0
+        args.accuracy_threshold = 90
         args.dataset = 'mnist'
-        args.tasks = 30
-        args.output_file = 'EWC_without_VLR_run{}'.format(args.run) 
+        args.tasks = 100
+        args.output_file = 'EWC_expandable_mlp_pen_fix_run{}'.format(args.run) 
         args.nets = ['EWCMLP']
         
 
