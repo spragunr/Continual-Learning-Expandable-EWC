@@ -65,15 +65,15 @@ class AlexNet(nn.Module):
             nn.MaxPool2d(kernel_size=2, stride=2),
             nn.Conv2d(in_channels=filters*3, out_channels=filters*6, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
-            nn.Conv2d(in_channels=filters*6, out_channels=256, kernel_size=3, padding=1),
+            nn.Conv2d(in_channels=filters*6, out_channels=filters*4, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
-            nn.Conv2d(in_channels=256, out_channels=256, kernel_size=3, padding=1),
+            nn.Conv2d(in_channels=filters*4, out_channels=filters*4, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2, stride=1),
         )
         self.classifier = nn.Sequential(
             nn.Dropout(),
-            nn.Linear(in_features=256, out_features=classification_width),
+            nn.Linear(in_features=filters*4, out_features=classification_width),
             nn.ReLU(inplace=True),
             nn.Dropout(),
             nn.Linear(in_features=classification_width, out_features=classification_width),
