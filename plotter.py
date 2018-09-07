@@ -29,8 +29,10 @@ def plot_line_avg_acc(avg_accuracies, expansion_markers, threshold, labels, save
             plt.axvline(x=marker, color='r')
             markers.append(marker)
         else:
-            plt.axvline(x=marker, color='g')
-    
+            plt.axvline(x=marker, color='r')
+            markers.append(marker)
+
+    plt.xticks(np.arange(1, len(avg_accuracies[0]), 1))
     print(markers)
 
     plt.axhline(y=threshold, linestyle='dashed', color='m')
